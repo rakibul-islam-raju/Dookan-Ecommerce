@@ -1,0 +1,140 @@
+from rest_framework import status, generics
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from users.models import User
+from users.serializers import UserSerializer
+from utils.email import send_verification_otp_email
+
+from .serializers import (
+    CustomTokenObtainPairSerializer,
+    UserRegistrationSerializer,
+    EmailVerificationSerializer,
+    ResendVerificationSerializer,
+)
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """
+    Custom JWT token view with additional user data
+    POST /auth/login/
+    """
+
+    permission_classes = [AllowAny]
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+class UserRegistrationView(generics.CreateAPIView):
+    """
+    User registration endpoint.
+    Creates user and sends email verification OTP.
+    POST /auth/register/
+    """
+
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = UserRegistrationSerializer
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        response.data["message"] = (
+            "Registration successful. Please check your email for verification OTP."
+        )
+        return response
+
+
+class EmailVerificationView(APIView):
+    """
+    Verify email with OTP.
+    POST /auth/verify-email/
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = EmailVerificationSerializer(data=request.data)
+
+        if serializer.is_valid():
+            otp = serializer.validated_data["otp"]
+            email = serializer.validated_data["email"]
+
+            # Mark OTP as verified
+            otp.is_verified = True
+            otp.save()
+
+            # Activate user and mark email as verified
+            try:
+                user = User.objects.get(email=email)
+                user.is_email_verified = True
+                user.is_active = True
+                user.save()
+
+                return Response(
+                    {"message": "Email verified successfully. You can now login."},
+                    status=status.HTTP_200_OK,
+                )
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResendVerificationView(APIView):
+    """
+    Resend verification email.
+    POST /auth/resend-verification/
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ResendVerificationSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.user
+
+            send_verification_otp_email(
+                email=user.email,
+                user_name=f"{user.first_name} {user.last_name}",
+                purpose="registration",
+            )
+
+            return Response(
+                {"message": "Verification email sent successfully."},
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutView(APIView):
+    """
+    Logout endpoint - blacklist refresh token
+    POST /auth/logout/
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh")
+            if not refresh_token:
+                return Response(
+                    {"error": "Refresh token is required."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(
+                {"message": "Logout successful."}, status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

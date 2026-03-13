@@ -1,0 +1,403 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import {
+	getOrdersByProductId,
+	useCancelOrder,
+	useUpdateOrderStatus,
+} from "@/lib/api/orders";
+import type { IOrderStatus, OrderListItem } from "@/@types/Order";
+import { useQuery } from "@tanstack/react-query";
+import {
+	Loader2,
+	MoreVertical,
+	XCircle,
+	FileText,
+	ArrowRight,
+} from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
+const ORDER_STATUSES: { value: IOrderStatus; label: string }[] = [
+	{ value: "pending", label: "Pending" },
+	{ value: "processing", label: "Processing" },
+	{ value: "shipped", label: "Shipped" },
+	{ value: "delivered", label: "Delivered" },
+	{ value: "cancelled", label: "Cancelled" },
+	{ value: "returned", label: "Returned" },
+];
+
+const getStatusBadgeVariant = (
+	status: IOrderStatus
+): "default" | "secondary" | "destructive" | "success" | "warning" | "info" => {
+	switch (status) {
+		case "pending":
+			return "warning";
+		case "processing":
+			return "info";
+		case "shipped":
+			return "info";
+		case "delivered":
+			return "success";
+		case "cancelled":
+			return "destructive";
+		case "returned":
+			return "secondary";
+		default:
+			return "default";
+	}
+};
+
+const formatDate = (dateString: string) => {
+	return new Date(dateString).toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
+};
+
+interface ProductOrdersProps {
+	productId: string;
+}
+
+export const ProductOrders = ({ productId }: ProductOrdersProps) => {
+	const navigate = useNavigate();
+
+	// Dialog states
+	const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+	const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+	const [selectedOrderNumber, setSelectedOrderNumber] = useState<string>("");
+
+	// Form states
+	const [selectedStatus, setSelectedStatus] = useState<IOrderStatus | "">("");
+	const [statusNote, setStatusNote] = useState("");
+	const [cancelNote, setCancelNote] = useState("");
+
+	const { data: ordersData, isPending: isLoadingOrders } = useQuery(
+		getOrdersByProductId(productId)
+	);
+
+	const { mutate: updateOrderStatus, isPending: isUpdatingStatus } =
+		useUpdateOrderStatus();
+	const { mutate: cancelOrder, isPending: isCancellingOrder } =
+		useCancelOrder();
+
+	const handleOpenStatusDialog = (order: OrderListItem) => {
+		setSelectedOrderId(order.id);
+		setSelectedOrderNumber(order.order_number);
+		setSelectedStatus(order.status);
+		setStatusNote("");
+		setIsStatusDialogOpen(true);
+	};
+
+	const handleOpenCancelDialog = (order: OrderListItem) => {
+		setSelectedOrderId(order.id);
+		setSelectedOrderNumber(order.order_number);
+		setCancelNote("");
+		setIsCancelDialogOpen(true);
+	};
+
+	const handleUpdateStatus = () => {
+		if (!selectedStatus || !selectedOrderId) return;
+
+		updateOrderStatus(
+			{
+				orderId: selectedOrderId,
+				status: selectedStatus,
+				note: statusNote || undefined,
+			},
+			{
+				onSuccess: () => {
+					toast.success("Order status updated successfully");
+					setIsStatusDialogOpen(false);
+					setSelectedOrderId(null);
+					setSelectedStatus("");
+					setStatusNote("");
+				},
+				onError: (error) => {
+					toast.error("Failed to update order status");
+					console.error(error);
+				},
+			}
+		);
+	};
+
+	const handleCancelOrder = () => {
+		if (!selectedOrderId) return;
+
+		cancelOrder(
+			{
+				orderId: selectedOrderId,
+				note: cancelNote || undefined,
+			},
+			{
+				onSuccess: () => {
+					toast.success("Order cancelled successfully");
+					setIsCancelDialogOpen(false);
+					setSelectedOrderId(null);
+					setCancelNote("");
+				},
+				onError: (error) => {
+					toast.error("Failed to cancel order");
+					console.error(error);
+				},
+			}
+		);
+	};
+
+	const orders = ordersData?.results || [];
+
+	return (
+		<>
+			<Card>
+				<CardHeader>
+					<CardTitle className="flex items-center gap-2">
+						<FileText className="h-5 w-5" />
+						Product Orders
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					{isLoadingOrders ? (
+						<div className="flex justify-center items-center py-12">
+							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						</div>
+					) : orders.length === 0 ? (
+						<div className="text-center py-12">
+							<FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+							<p className="text-muted-foreground">No orders found for this product</p>
+						</div>
+					) : (
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Order Number</TableHead>
+									<TableHead>Customer</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead>Date</TableHead>
+									<TableHead className="text-right">Amount</TableHead>
+									<TableHead className="text-right">Items</TableHead>
+									<TableHead className="w-[70px]"></TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{orders.map((order) => {
+									const canCancel = ![
+										"cancelled",
+										"delivered",
+										"returned",
+									].includes(order.status);
+
+									return (
+										<TableRow key={order.id}>
+											<TableCell className="font-medium">
+												#{order.order_number}
+											</TableCell>
+											<TableCell>{order.customer_name}</TableCell>
+											<TableCell>
+												<Badge variant={getStatusBadgeVariant(order.status)}>
+													{order.status.charAt(0).toUpperCase() +
+														order.status.slice(1)}
+												</Badge>
+											</TableCell>
+											<TableCell className="text-muted-foreground">
+												{formatDate(order.created_at)}
+											</TableCell>
+											<TableCell className="text-right">
+												BDT {Number(order.total_amount).toFixed(2)}
+											</TableCell>
+											<TableCell className="text-right">
+												{order.items_count}
+											</TableCell>
+											<TableCell>
+												<div className="flex justify-end gap-1">
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-8 w-8"
+														onClick={() =>
+															navigate(`/orders/${order.id}`)
+														}
+														title="View Order Details"
+													>
+														<ArrowRight className="h-4 w-4" />
+													</Button>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant="ghost"
+																size="icon"
+																className="h-8 w-8"
+															>
+																<MoreVertical className="h-4 w-4" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuItem
+																onClick={() => handleOpenStatusDialog(order)}
+															>
+																Change Status
+															</DropdownMenuItem>
+															{canCancel && (
+																<>
+																	<DropdownMenuSeparator />
+																	<DropdownMenuItem
+																		className="text-destructive focus:text-destructive"
+																		onClick={() => handleOpenCancelDialog(order)}
+																	>
+																		<XCircle className="h-4 w-4 mr-2" />
+																		Cancel Order
+																	</DropdownMenuItem>
+																</>
+															)}
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</div>
+											</TableCell>
+										</TableRow>
+									);
+								})}
+							</TableBody>
+						</Table>
+					)}
+				</CardContent>
+			</Card>
+
+			{/* Change Order Status Dialog */}
+			<Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Change Order Status</DialogTitle>
+						<DialogDescription>
+							Update the status of order #{selectedOrderNumber}
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-4 pt-4">
+						<div className="space-y-2">
+							<Label htmlFor="status">New Status</Label>
+							<Select
+								value={selectedStatus}
+								onValueChange={(value) =>
+									setSelectedStatus(value as IOrderStatus)
+								}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Select status" />
+								</SelectTrigger>
+								<SelectContent>
+									{ORDER_STATUSES.map((status) => (
+										<SelectItem key={status.value} value={status.value}>
+											{status.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="note">Note (Optional)</Label>
+							<Textarea
+								id="note"
+								placeholder="Add a note about this status change..."
+								value={statusNote}
+								onChange={(e) => setStatusNote(e.target.value)}
+								rows={3}
+							/>
+						</div>
+						<div className="flex justify-end gap-2 pt-2">
+							<Button
+								variant="outline"
+								onClick={() => setIsStatusDialogOpen(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								onClick={handleUpdateStatus}
+								disabled={!selectedStatus || isUpdatingStatus}
+							>
+								{isUpdatingStatus && (
+									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+								)}
+								Update Status
+							</Button>
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
+
+			{/* Cancel Order Dialog */}
+			<Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Cancel Order</DialogTitle>
+						<DialogDescription>
+							Are you sure you want to cancel order #{selectedOrderNumber}? This
+							action cannot be undone.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-4 pt-4">
+						<div className="space-y-2">
+							<Label htmlFor="cancel-note">Cancellation Reason (Optional)</Label>
+							<Textarea
+								id="cancel-note"
+								placeholder="Enter the reason for cancellation..."
+								value={cancelNote}
+								onChange={(e) => setCancelNote(e.target.value)}
+								rows={3}
+							/>
+						</div>
+						<div className="flex justify-end gap-2 pt-2">
+							<Button
+								variant="outline"
+								onClick={() => setIsCancelDialogOpen(false)}
+							>
+								Keep Order
+							</Button>
+							<Button
+								variant="destructive"
+								onClick={handleCancelOrder}
+								disabled={isCancellingOrder}
+							>
+								{isCancellingOrder && (
+									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+								)}
+								Cancel Order
+							</Button>
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
+		</>
+	);
+};

@@ -1,0 +1,41 @@
+import React from "react";
+
+/**
+ * AppLoader Component
+ * Displays a loading screen during app initialization
+ */
+const AppLoader: React.FC = () => {
+	return (
+		<div className="fixed inset-0 flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100">
+			<div className="flex flex-col items-center gap-6">
+				{/* Logo/Brand Section */}
+				<img src="/images/dookan.jpg" alt="Dookan" className="w-40 h-40" />
+				<h1 className="text-3xl font-bold text-slate-800 mb-2">Dookan</h1>
+				<p className="text-sm text-slate-500">Admin Dashboard</p>
+
+				{/* Spinner */}
+				<div className="relative">
+					{/* Outer rotating ring */}
+					<div className="w-16 h-16 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+
+					{/* Inner pulsing dot */}
+					<div className="absolute inset-0 flex items-center justify-center">
+						<div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
+					</div>
+				</div>
+
+				{/* Loading text */}
+				<div className="flex items-center gap-2">
+					<span className="text-sm text-slate-600 font-medium">Loading</span>
+					<div className="flex gap-1">
+						<span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:0ms]"></span>
+						<span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:150ms]"></span>
+						<span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:300ms]"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export default AppLoader;

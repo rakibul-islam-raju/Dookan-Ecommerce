@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  web:
+    container_name: dookan_web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+        - NEXT_PUBLIC_BASE_APP_URL=${NEXT_PUBLIC_BASE_APP_URL}
+        - NEXT_PUBLIC_AUTH_COOKIE_NAME=${NEXT_PUBLIC_AUTH_COOKIE_NAME}
+        - NEXT_PUBLIC_REFRESH_COOKIE_NAME=${NEXT_PUBLIC_REFRESH_COOKIE_NAME}
+        - NEXT_PUBLIC_IMAGE_DOMAIN=${NEXT_PUBLIC_IMAGE_DOMAIN}
+        - REVALIDATE_PRODUCTS=${REVALIDATE_PRODUCTS}
+        - REVALIDATE_CATEGORIES=${REVALIDATE_CATEGORIES}
+    ports:
+      - "6000:3000"
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_BASE_APP_URL=${NEXT_PUBLIC_BASE_APP_URL}
+      - NEXT_PUBLIC_AUTH_COOKIE_NAME=${NEXT_PUBLIC_AUTH_COOKIE_NAME}
+      - NEXT_PUBLIC_REFRESH_COOKIE_NAME=${NEXT_PUBLIC_REFRESH_COOKIE_NAME}
+      - NEXT_PUBLIC_IMAGE_DOMAIN=${NEXT_PUBLIC_IMAGE_DOMAIN}
+      - REVALIDATE_PRODUCTS=${REVALIDATE_PRODUCTS}
+      - REVALIDATE_CATEGORIES=${REVALIDATE_CATEGORIES}
+    restart: unless-stopped
+    networks:
+      - dookan_network
+
+networks:
+  dookan_network:
+    driver: bridge

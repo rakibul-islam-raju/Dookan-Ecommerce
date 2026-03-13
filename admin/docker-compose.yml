@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  web:
+    container_name: dookan_admin_web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+    ports:
+      - "6001:4173"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - dookan_admin_network
+
+networks:
+  dookan_admin_network:
+    driver: bridge

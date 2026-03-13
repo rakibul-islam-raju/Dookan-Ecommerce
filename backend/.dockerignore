@@ -1,0 +1,49 @@
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py~
+*.so
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# UV cache (fast dependency manager)
+.uv/
+
+# Django static and media (generated files)
+staticfiles/
+media/
+
+# Logs
+*.log
+logs/
+*.sqlite3
+
+# Node / frontend builds (if integrated later)
+node_modules/
+dist/
+build/
+.next/
+npm-debug.log
+yarn-error.log
+
+# Environment & local configs
+.env
+.env.local
+*.env.*
+.DS_Store
+
+# IDE & editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker related
+docker-compose.override.yml
+Dockerfile.dev
+Dockerfile.prod

@@ -1,0 +1,76 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Order Confirmation - Dookan{% endblock %}
+
+{% block content %}
+<h2>Order Confirmation</h2>
+<p>Hello {{ customer_name }},</p>
+<p>Thank you for your order! Your order has been received and is being processed.</p>
+
+<div class="highlight">
+    <p style="margin: 0;"><strong>Order Number:</strong> {{ order_number }}</p>
+    <p style="margin: 5px 0 0 0;"><strong>Order Date:</strong> {{ order_date }}</p>
+    {% if payment_method %}
+    <p style="margin: 5px 0 0 0;"><strong>Payment Method:</strong> {{ payment_method|title }}</p>
+    {% endif %}
+</div>
+
+<h3>Order Items</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th class="text-center">Qty</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.product_name }}</td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="text-right">{{ item.unit_price }} BDT</td>
+            <td class="text-right">{{ item.total_price }} BDT</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="text-align: right; margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 4px;">
+    <p style="margin: 5px 0;"><strong>Subtotal:</strong> {{ subtotal }} BDT</p>
+    {% if discount_amount %}
+    <p style="margin: 5px 0; color: #4CAF50;"><strong>Discount:</strong> -{{ discount_amount }} BDT</p>
+    {% endif %}
+    {% if tax_amount %}
+    <p style="margin: 5px 0;"><strong>Tax:</strong> {{ tax_amount }} BDT</p>
+    {% endif %}
+    <p style="margin: 5px 0;"><strong>Shipping:</strong> {{ shipping_amount }} BDT</p>
+    <hr style="margin: 10px 0; border: none; border-top: 1px solid #ddd;">
+    <p style="margin: 5px 0; font-size: 18px;"><strong>Total:</strong> {{ total_amount }} BDT</p>
+</div>
+
+{% if shipping_address %}
+<h3>Shipping Address</h3>
+<div class="highlight">
+    <p style="margin: 0;">
+        <strong>{{ shipping_address.full_name }}</strong><br>
+        {{ shipping_address.address_line1 }}<br>
+        {% if shipping_address.address_line2 %}{{ shipping_address.address_line2 }}<br>{% endif %}
+        {{ shipping_address.city }}, {{ shipping_address.state }} {{ shipping_address.postal_code }}<br>
+        {{ shipping_address.country }}
+    </p>
+</div>
+{% endif %}
+
+<h3>What's Next?</h3>
+<ul>
+    <li>We'll send you an email when your order is shipped.</li>
+    <li>You can track your order status in your account.</li>
+    <li>If you have any questions, please contact our support team.</li>
+</ul>
+
+<p>Thank you for choosing Dookan!</p>
+
+<p>Best regards,<br>The Dookan Team</p>
+{% endblock %}

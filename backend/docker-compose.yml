@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  db:
+    container_name: organic_ecom_db
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ecom
+      POSTGRES_USER: ecom_user
+      POSTGRES_PASSWORD: ecom_password
+    ports:
+      - "5433:5432" # expose to 5433
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

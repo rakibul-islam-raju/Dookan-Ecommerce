@@ -1,0 +1,149 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/**
+ * Authentication API Service
+ */
+
+import { queryKeys } from "@/constants/queryKeys";
+import {
+	queryOptions,
+	useMutation,
+	useQueryClient,
+} from "@tanstack/react-query";
+import type {
+	BaseModel,
+	ICommonFilter,
+	IPaginatedResponse,
+} from "../../@types/Common.type";
+import { clientApi } from "./axios";
+
+export interface CategoryListItem extends BaseModel {
+	name: string;
+	slug: string;
+	description?: string;
+	image?: string;
+	display_order: number;
+}
+
+export interface CategoryListResponse
+	extends IPaginatedResponse<CategoryListItem> {}
+
+export interface CategoryCreateData {
+	name: string;
+	slug: string;
+	description?: string;
+	image?: string;
+	display_order: number;
+}
+
+export interface CategoryUpdateData extends Partial<CategoryCreateData> {}
+
+export interface User {
+	id: string;
+	email: string;
+	first_name: string;
+	last_name: string;
+}
+
+export interface CategoryFilter extends ICommonFilter {
+	search?: string;
+	is_active?: boolean;
+}
+
+/**
+ * Authentication API (Client-side only)
+ */
+export const categoryApi = {
+	/**
+	 * List categories
+	 */
+	async list(params: CategoryFilter): Promise<CategoryListResponse> {
+		const { data } = await clientApi.get<CategoryListResponse>(
+			"/products/categories/",
+			{
+				params,
+			}
+		);
+		return data;
+	},
+	/**
+	 * Create new category
+	 */
+	async create(categoryData: CategoryCreateData): Promise<CategoryListItem> {
+		const { data } = await clientApi.post<CategoryListItem>(
+			"/products/categories/",
+			categoryData
+		);
+		return data;
+	},
+
+	/**
+	 * Update category
+	 */
+	async update(
+		id: string,
+		updateData: CategoryUpdateData
+	): Promise<CategoryListItem> {
+		const { data } = await clientApi.put<CategoryListItem>(
+			`/products/categories/${id}/`,
+			updateData
+		);
+		return data;
+	},
+
+	/**
+	 * Delete category
+	 */
+	async delete(id: string): Promise<void> {
+		await clientApi.delete(`/products/categories/${id}/`);
+	},
+};
+
+export const getCategories = (params: CategoryFilter) =>
+	queryOptions({
+		queryKey: [queryKeys.categories, { params }],
+		queryFn: async () => categoryApi.list(params),
+	});
+
+export const useCreateCategory = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (categoryData: CategoryCreateData) =>
+			categoryApi.create(categoryData),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: [queryKeys.categories],
+			});
+		},
+	});
+};
+
+export const useUpdateCategory = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: ({
+			id,
+			updateData,
+		}: {
+			id: string;
+			updateData: CategoryUpdateData;
+		}) => categoryApi.update(id, updateData),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: [queryKeys.categories],
+			});
+		},
+	});
+};
+
+export const useDeleteCategory = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (id: string) => categoryApi.delete(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: [queryKeys.categories],
+			});
+		},
+	});
+};
