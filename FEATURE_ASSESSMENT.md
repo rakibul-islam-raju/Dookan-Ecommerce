@@ -1,6 +1,6 @@
-# Fatty Life - Production Readiness Assessment
+# Dookan - Production Readiness Assessment
 
-> Comprehensive review of the Fatty Life e-commerce platform
+> Comprehensive review of the Dookan e-commerce platform
 >
 > **Date:** 2026-03-03
 >
@@ -10,26 +10,28 @@
 
 ## Project Overview
 
-Fatty Life is an e-commerce platform for organic products consisting of three independent applications:
+Dookan is an e-commerce platform for organic products consisting of three independent applications:
 
-| Component | Tech Stack | Status |
-|-----------|-----------|--------|
-| **Backend** | Django 5.2, DRF 3.16, PostgreSQL 17, Python 3.13 | ⚠️ Partially Complete |
-| **Frontend** | Next.js 16, React 19, TanStack Query, TypeScript 5.9 | ✅ Mostly Complete |
-| **Admin** | Vite 7, React 19, React Router 7, TypeScript 5.9 | ✅ Mostly Complete |
+| Component    | Tech Stack                                           | Status                |
+| ------------ | ---------------------------------------------------- | --------------------- |
+| **Backend**  | Django 5.2, DRF 3.16, PostgreSQL 17, Python 3.13     | ⚠️ Partially Complete |
+| **Frontend** | Next.js 16, React 19, TanStack Query, TypeScript 5.9 | ✅ Mostly Complete    |
+| **Admin**    | Vite 7, React 19, React Router 7, TypeScript 5.9     | ✅ Mostly Complete    |
 
 ---
 
 ## Architecture Summary
 
-### Backend (`fatty-life-backend/`)
+### Backend (`backend/`)
+
 - **Framework:** Django 5.2 with Django REST Framework 3.16
 - **Database:** PostgreSQL 17 (via Docker)
 - **Authentication:** JWT (1-day access, 30-day refresh tokens)
 - **Package Manager:** uv
 - **Apps:** `authentication`, `users`, `products`, `orders`, `store`, `utils`
 
-### Frontend (`fatty-life-frontend/`)
+### Frontend (`frontend/`)
+
 - **Framework:** Next.js 16 with App Router
 - **State Management:** Zustand (auth, cart) + TanStack Query (server state)
 - **UI Library:** shadcn/ui (New York style) + Tailwind CSS 4
@@ -37,7 +39,8 @@ Fatty Life is an e-commerce platform for organic products consisting of three in
 - **Features:** SSR, ISR, SEO-optimized
 - **Cart Architecture:** Client-side only (localStorage) - by design decision
 
-### Admin (`fatty-life-admin/`)
+### Admin (`admin/`)
+
 - **Framework:** Vite 7 + React 19 with React Router 7
 - **State Management:** Zustand + TanStack Query
 - **UI Library:** shadcn/ui (New York style) + Tailwind CSS 4
@@ -49,61 +52,62 @@ Fatty Life is an e-commerce platform for organic products consisting of three in
 
 ### ✅ Fully Implemented Features
 
-| Feature | Backend | Frontend | Admin | Notes |
-|---------|---------|----------|-------|-------|
-| **User Authentication (JWT)** | ✅ | ✅ | ✅ | Login/register with token refresh |
-| **Email Verification (OTP)** | ✅ | ✅ | ❌ | OTP-based email confirmation |
-| **Password Reset** | ✅ | ✅ | ✅ | Email-based reset flow |
-| **Product Catalog** | ✅ | ✅ | ✅ | Full CRUD operations |
-| **Product Search** | ✅ | ✅ | ✅ | Name-based search |
-| **Category Management** | ✅ | ✅ | ✅ | Hierarchical categories |
-| **Product Images (Multiple)** | ✅ | ✅ | ✅ | Primary image selection |
-| **Shopping Cart (Client-side)** | ✅ | ✅ | ❌ | localStorage persistence (by design) |
-| **Guest Checkout** | ✅ | ✅ | ❌ | OTP-based order tracking |
-| **Order Creation** | ✅ | ✅ | ✅ | Supports guest & registered |
-| **Order History** | ✅ | ✅ | ✅ | User order listing |
-| **Order Status Tracking** | ✅ | ✅ | ✅ | 7 status types |
-| **Guest Order Tracking (OTP)** | ✅ | ✅ | ❌ | Email + OTP verification |
-| **User Addresses** | ✅ | ✅ | ❌ | Home/work/other types |
-| **Inventory Tracking** | ✅ | ✅ | ✅ | Stock quantity, low stock alerts |
-| **Banner Management** | ✅ | ✅ | ✅ | Date-range scheduled |
-| **Announcement System** | ✅ | ✅ | ✅ | Time-bound announcements |
-| **Site Configuration** | ✅ | ❌ | ✅ | Store settings, social links |
-| **SEO (Meta tags, Schema)** | ✅ | ✅ | ❌ | Structured data, OpenGraph |
-| **Mobile Responsive** | ❌ | ✅ | ✅ | Mobile-first design |
+| Feature                         | Backend | Frontend | Admin | Notes                                |
+| ------------------------------- | ------- | -------- | ----- | ------------------------------------ |
+| **User Authentication (JWT)**   | ✅      | ✅       | ✅    | Login/register with token refresh    |
+| **Email Verification (OTP)**    | ✅      | ✅       | ❌    | OTP-based email confirmation         |
+| **Password Reset**              | ✅      | ✅       | ✅    | Email-based reset flow               |
+| **Product Catalog**             | ✅      | ✅       | ✅    | Full CRUD operations                 |
+| **Product Search**              | ✅      | ✅       | ✅    | Name-based search                    |
+| **Category Management**         | ✅      | ✅       | ✅    | Hierarchical categories              |
+| **Product Images (Multiple)**   | ✅      | ✅       | ✅    | Primary image selection              |
+| **Shopping Cart (Client-side)** | ✅      | ✅       | ❌    | localStorage persistence (by design) |
+| **Guest Checkout**              | ✅      | ✅       | ❌    | OTP-based order tracking             |
+| **Order Creation**              | ✅      | ✅       | ✅    | Supports guest & registered          |
+| **Order History**               | ✅      | ✅       | ✅    | User order listing                   |
+| **Order Status Tracking**       | ✅      | ✅       | ✅    | 7 status types                       |
+| **Guest Order Tracking (OTP)**  | ✅      | ✅       | ❌    | Email + OTP verification             |
+| **User Addresses**              | ✅      | ✅       | ❌    | Home/work/other types                |
+| **Inventory Tracking**          | ✅      | ✅       | ✅    | Stock quantity, low stock alerts     |
+| **Banner Management**           | ✅      | ✅       | ✅    | Date-range scheduled                 |
+| **Announcement System**         | ✅      | ✅       | ✅    | Time-bound announcements             |
+| **Site Configuration**          | ✅      | ❌       | ✅    | Store settings, social links         |
+| **SEO (Meta tags, Schema)**     | ✅      | ✅       | ❌    | Structured data, OpenGraph           |
+| **Mobile Responsive**           | ❌      | ✅       | ✅    | Mobile-first design                  |
+| **Product Reviews**             | ✅      | ✅       | ✅    | Ratings, moderation, SEO integration |
+| **Customer Management**         | ✅      | ❌       | ✅    | Admin customer list with filters     |
 
 ### ⚠️ Partially Implemented Features
 
-| Feature | Backend | Frontend | Admin | Gap Description |
-|---------|---------|----------|-------|-----------------|
-| **Shopping Cart** | ❌ | ✅ (local only) | ❌ | Client-side only (by design) - persists in localStorage |
-| **Payments** | COD only | COD only | COD only | No payment gateway integration (bKash, Nagad, Stripe) |
-| **Customer Management** | ✅ | ❌ | Placeholder | Admin customer page not implemented |
-| **Dashboard Analytics** | ❌ | ❌ | ❌ | All placeholder data, no real metrics |
+| Feature                 | Backend  | Frontend        | Admin       | Gap Description                                         |
+| ----------------------- | -------- | --------------- | ----------- | ------------------------------------------------------- |
+| **Shopping Cart**       | ❌       | ✅ (local only) | ❌          | Client-side only (by design) - persists in localStorage |
+| **Payments**            | COD only | COD only        | COD only    | No payment gateway integration (bKash, Nagad, Stripe)   |
+| **Customer Management** | ✅       | ❌              | ✅          | Admin customer list with search/filter                  |
+| **Dashboard Analytics** | ❌       | ❌              | ❌          | All placeholder data, no real metrics                   |
 
 ### ❌ Missing Features
 
-| Feature | Priority | Description |
-|---------|----------|-------------|
-| **Payment Gateway** | 🔴 Critical | bKash, Nagad, Stripe integration for Bangladesh market |
-| **Product Variants** | 🟡 High | Size, color, flavor options (currently requiring separate products) |
-| **Product Reviews** | 🟡 High | Customer ratings and feedback system |
-| **Wishlist** | 🟡 High | Save products for later purchase |
-| **Coupons/Discounts** | 🟡 High | Promo code and discount system |
-| **Admin Dashboard Metrics** | 🟡 High | Real analytics (sales, orders, customers) |
-| **Customer Management Page** | 🟡 High | Admin customer list and details view |
-| **Refund System** | 🟢 Medium | Return/refund workflow automation |
-| **Email Templates** | 🟢 Medium | Styled transactional emails (currently plain text) |
-| **Product Recommendations** | 🟢 Low | Related products/upselling feature |
-| **SMS Notifications** | 🟢 Low | Mobile number verification via SMS |
-| **Role-Based Access** | 🟢 Low | Admin permissions and roles |
-| **Testing Suite** | 🔴 High | No unit, integration, or E2E tests |
+| Feature                      | Priority    | Description                                                         |
+| ---------------------------- | ----------- | ------------------------------------------------------------------- |
+| **Payment Gateway**          | 🔴 Critical | bKash, Nagad, Stripe integration for Bangladesh market              |
+| **Product Variants**         | 🟡 High     | Size, color, flavor options (currently requiring separate products) |
+| **Wishlist**                 | 🟡 High     | Save products for later purchase                                    |
+| **Coupons/Discounts**        | 🟡 High     | Promo code and discount system                                      |
+| **Admin Dashboard Metrics**  | 🟡 High     | Real analytics (sales, orders, customers)                           |
+| **Refund System**            | 🟢 Medium   | Return/refund workflow automation                                   |
+| **Email Templates**          | 🟢 Medium   | Styled transactional emails (currently plain text)                  |
+| **Product Recommendations**  | 🟢 Low      | Related products/upselling feature                                  |
+| **SMS Notifications**        | 🟢 Low      | Mobile number verification via SMS                                  |
+| **Role-Based Access**        | 🟢 Low      | Admin permissions and roles                                         |
+| **Testing Suite**            | 🔴 High     | No unit, integration, or E2E tests                                  |
 
 ---
 
 ## API Endpoints Summary
 
 ### Authentication (`/api/v1/auth/`)
+
 ```
 POST   /login/                 JWT login
 POST   /register/              User registration
@@ -114,6 +118,7 @@ POST   /logout/                Logout (blacklist token)
 ```
 
 ### Users (`/api/v1/users/`)
+
 ```
 GET    /                       Admin user list (filterable/searchable)
 GET    /me/                    Current user profile
@@ -128,6 +133,7 @@ POST   /profile/change-password/ Change password
 ```
 
 ### Products (`/api/v1/products/`)
+
 ```
 GET    /categories/            List categories
 POST   /categories/            Create category (admin)
@@ -143,9 +149,15 @@ GET    /slug/{slug}/           Get product by slug
 GET    /{id}/images/           Product images
 POST   /{id}/images/           Upload image (admin)
 DELETE /images/{id}/           Delete image (admin)
+POST   /reviews/               Create review (authenticated)
+GET    /reviews/admin/          List all reviews (admin)
+PATCH  /reviews/{id}/status/    Approve/reject review (admin)
+DELETE /reviews/{id}/           Delete review (admin)
+GET    /{id}/reviews/           Product reviews (public)
 ```
 
 ### Orders (`/api/v1/orders/`)
+
 ```
 POST   /create/                Create order (guest/registered)
 GET    /                       Order list (own for users, all for admin)
@@ -161,6 +173,7 @@ POST   /guest-orders/{order_number}/ Get specific guest order
 ```
 
 ### Store (`/api/v1/store/`)
+
 ```
 GET    /site-config/           Site configuration
 POST   /site-config/           Create config (admin)
@@ -180,22 +193,27 @@ DELETE /announcements/{id}/    Delete announcement
 ## Database Models Summary
 
 ### Users App
+
 - **User**: Custom user model with UUID, email/mobile verification
 - **OTPVerification**: OTP tracking for registration, orders, password reset
 - **UserAddress**: Saved addresses with type (home/work/other)
 
 ### Products App
+
 - **Category**: Hierarchical categories with images, slugs, display order
 - **Product**: SKU, pricing, inventory tracking, units, SEO fields
 - **ProductImage**: Multiple images with primary flag
+- **ProductReview**: Customer ratings (1-5), review text, admin moderation
 
 ### Orders App
+
 - **Order**: Full order lifecycle with status, payment, delivery tracking
 - **OrderItem**: Product snapshot for order items
 - **ShippingAddress**: Complete address details
 - **OrderStatusHistory**: Audit trail for status changes
 
 ### Store App
+
 - **Announcement**: Time-bound announcements
 - **SiteConfig**: Singleton for site-wide configuration
 - **Banner**: Campaign banners with date ranges
@@ -207,6 +225,7 @@ DELETE /announcements/{id}/    Delete announcement
 ### 🔴 BLOCKERS - Must Fix Before Launch
 
 #### 1. Payment Gateway Integration
+
 - **Current:** Cash on Delivery (COD) only
 - **Problem:** Bangladesh market expects digital payments (bKash, Nagad)
 - **Impact:** Significantly limits sales potential
@@ -224,15 +243,7 @@ DELETE /announcements/{id}/    Delete announcement
    - Replace placeholders with actual metrics
    - Sales today/week/month, order counts, customer counts
 
-3. **Customer Management Page** (2-3 days)
-   - Admin needs to view/manage customers
-   - Currently just a placeholder route
-
-4. **Product Reviews** (3-4 days)
-   - Social proof drives conversions
-   - Essential for organic products
-
-5. **Basic Coupon System** (2-3 days)
+3. **Basic Coupon System** (2-3 days)
    - Marketing flexibility
    - First-order discounts, promo codes
 
@@ -251,13 +262,13 @@ DELETE /announcements/{id}/    Delete announcement
 
 ## Technical Debt & Issues
 
-| Issue | Severity | Location | Recommendation |
-|-------|----------|----------|----------------|
-| No testing suite | High | All projects | Add basic tests before scaling |
-| No error monitoring | Medium | All projects | Add Sentry for production |
-| Gmail SMTP for emails | Medium | Backend | Use SendGrid/Mailgun for production |
-| React Compiler impact | Low | Admin | Monitor build performance |
-| Mobile SMS incomplete | Low | Backend | SMS provider integration |
+| Issue                 | Severity | Location     | Recommendation                      |
+| --------------------- | -------- | ------------ | ----------------------------------- |
+| No testing suite      | High     | All projects | Add basic tests before scaling      |
+| No error monitoring   | Medium   | All projects | Add Sentry for production           |
+| Gmail SMTP for emails | Medium   | Backend      | Use SendGrid/Mailgun for production |
+| React Compiler impact | Low      | Admin        | Monitor build performance           |
+| Mobile SMS incomplete | Low      | Backend      | SMS provider integration            |
 
 ---
 
@@ -275,7 +286,6 @@ Week 1: Critical Features
 
 Optional Week 2: High Priority Items
 ├── Admin Dashboard real metrics
-├── Customer Management page
 ├── Production email setup (SendGrid/Mailgun)
 └── Security audit
 
@@ -290,7 +300,6 @@ Week 3: Testing & Polish
 
 ```
 Month 1:
-├── Product Reviews system
 ├── Wishlist functionality
 ├── Coupon/Promocode system
 └── Basic analytics integration (Google Analytics)
@@ -308,9 +317,10 @@ Month 2:
 ## Production Checklist
 
 ### Pre-Launch
+
 - [ ] Payment gateway integrated (at least bKash)
 - [ ] Admin dashboard showing real data
-- [ ] Customer management page complete
+- [x] Customer management page complete
 - [ ] Production email service configured
 - [ ] Environment variables secured
 - [ ] CORS properly configured
@@ -326,6 +336,7 @@ Month 2:
 - [ ] Order cancellation tested
 
 ### Post-Launch (First Week)
+
 - [ ] Monitor error rates
 - [ ] Monitor payment success rates
 - [ ] Check email deliverability
@@ -337,23 +348,24 @@ Month 2:
 
 ## Summary
 
-| Category | Status | Notes |
-|----------|--------|-------|
-| **Code Quality** | ⭐⭐⭐⭐ | Good architecture, clean code, modern patterns |
-| **Feature Completeness** | ⭐⭐⭐ | Core features present, key gaps identified |
-| **Production Readiness** | ⭐⭐⭐ | Needs payment gateway + minor features |
-| **Testing** | ⭐ | No tests - critical gap |
-| **Documentation** | ⭐⭐⭐ | Good API docs, inline comments present |
+| Category                 | Status   | Notes                                          |
+| ------------------------ | -------- | ---------------------------------------------- |
+| **Code Quality**         | ⭐⭐⭐⭐ | Good architecture, clean code, modern patterns |
+| **Feature Completeness** | ⭐⭐⭐   | Core features present, key gaps identified     |
+| **Production Readiness** | ⭐⭐⭐   | Needs payment gateway + minor features         |
+| **Testing**              | ⭐       | No tests - critical gap                        |
+| **Documentation**        | ⭐⭐⭐   | Good API docs, inline comments present         |
 
 ### Overall Assessment: **80-85% Complete**
 
-The Fatty Life platform has a **solid foundation** with clean architecture and modern tech stack. The core e-commerce functionality is implemented, but **one critical gap** blocks immediate launch:
+The Dookan Life platform has a **solid foundation** with clean architecture and modern tech stack. The core e-commerce functionality is implemented, but **one critical gap** blocks immediate launch:
 
 1. **Payment Gateway** - bKash/Nagad for Bangladesh market
 
 With focused development over **1 week** (core) to **2 weeks** (with polish), this platform can be production-ready for an MVP launch. The remaining features (reviews, wishlist, advanced features) can be phased post-launch based on user feedback.
 
 ### Strengths
+
 - Modern, scalable architecture
 - Clean, well-organized codebase
 - Comprehensive API design
@@ -362,6 +374,7 @@ With focused development over **1 week** (core) to **2 weeks** (with polish), th
 - Responsive design across all apps
 
 ### Areas for Improvement
+
 - Add testing suite (unit, integration, E2E)
 - Implement payment gateway(s)
 - Add error monitoring
@@ -370,6 +383,6 @@ With focused development over **1 week** (core) to **2 weeks** (with polish), th
 
 ---
 
-*Generated: 2026-03-03*
-*Review Type: Senior Software Engineer Assessment*
-*Scope: Full-stack production readiness evaluation*
+_Generated: 2026-03-03_
+_Review Type: Senior Software Engineer Assessment_
+_Scope: Full-stack production readiness evaluation_

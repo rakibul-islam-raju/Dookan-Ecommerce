@@ -6,10 +6,12 @@ import {
 	Image,
 	LayoutDashboard,
 	Megaphone,
+	MessageSquareText,
 	Package,
 	Settings,
 	ShoppingCart,
 	Store,
+	SwatchBook,
 	Users,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -20,6 +22,8 @@ const sidebarItems = [
 	{ icon: ShoppingCart, label: "Orders", href: "/orders" },
 	{ icon: Users, label: "Customers", href: "/customers" },
 	{ icon: Grid2X2Check, label: "Categories", href: "/categories" },
+	{ icon: SwatchBook, label: "Variant Types", href: "/variant-types" },
+	{ icon: MessageSquareText, label: "Reviews", href: "/reviews" },
 ];
 
 const storeItems = [

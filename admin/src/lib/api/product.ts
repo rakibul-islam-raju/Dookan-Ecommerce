@@ -3,6 +3,7 @@ import type {
 	ICommonFilter,
 	IPaginatedResponse,
 } from "@/@types/Common.type";
+import type { ProductVariant } from "./variant";
 import { queryKeys } from "@/constants/queryKeys";
 import { queryOptions, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../react-query";
@@ -111,6 +112,7 @@ export interface ProductDetailsResponse {
 	meta_title: string;
 	meta_description: string;
 	images: ProductImage[];
+	variants: ProductVariant[];
 }
 
 export interface ProductImageUploadRequest {

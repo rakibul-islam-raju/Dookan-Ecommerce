@@ -49,7 +49,7 @@ export function CategoryList() {
 			...params,
 			search: searchQuery || undefined,
 			offset: (currentPage - 1) * pagination.limit,
-		})
+		}),
 	);
 
 	// Delete mutation
@@ -216,8 +216,8 @@ export function CategoryList() {
 					isLoading
 						? "Loading categories..."
 						: error
-						? "Error loading categories"
-						: "No categories found"
+							? "Error loading categories"
+							: "No categories found"
 				}
 				pagination={{
 					currentPage,
@@ -233,6 +233,7 @@ export function CategoryList() {
 				onOpenChange={setIsModalOpen}
 				category={selectedCategory}
 				mode={modalMode}
+				intialOrder={data?.count ? data.count + 1 : 1}
 			/>
 		</div>
 	);

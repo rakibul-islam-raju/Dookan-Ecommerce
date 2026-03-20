@@ -13,6 +13,12 @@ export interface CartItem {
 		price: number;
 		primary_image?: string;
 	};
+	variant?: {
+		id: string;
+		name: string;
+		sku: string;
+		price: number;
+	} | null;
 	quantity: number;
 	subtotal: number;
 }

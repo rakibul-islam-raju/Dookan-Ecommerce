@@ -28,7 +28,7 @@ const categorySchema = z.object({
 		.max(100, "Slug must not exceed 100 characters")
 		.regex(
 			/^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-			"Slug must be lowercase letters, numbers, and hyphens only"
+			"Slug must be lowercase letters, numbers, and hyphens only",
 		),
 	description: z
 		.string()
@@ -49,12 +49,14 @@ interface CategoryFormProps {
 	handleClose: () => void;
 	category?: CategoryListItem | null;
 	mode: "create" | "edit";
+	intialOrder: number;
 }
 
 export const CategoryForm = ({
 	handleClose,
 	category,
 	mode,
+	intialOrder,
 }: CategoryFormProps) => {
 	const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
 
@@ -68,7 +70,7 @@ export const CategoryForm = ({
 			name: "",
 			slug: "",
 			description: "",
-			display_order: 0,
+			display_order: intialOrder,
 			is_active: true,
 		},
 	});
@@ -92,7 +94,7 @@ export const CategoryForm = ({
 						handleCancel();
 						toast.success("Category updated successfully");
 					},
-				}
+				},
 			);
 		} else {
 			createCategory(data, {

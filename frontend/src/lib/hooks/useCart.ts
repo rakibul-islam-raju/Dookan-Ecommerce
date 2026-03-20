@@ -22,6 +22,12 @@ export { useCartStore };
  */
 export interface LocalAddToCartData {
 	product: any; // Full product object
+	variant?: {
+		id: string;
+		name: string;
+		sku: string;
+		price: number;
+	} | null;
 	quantity?: number;
 }
 
@@ -51,6 +57,13 @@ const initialCart: Cart = {
 };
 
 /**
+ * Generate a unique cart item key based on product + variant
+ */
+function getCartItemKey(productId: string, variantId?: string | null): string {
+	return variantId ? `${productId}-${variantId}` : productId;
+}
+
+/**
  * Cart Store with Zustand
  */
 const useCartStore = create<CartStore>()(
@@ -61,33 +74,48 @@ const useCartStore = create<CartStore>()(
 
 			addToCart: (data: LocalAddToCartData) => {
 				const { cart } = get();
-				const { product, quantity = 1 } = data;
-				const existingItem = cart.items.find(
-					(item) => item.product.id === product.id
-				);
+				const { product, variant, quantity = 1 } = data;
+				const itemKey = getCartItemKey(product.id, variant?.id);
 
+				const existingItem = cart.items.find((item) => {
+					const existingKey = getCartItemKey(
+						item.product.id,
+						item.variant?.id
+					);
+					return existingKey === itemKey;
+				});
+
+				const effectivePrice = variant ? variant.price : Number(product.price);
 				let newItems: CartItem[];
 
 				if (existingItem) {
 					// Update existing item quantity
-					newItems = cart.items.map((item) =>
-						item.product.id === product.id
-							? { ...item, quantity: item.quantity + quantity }
-							: item
-					);
+					newItems = cart.items.map((item) => {
+						const key = getCartItemKey(item.product.id, item.variant?.id);
+						if (key === itemKey) {
+							const newQty = item.quantity + quantity;
+							return {
+								...item,
+								quantity: newQty,
+								subtotal: effectivePrice * newQty,
+							};
+						}
+						return item;
+					});
 				} else {
 					// Add new item with full product details
 					const newItem: CartItem = {
-						id: `${product.id}-${Date.now()}`, // Unique ID for cart item
+						id: `${itemKey}-${Date.now()}`, // Unique ID for cart item
 						product: {
 							id: product.id,
 							name: product.name,
 							slug: product.slug,
-							price: product.price,
+							price: Number(product.price),
 							primary_image: product.primary_image,
 						},
+						variant: variant || null,
 						quantity: quantity,
-						subtotal: product.price * quantity,
+						subtotal: effectivePrice * quantity,
 					};
 					newItems = [...cart.items, newItem];
 				}
@@ -121,9 +149,11 @@ const useCartStore = create<CartStore>()(
 
 				const newItems = cart.items.map((item) => {
 					if (item.id === itemId) {
-						const newQuantity = quantity;
-						const newSubtotal = item.product.price * newQuantity;
-						return { ...item, quantity: newQuantity, subtotal: newSubtotal };
+						const effectivePrice = item.variant
+							? item.variant.price
+							: item.product.price;
+						const newSubtotal = effectivePrice * quantity;
+						return { ...item, quantity, subtotal: newSubtotal };
 					}
 					return item;
 				});

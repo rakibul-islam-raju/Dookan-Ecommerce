@@ -4,7 +4,11 @@ export const queryKeys = {
 	productDetails: "productDetails",
 	categories: "categories",
 	orders: "orders",
+	customers: "customers",
+	reviews: "reviews",
 	banners: "banners",
 	announcements: "announcements",
 	siteConfig: "siteConfig",
+	variantTypes: "variantTypes",
+	productVariants: "productVariants",
 } as const;

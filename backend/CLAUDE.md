@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Fatty Life backend is a Django REST Framework API for an organic products e-commerce platform. This API serves a Next.js customer storefront and a Vite + React admin dashboard.
+Dookan backend is a Django REST Framework API for an organic products e-commerce platform. This API serves a Next.js customer storefront and a Vite + React admin dashboard.
 
 ## Development Commands
 
@@ -46,6 +46,7 @@ The backend is organized into domain-specific Django apps:
 ### URL Patterns
 
 API endpoints are versioned at `/api/v1/{app}/`:
+
 - `/api/v1/auth/` - Authentication endpoints
 - `/api/v1/users/` - User profile and addresses
 - `/api/v1/products/` - Products and categories
@@ -53,6 +54,7 @@ API endpoints are versioned at `/api/v1/{app}/`:
 - `/api/v1/store/` - Store configuration
 
 Additional endpoints:
+
 - `/` - Swagger UI API documentation
 - `/control-panel/` - Django admin interface
 
@@ -61,11 +63,13 @@ Additional endpoints:
 **Custom User Model**: Uses `users.User` with email as username field and UUID primary key.
 
 **BaseModel Pattern**: All models inherit from `utils.models.BaseModel` which provides:
+
 - UUID primary key (`id`)
 - `is_active` for soft deletes
 - `created_at` and `updated_at` timestamps
 
 **JWT Authentication**: Via `rest_framework_simplejwt` with:
+
 - 1-day access token lifetime
 - 30-day refresh token lifetime
 - Token rotation and blacklisting on logout
@@ -77,6 +81,7 @@ Additional endpoints:
 ### Environment Variables
 
 Required in `.env`:
+
 - `DJANGO_SECRET_KEY` - Django secret key
 - `DEBUG` - Debug mode (True/False)
 - `DJANGO_ALLOWED_HOSTS` - Comma-separated list of allowed hosts
@@ -88,6 +93,7 @@ Required in `.env`:
 ### Database
 
 PostgreSQL 17 running in Docker on port 5433 (mapped from container's 5432). Default credentials from `docker-compose.yml`:
+
 - Database: `ecom`
 - User: `ecom_user`
 - Password: `ecom_password`

@@ -133,3 +133,44 @@ class UserListView(generics.ListAPIView):
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     filterset_fields = ["is_active", "is_staff", "is_superuser", "is_mobile_verified"]
     search_fields = ["=email", "=mobile_number", "^first_name", "^last_name"]
+
+
+class UserDetailView(generics.RetrieveAPIView):
+    """
+    Get user details (admin only)
+    GET /users/<uuid:id>/
+    """
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = "id"
+
+
+class UserStatusUpdateView(APIView):
+    """
+    Toggle user active status (admin only)
+    PATCH /users/<uuid:id>/status/
+    """
+
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        is_active = request.data.get("is_active")
+        if is_active is None:
+            return Response(
+                {"detail": "is_active field is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.is_active = is_active
+        user.save(update_fields=["is_active"])
+        serializer = UserListSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

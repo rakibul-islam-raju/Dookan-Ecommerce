@@ -27,6 +27,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ProductImages } from "./components/ProductImages";
 import { ProductOrders } from "./components/ProductOrders";
+import { ProductVariants } from "./components/ProductVariants";
 
 export const ProductDetails = () => {
 	const { id } = useParams();
@@ -370,6 +371,9 @@ export const ProductDetails = () => {
 					</Card>
 				</div>
 			</div>
+
+			{/* Product Variants Section */}
+			<ProductVariants productId={id!} />
 
 			{/* Product Orders Section */}
 			<ProductOrders productId={id!} />

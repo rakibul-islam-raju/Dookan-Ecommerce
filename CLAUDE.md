@@ -4,19 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Fatty Life is an e-commerce platform for organic products consisting of three independent applications:
+Dookan is an e-commerce platform for organic products consisting of three independent applications:
 
-- **fatty-life-frontend**: Next.js 16 customer-facing storefront
-- **fatty-life-admin**: Vite + React admin dashboard for store management
-- **fatty-life-backend**: Django REST Framework API
+- **frontend**: Next.js 16 customer-facing storefront
+- **admin**: Vite + React admin dashboard for store management
+- **backend**: Django REST Framework API
 
 Each project has its own git repository and runs independently.
 
 ## Development Commands
 
 ### Backend (Django)
+
 ```bash
-cd fatty-life-backend
+cd backend
 
 # Start PostgreSQL database
 docker compose up -d
@@ -35,8 +36,9 @@ uv run python manage.py makemigrations
 ```
 
 ### Frontend (Next.js)
+
 ```bash
-cd fatty-life-frontend
+cd frontend
 npm install   # or pnpm install
 npm run dev   # Development server on http://localhost:3000
 npm run build
@@ -44,8 +46,9 @@ npm run lint
 ```
 
 ### Admin (Vite + React Compiler)
+
 ```bash
-cd fatty-life-admin
+cd admin
 npm install   # or pnpm install
 npm run dev   # Development server on http://localhost:5173
 npm run build # tsc -b && vite build
@@ -57,7 +60,9 @@ Note: React Compiler is enabled in admin, which impacts dev & build performance.
 ## Architecture
 
 ### Backend Structure
+
 Django project with apps organized by domain:
+
 - `core/` - Project settings, root URL configuration
 - `authentication/` - JWT auth (login, register, token refresh)
 - `users/` - Custom user model and profile management
@@ -69,12 +74,14 @@ Django project with apps organized by domain:
 API endpoints follow pattern: `/api/v1/{app}/`
 
 Key configurations:
+
 - JWT authentication via `djangorestframework-simplejwt`
 - API documentation at root URL via `drf-spectacular` (Swagger UI)
 - Admin panel at `/control-panel/`
 - Custom user model: `users.User`
 
 ### Frontend Structure (Next.js App Router)
+
 ```
 src/
 ├── app/
@@ -91,12 +98,14 @@ src/
 ```
 
 Key patterns:
+
 - Server/client axios instances in `lib/api/axios.ts`
 - React Query for client-side data fetching with query key factories
 - Zustand for auth state with cookie-based token storage
 - Forms use react-hook-form with Zod validation
 
 ### Admin Structure (Vite + React Router)
+
 ```
 src/
 ├── features/            # Feature modules (products, orders, categories, auth)
@@ -109,6 +118,7 @@ src/
 ```
 
 Key patterns:
+
 - Feature-based organization
 - React Router for navigation
 - Auth tokens stored in localStorage
@@ -116,18 +126,21 @@ Key patterns:
 ## Tech Stack Details
 
 ### Backend
+
 - Python 3.13, Django 5.2, DRF 3.16
 - PostgreSQL 17 (via Docker)
 - JWT tokens (1-day access, 30-day refresh)
 - Package management: `uv`
 
 ### Frontend
+
 - Next.js 16, React 19, TypeScript 5.9
 - Tailwind CSS 4 with shadcn/ui components
 - TanStack Query for data fetching
 - React Compiler enabled
 
 ### Admin
+
 - Vite 7, React 19, TypeScript 5.9
 - React Router 7, TanStack Query
 - Tailwind CSS 4 with shadcn/ui components
@@ -135,11 +148,14 @@ Key patterns:
 
 ## Environment Variables
 
-### Backend (`fatty-life-backend/.env`)
+### Backend (`backend/.env`)
+
 Required: `DJANGO_SECRET_KEY`, `DEBUG`, `DJANGO_ALLOWED_HOSTS`, `POSTGRES_*`, `CORS_ALLOWED_ORIGINS`
 
-### Frontend (`fatty-life-frontend/.env`)
+### Frontend (`frontend/.env`)
+
 Required: `NEXT_PUBLIC_API_URL`
 
-### Admin (`fatty-life-admin/.env`)
+### Admin (`admin/.env`)
+
 Required: `VITE_API_URL`

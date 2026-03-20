@@ -172,6 +172,8 @@ class UserListSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "mobile_number",
+            "is_active",
+            "is_email_verified",
             "is_mobile_verified",
             "created_at",
             "updated_at",

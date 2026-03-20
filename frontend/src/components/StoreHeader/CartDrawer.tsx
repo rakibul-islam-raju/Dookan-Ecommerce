@@ -130,8 +130,13 @@ export const CartDrawer = ({
 													{item.product.name}
 												</Link>
 											</h4>
+											{item.variant && (
+												<p className="text-xs text-muted-foreground mt-0.5">
+													{item.variant.name}
+												</p>
+											)}
 											<p className="text-sm text-muted-foreground mt-1">
-												৳{item.product.price}
+												৳{item.variant ? item.variant.price : item.product.price}
 											</p>
 										</div>
 										<div className="flex items-center justify-between mt-2">

@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 from django.utils.text import slugify
@@ -199,3 +199,157 @@ class ProductImage(BaseModel):
 
     def __str__(self):
         return f"Image for {self.product.name}"
+
+
+class VariantType(BaseModel):
+    """
+    Reusable variant types (e.g., Size, Color, Weight, Flavor)
+    """
+
+    name = models.CharField(max_length=100, unique=True)
+    display_order = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = "variant_types"
+        ordering = ["display_order", "name"]
+
+    def __str__(self):
+        return self.name
+
+
+class VariantOption(BaseModel):
+    """
+    Options for a variant type (e.g., Small, Medium, Large for Size)
+    """
+
+    variant_type = models.ForeignKey(
+        VariantType, on_delete=models.CASCADE, related_name="options"
+    )
+    value = models.CharField(max_length=100)
+    display_order = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = "variant_options"
+        ordering = ["display_order", "value"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["variant_type", "value"],
+                name="unique_variant_option_per_type",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.variant_type.name}: {self.value}"
+
+
+class ProductVariant(BaseModel):
+    """
+    A specific purchasable variant of a product with its own SKU, price, and stock
+    """
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="variants"
+    )
+    sku = models.CharField(max_length=50, unique=True, db_index=True)
+    name = models.CharField(
+        max_length=200, blank=True, help_text="Auto-generated from options if blank"
+    )
+
+    # Pricing
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    compare_at_price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    cost_price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+
+    # Inventory
+    stock_quantity = models.IntegerField(default=0)
+    low_stock_threshold = models.IntegerField(default=5)
+
+    # Attributes
+    weight = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, help_text="Weight in grams"
+    )
+
+    # Options that define this variant
+    options = models.ManyToManyField(VariantOption, related_name="product_variants")
+
+    display_order = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = "product_variants"
+        ordering = ["display_order", "created_at"]
+        indexes = [
+            models.Index(fields=["product", "is_active"]),
+            models.Index(fields=["sku"]),
+        ]
+
+    def __str__(self):
+        return f"{self.product.name} - {self.name or self.sku}"
+
+    @property
+    def is_in_stock(self):
+        return self.stock_quantity > 0
+
+    @property
+    def is_low_stock(self):
+        return 0 < self.stock_quantity <= self.low_stock_threshold
+
+    @property
+    def discount_percentage(self):
+        if self.compare_at_price and self.compare_at_price > self.price:
+            return int(
+                ((self.compare_at_price - self.price) / self.compare_at_price) * 100
+            )
+        return 0
+
+    def save(self, *args, **kwargs):
+        # Auto-generate name from options if not provided
+        if not self.name and self.pk:
+            option_values = self.options.values_list("value", flat=True)
+            if option_values:
+                self.name = " / ".join(option_values)
+        super().save(*args, **kwargs)
+
+
+class ProductReview(BaseModel):
+    """
+    Customer product reviews with ratings
+    """
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="reviews"
+    )
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="reviews"
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Rating from 1 to 5",
+    )
+    title = models.CharField(max_length=200, blank=True)
+    comment = models.TextField(blank=True)
+    is_approved = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "product_reviews"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product", "user"],
+                name="unique_product_review_per_user",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["product", "is_approved", "is_active"]),
+            models.Index(fields=["user"]),
+        ]
+
+    def __str__(self):
+        return f"Review by {self.user.email} for {self.product.name} ({self.rating}/5)"

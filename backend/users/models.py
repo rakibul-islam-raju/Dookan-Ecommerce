@@ -41,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name"]
+    REQUIRED_FIELDS = ["first_name", "last_name", "mobile_number"]
 
     class Meta:
         db_table = "users"
@@ -66,7 +66,9 @@ class OTPVerification(BaseModel):
 
     email = models.EmailField(db_index=True, default="")
     otp_code = models.CharField(max_length=6)
-    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES, default="registration")
+    purpose = models.CharField(
+        max_length=20, choices=PURPOSE_CHOICES, default="registration"
+    )
     is_verified = models.BooleanField(default=False)
     expires_at = models.DateTimeField()
     attempts = models.IntegerField(default=0)

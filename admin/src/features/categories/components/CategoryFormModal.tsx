@@ -13,6 +13,7 @@ interface CategoryFormModalProps {
 	onOpenChange: (open: boolean) => void;
 	category?: CategoryListItem | null;
 	mode: "create" | "edit";
+	intialOrder: number;
 }
 
 export function CategoryFormModal({
@@ -20,6 +21,7 @@ export function CategoryFormModal({
 	onOpenChange,
 	category,
 	mode,
+	intialOrder,
 }: CategoryFormModalProps) {
 	const isEditMode = mode === "edit";
 
@@ -46,6 +48,7 @@ export function CategoryFormModal({
 						handleClose={handleClose}
 						category={category}
 						mode={mode}
+						intialOrder={intialOrder}
 					/>
 				</div>
 			</DialogContent>

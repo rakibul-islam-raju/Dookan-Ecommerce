@@ -8,6 +8,17 @@ from .views import (
     ProductRetrieveUpdateDestroyAPIView,
     ProductImageListCreateAPIView,
     ProductImageDestroyAPIView,
+    ProductReviewListAPIView,
+    ProductReviewCreateAPIView,
+    AdminReviewListAPIView,
+    AdminReviewStatusUpdateAPIView,
+    AdminReviewDeleteAPIView,
+    VariantTypeListCreateAPIView,
+    VariantTypeRetrieveUpdateDestroyAPIView,
+    VariantOptionListCreateAPIView,
+    VariantOptionDestroyAPIView,
+    ProductVariantListCreateAPIView,
+    ProductVariantRetrieveUpdateDestroyAPIView,
 )
 
 app_name = "products"
@@ -27,6 +38,53 @@ urlpatterns = [
         ProductImageDestroyAPIView.as_view(),
         name="product-image-destroy",
     ),
+    # Reviews
+    path(
+        "reviews/",
+        ProductReviewCreateAPIView.as_view(),
+        name="review-create",
+    ),
+    path(
+        "reviews/admin/",
+        AdminReviewListAPIView.as_view(),
+        name="admin-review-list",
+    ),
+    path(
+        "reviews/<str:pk>/",
+        AdminReviewDeleteAPIView.as_view(),
+        name="admin-review-delete",
+    ),
+    path(
+        "reviews/<str:pk>/status/",
+        AdminReviewStatusUpdateAPIView.as_view(),
+        name="admin-review-status",
+    ),
+    # Variant Types (must be before <str:pk>/ catch-all)
+    path(
+        "variant-types/",
+        VariantTypeListCreateAPIView.as_view(),
+        name="variant-type-list-create",
+    ),
+    path(
+        "variant-types/<str:pk>/",
+        VariantTypeRetrieveUpdateDestroyAPIView.as_view(),
+        name="variant-type-detail",
+    ),
+    path(
+        "variant-types/<str:variant_type_id>/options/",
+        VariantOptionListCreateAPIView.as_view(),
+        name="variant-option-list-create",
+    ),
+    path(
+        "variant-options/<str:pk>/",
+        VariantOptionDestroyAPIView.as_view(),
+        name="variant-option-destroy",
+    ),
+    path(
+        "variants/<str:pk>/",
+        ProductVariantRetrieveUpdateDestroyAPIView.as_view(),
+        name="product-variant-detail",
+    ),
     path(
         "slug/<str:slug>/",
         ProductDetailsAPIView.as_view(),
@@ -41,5 +99,15 @@ urlpatterns = [
         "<str:product_id>/images/",
         ProductImageListCreateAPIView.as_view(),
         name="product-image-list-create",
+    ),
+    path(
+        "<str:product_id>/reviews/",
+        ProductReviewListAPIView.as_view(),
+        name="product-review-list",
+    ),
+    path(
+        "<str:product_id>/variants/",
+        ProductVariantListCreateAPIView.as_view(),
+        name="product-variant-list-create",
     ),
 ]

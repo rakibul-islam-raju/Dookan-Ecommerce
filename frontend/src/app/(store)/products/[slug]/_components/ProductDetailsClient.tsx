@@ -1,6 +1,6 @@
 "use client";
 
-import { IConsumerProductDetail } from "@/@types/Product";
+import type { IConsumerProductDetail, IProductVariant } from "@/@types/Product";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,6 +19,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { ProductReviews } from "./ProductReviews";
+import { VariantSelector } from "./VariantSelector";
 
 interface ProductDetailsClientProps {
 	product: IConsumerProductDetail;
@@ -32,17 +34,47 @@ export const ProductDetailsClient = ({
 	);
 	const [quantity, setQuantity] = useState(1);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
+	const [selectedVariant, setSelectedVariant] = useState<IProductVariant | null>(
+		product.has_variants && product.variants.length > 0
+			? product.variants[0]
+			: null
+	);
 
 	const addToCartMutation = useAddToCart();
 
+	// Derive active pricing and stock from variant or base product
+	const activePrice = selectedVariant
+		? selectedVariant.price
+		: product.price;
+	const activeComparePrice = selectedVariant
+		? selectedVariant.compare_at_price
+		: product.compare_at_price;
+	const activeDiscount = selectedVariant
+		? selectedVariant.discount_percentage
+		: product.discount_percentage;
+	const activeStock = selectedVariant
+		? selectedVariant.stock_quantity
+		: product.stock_quantity;
+	const activeInStock = selectedVariant
+		? selectedVariant.is_in_stock
+		: product.is_in_stock;
+
 	const handleQuantityChange = (delta: number) => {
 		const newQuantity = quantity + delta;
-		if (newQuantity >= 1 && newQuantity <= product.stock_quantity) {
+		if (newQuantity >= 1 && newQuantity <= activeStock) {
 			setQuantity(newQuantity);
 		}
 	};
 
+	const handleVariantChange = (variant: IProductVariant | null) => {
+		setSelectedVariant(variant);
+		setQuantity(1);
+	};
+
 	const handleAddToCart = async () => {
+		// If product has variants, a variant must be selected
+		if (product.has_variants && !selectedVariant) return;
+
 		setIsAddingToCart(true);
 		try {
 			addToCartMutation.mutate({
@@ -50,13 +82,20 @@ export const ProductDetailsClient = ({
 					id: product.id,
 					name: product.name,
 					slug: product.slug,
-					price: product.price,
-					discount_percentage: product.discount_percentage,
+					price: activePrice,
+					discount_percentage: activeDiscount,
 					primary_image: product.images[0]?.image,
 				},
+				variant: selectedVariant
+					? {
+							id: selectedVariant.id,
+							name: selectedVariant.name,
+							sku: selectedVariant.sku,
+							price: Number(selectedVariant.price),
+						}
+					: undefined,
 				quantity,
 			});
-			// Reset quantity after successful add
 			setQuantity(1);
 		} catch (error) {
 			console.error("Failed to add to cart:", error);
@@ -97,9 +136,9 @@ export const ProductDetailsClient = ({
 							unoptimized
 							fill
 						/>
-						{product.discount_percentage > 0 && (
+						{activeDiscount > 0 && (
 							<Badge className="absolute top-4 left-4 bg-destructive text-white border-none text-sm px-3 py-1">
-								-{product.discount_percentage}%
+								-{activeDiscount}%
 							</Badge>
 						)}
 					</div>
@@ -137,22 +176,22 @@ export const ProductDetailsClient = ({
 						</h1>
 						<div className="flex flex-wrap items-center gap-3 mb-6">
 							<span className="bg-secondary/50 text-secondary-foreground px-3 py-1 rounded-md text-xs font-semibold tracking-wide">
-								SKU: {product.sku}
+								SKU: {selectedVariant ? selectedVariant.sku : product.sku}
 							</span>
-							{product.discount_percentage > 0 && (
+							{activeDiscount > 0 && (
 								<Badge className="bg-red-500/20 text-red-700 border-red-200 hover:bg-red-500/30">
-									Save {product.discount_percentage}%
+									Save {activeDiscount}%
 								</Badge>
 							)}
 							<div
 								className={cn(
 									"flex items-center gap-2 px-3 py-1 rounded-md font-medium text-sm",
-									product.is_in_stock
+									activeInStock
 										? "bg-green-500/10 text-green-700"
 										: "bg-red-500/10 text-red-700"
 								)}
 							>
-								{product.is_in_stock ? (
+								{activeInStock ? (
 									<>
 										<Check className="size-4" /> In Stock
 									</>
@@ -166,11 +205,11 @@ export const ProductDetailsClient = ({
 
 						<div className="flex items-baseline gap-3 mb-6">
 							<span className="text-4xl font-bold text-primary">
-								৳{product.price}
+								৳{activePrice}
 							</span>
-							{product.discount_percentage > 0 && (
+							{activeDiscount > 0 && activeComparePrice && (
 								<span className="text-xl text-muted-foreground line-through">
-									৳{product.compare_at_price}
+									৳{activeComparePrice}
 								</span>
 							)}
 						</div>
@@ -183,6 +222,23 @@ export const ProductDetailsClient = ({
 
 						<Separator className="mb-8" />
 
+						{/* Variant Selector */}
+						{product.has_variants && product.variant_types.length > 0 && (
+							<div className="mb-6">
+								<VariantSelector
+									variantTypes={product.variant_types}
+									variants={product.variants}
+									selectedVariant={selectedVariant}
+									onSelectVariant={handleVariantChange}
+								/>
+								{product.has_variants && !selectedVariant && (
+									<p className="text-sm text-amber-600 mt-2">
+										Please select a variant to continue
+									</p>
+								)}
+							</div>
+						)}
+
 						{/* Actions */}
 						<div className="space-y-6">
 							<div className="space-y-3">
@@ -193,7 +249,7 @@ export const ProductDetailsClient = ({
 									<div className="flex items-center border rounded-lg overflow-hidden">
 										<button
 											onClick={() => handleQuantityChange(-1)}
-											disabled={quantity <= 1 || !product.is_in_stock}
+											disabled={quantity <= 1 || !activeInStock}
 											className="p-2 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
 											aria-label="Decrease quantity"
 										>
@@ -205,8 +261,8 @@ export const ProductDetailsClient = ({
 										<button
 											onClick={() => handleQuantityChange(1)}
 											disabled={
-												quantity >= product.stock_quantity ||
-												!product.is_in_stock
+												quantity >= activeStock ||
+												!activeInStock
 											}
 											className="p-2 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
 											aria-label="Increase quantity"
@@ -224,7 +280,11 @@ export const ProductDetailsClient = ({
 								<Button
 									size="lg"
 									className="flex-1 text-base h-12 font-semibold"
-									disabled={!product.is_in_stock || isAddingToCart}
+									disabled={
+										!activeInStock ||
+										isAddingToCart ||
+										(product.has_variants && !selectedVariant)
+									}
 									onClick={handleAddToCart}
 									aria-busy={isAddingToCart}
 								>
@@ -258,11 +318,13 @@ export const ProductDetailsClient = ({
 								</Button>
 							</div>
 
-							{!product.is_in_stock && (
+							{!activeInStock && (
 								<div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 flex items-center gap-2">
 									<AlertTriangle className="size-4 text-destructive" />
 									<span className="text-sm text-destructive font-medium">
-										This product is currently out of stock
+										{product.has_variants && selectedVariant
+											? "This variant is currently out of stock"
+											: "This product is currently out of stock"}
 									</span>
 								</div>
 							)}
@@ -285,7 +347,9 @@ export const ProductDetailsClient = ({
 									<dl className="space-y-2 text-sm">
 										<div className="flex justify-between">
 											<dt className="text-muted-foreground">SKU:</dt>
-											<dd className="font-medium">{product.sku}</dd>
+											<dd className="font-medium">
+												{selectedVariant ? selectedVariant.sku : product.sku}
+											</dd>
 										</div>
 										<div className="flex justify-between">
 											<dt className="text-muted-foreground">Category:</dt>
@@ -297,11 +361,11 @@ export const ProductDetailsClient = ({
 												{product.unit_value} {product.unit}
 											</dd>
 										</div>
-										{product.discount_percentage > 0 && (
+										{activeDiscount > 0 && (
 											<div className="flex justify-between">
 												<dt className="text-muted-foreground">Discount:</dt>
 												<dd className="font-medium text-green-600">
-													{product.discount_percentage}% OFF
+													{activeDiscount}% OFF
 												</dd>
 											</div>
 										)}
@@ -316,12 +380,12 @@ export const ProductDetailsClient = ({
 											<dd
 												className={cn(
 													"font-semibold",
-													product.is_in_stock
+													activeInStock
 														? "text-green-600"
 														: "text-destructive"
 												)}
 											>
-												{product.is_in_stock ? "In Stock" : "Out of Stock"}
+												{activeInStock ? "In Stock" : "Out of Stock"}
 											</dd>
 										</div>
 										<div className="flex justify-between">
@@ -329,7 +393,7 @@ export const ProductDetailsClient = ({
 												Available Quantity:
 											</dt>
 											<dd className="font-medium">
-												{product.stock_quantity} units
+												{activeStock} units
 											</dd>
 										</div>
 										<div className="flex justify-between">
@@ -352,6 +416,12 @@ export const ProductDetailsClient = ({
 					)}
 				</div>
 			</div>
+
+			{/* Product Reviews */}
+			<ProductReviews
+				productId={product.id}
+				reviewSummary={product.review_summary}
+			/>
 		</div>
 	);
 };

@@ -4,6 +4,9 @@ import { ForgotPassword } from "@/features/auth/ForgotPassword";
 import { Login } from "@/features/auth/Login";
 import { SetPassword } from "@/features/auth/SetPassword";
 import { CategoryList } from "@/features/categories/CategoryList";
+import { VariantTypeList } from "@/features/variants/VariantTypeList";
+import { CustomerList } from "@/features/customers/CustomerList";
+import { ReviewList } from "@/features/reviews/ReviewList";
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { OrderDetails } from "@/features/orders/OrderDetails";
 import { OrderList } from "@/features/orders/OrderList";
@@ -51,11 +54,19 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "customers",
-				element: <div>Customers Page</div>,
+				element: <CustomerList />,
 			},
 			{
 				path: "categories",
 				element: <CategoryList />,
+			},
+			{
+				path: "reviews",
+				element: <ReviewList />,
+			},
+			{
+				path: "variant-types",
+				element: <VariantTypeList />,
 			},
 			{
 				path: "store/banners",

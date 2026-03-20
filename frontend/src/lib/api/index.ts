@@ -24,5 +24,8 @@ export type { AddToCartData, Cart, CartItem, UpdateCartItemData } from "./cart";
 // Order APIs
 export { orderClientApi } from "./orders";
 
+// Review APIs
+export { reviewClientApi, reviewServerApi } from "./reviews";
+
 // Store APIs (site config, banners)
 export { storeClientApi, storeServerApi } from "./store";

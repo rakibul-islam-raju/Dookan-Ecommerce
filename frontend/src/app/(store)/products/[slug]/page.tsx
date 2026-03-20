@@ -145,11 +145,13 @@ export default async function ProductDetailsPage({ params }: ProductPageProps) {
 					: "https://schema.org/OutOfStock",
 			itemCondition: "https://schema.org/NewCondition",
 		},
-		aggregateRating: {
-			"@type": "AggregateRating",
-			ratingValue: "4.5",
-			reviewCount: "10",
-		},
+		...(product.review_summary?.review_count > 0 && {
+			aggregateRating: {
+				"@type": "AggregateRating",
+				ratingValue: String(product.review_summary.average_rating),
+				reviewCount: String(product.review_summary.review_count),
+			},
+		}),
 		category: product.category.name,
 	};
 

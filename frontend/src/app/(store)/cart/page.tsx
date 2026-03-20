@@ -138,8 +138,13 @@ export default function CartPage() {
 														{item.product.name}
 													</Link>
 												</h3>
+												{item.variant && (
+													<p className="text-sm text-muted-foreground mt-0.5">
+														{item.variant.name}
+													</p>
+												)}
 												<p className="text-muted-foreground mt-1">
-													৳{item.product.price}
+													৳{item.variant ? item.variant.price : item.product.price}
 												</p>
 											</div>
 											<div className="text-right font-medium hidden sm:block">

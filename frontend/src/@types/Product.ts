@@ -1,4 +1,5 @@
 import { ICategory } from "./Category";
+import { IReviewSummary } from "./Review";
 
 export interface IProductImage {
 	id: string;
@@ -7,6 +8,33 @@ export interface IProductImage {
 	alt_text: string;
 	is_primary: boolean;
 	display_order: number;
+}
+
+export interface IProductVariantOption {
+	id: string;
+	variant_type_id: string;
+	variant_type_name: string;
+	value: string;
+}
+
+export interface IProductVariant {
+	id: string;
+	sku: string;
+	name: string;
+	price: string;
+	compare_at_price?: string;
+	stock_quantity: number;
+	is_in_stock: boolean;
+	is_low_stock: boolean;
+	discount_percentage: number;
+	display_order: number;
+	options: IProductVariantOption[];
+}
+
+export interface IProductVariantType {
+	id: string;
+	name: string;
+	options: { id: string; value: string }[];
 }
 
 export interface IConsumerProductListItem {
@@ -30,6 +58,8 @@ export interface IConsumerProductListItem {
 	is_featured: boolean;
 	is_active: boolean;
 	primary_image?: string;
+	has_variants: boolean;
+	min_variant_price?: string | null;
 }
 
 export interface IConsumerProductDetail {
@@ -54,4 +84,8 @@ export interface IConsumerProductDetail {
 	meta_title?: string;
 	meta_description?: string;
 	images: IProductImage[];
+	review_summary: IReviewSummary;
+	has_variants: boolean;
+	variants: IProductVariant[];
+	variant_types: IProductVariantType[];
 }
