@@ -11,4 +11,5 @@ export const queryKeys = {
 	siteConfig: "siteConfig",
 	variantTypes: "variantTypes",
 	productVariants: "productVariants",
+	coupons: "coupons",
 } as const;

@@ -13,9 +13,26 @@ from products.models import (
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ["id", "name", "slug", "description", "is_active", "display_order"]
+        fields = ["id", "name", "slug", "description", "image", "is_active", "display_order"]
+        read_only_fields = ["id"]
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if obj.image:
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class CategoryCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name", "slug", "description", "image", "is_active", "display_order"]
         read_only_fields = ["id"]
 
 

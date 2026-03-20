@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
+from coupons.models import Coupon
 from products.models import Product
 from users.models import User
 from utils.models import BaseModel
@@ -76,6 +77,12 @@ class Order(BaseModel):
         default=False,
         help_text=_("Whether shipping cost has been paid for COD orders"),
     )
+
+    # Coupon
+    coupon = models.ForeignKey(
+        Coupon, on_delete=models.SET_NULL, null=True, blank=True, related_name="orders"
+    )
+    coupon_code = models.CharField(max_length=50, blank=True)
 
     # Pricing
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)

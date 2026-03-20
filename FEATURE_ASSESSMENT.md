@@ -2,7 +2,7 @@
 
 > Comprehensive review of the Dookan e-commerce platform
 >
-> **Date:** 2026-03-03
+> **Date:** 2026-03-20
 >
 > **Reviewer:** Senior Software Engineer Assessment
 
@@ -28,7 +28,7 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 - **Database:** PostgreSQL 17 (via Docker)
 - **Authentication:** JWT (1-day access, 30-day refresh tokens)
 - **Package Manager:** uv
-- **Apps:** `authentication`, `users`, `products`, `orders`, `store`, `utils`
+- **Apps:** `authentication`, `users`, `products`, `orders`, `coupons`, `store`, `utils`
 
 ### Frontend (`frontend/`)
 
@@ -75,6 +75,8 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 | **SEO (Meta tags, Schema)**     | ✅      | ✅       | ❌    | Structured data, OpenGraph           |
 | **Mobile Responsive**           | ❌      | ✅       | ✅    | Mobile-first design                  |
 | **Product Reviews**             | ✅      | ✅       | ✅    | Ratings, moderation, SEO integration |
+| **Product Variants**            | ✅      | ✅       | ✅    | Size, weight, color options per product |
+| **Coupons/Discounts**           | ✅      | ✅       | ✅    | Percentage & fixed amount, usage limits |
 | **Customer Management**         | ✅      | ❌       | ✅    | Admin customer list with filters     |
 
 ### ⚠️ Partially Implemented Features
@@ -91,9 +93,7 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 | Feature                      | Priority    | Description                                                         |
 | ---------------------------- | ----------- | ------------------------------------------------------------------- |
 | **Payment Gateway**          | 🔴 Critical | bKash, Nagad, Stripe integration for Bangladesh market              |
-| **Product Variants**         | 🟡 High     | Size, color, flavor options (currently requiring separate products) |
 | **Wishlist**                 | 🟡 High     | Save products for later purchase                                    |
-| **Coupons/Discounts**        | 🟡 High     | Promo code and discount system                                      |
 | **Admin Dashboard Metrics**  | 🟡 High     | Real analytics (sales, orders, customers)                           |
 | **Refund System**            | 🟢 Medium   | Return/refund workflow automation                                   |
 | **Email Templates**          | 🟢 Medium   | Styled transactional emails (currently plain text)                  |
@@ -172,6 +172,35 @@ POST   /guest-orders/track/    Track guest orders by email
 POST   /guest-orders/{order_number}/ Get specific guest order
 ```
 
+### Coupons (`/api/v1/coupons/`)
+
+```
+GET    /                       List coupons (admin)
+POST   /                       Create coupon (admin)
+POST   /validate/              Validate a coupon code (public)
+GET    /{id}/                  Coupon details (admin)
+PUT    /{id}/                  Update coupon (admin)
+DELETE /{id}/                  Delete coupon (admin)
+```
+
+### Products - Variants (`/api/v1/products/`)
+
+```
+GET    /variant-types/                      List variant types (admin)
+POST   /variant-types/                      Create variant type (admin)
+GET    /variant-types/{id}/                 Variant type details (admin)
+PUT    /variant-types/{id}/                 Update variant type (admin)
+DELETE /variant-types/{id}/                 Delete variant type (admin)
+GET    /variant-types/{id}/options/         List options for type (admin)
+POST   /variant-types/{id}/options/         Create option (admin)
+DELETE /variant-options/{id}/               Delete option (admin)
+GET    /{product_id}/variants/              List product variants (admin)
+POST   /{product_id}/variants/              Create product variant (admin)
+GET    /variants/{id}/                      Variant details (admin)
+PUT    /variants/{id}/                      Update variant (admin)
+DELETE /variants/{id}/                      Delete variant (admin)
+```
+
 ### Store (`/api/v1/store/`)
 
 ```
@@ -204,13 +233,20 @@ DELETE /announcements/{id}/    Delete announcement
 - **Product**: SKU, pricing, inventory tracking, units, SEO fields
 - **ProductImage**: Multiple images with primary flag
 - **ProductReview**: Customer ratings (1-5), review text, admin moderation
+- **VariantType**: Reusable variant types (Size, Color, Weight, etc.)
+- **VariantOption**: Options per variant type (S/M/L, 250g/500g/1kg)
+- **ProductVariant**: Purchasable variant with own SKU, price, stock
 
 ### Orders App
 
-- **Order**: Full order lifecycle with status, payment, delivery tracking
+- **Order**: Full order lifecycle with status, payment, delivery tracking, coupon support
 - **OrderItem**: Product snapshot for order items
 - **ShippingAddress**: Complete address details
 - **OrderStatusHistory**: Audit trail for status changes
+
+### Coupons App
+
+- **Coupon**: Percentage/fixed discounts, min order amount, usage limits, date validity
 
 ### Store App
 
@@ -234,18 +270,9 @@ DELETE /announcements/{id}/    Delete announcement
 
 ### 🟡 HIGHLY RECOMMENDED - Should Have
 
-1. **Product Variants System** (5-7 days)
-   - Size, color, flavor options for products
-   - Currently requires separate products as workaround
-   - Can defer if product range is simple
-
-2. **Admin Dashboard Real Data** (1-2 days)
+1. **Admin Dashboard Real Data** (1-2 days)
    - Replace placeholders with actual metrics
    - Sales today/week/month, order counts, customer counts
-
-3. **Basic Coupon System** (2-3 days)
-   - Marketing flexibility
-   - First-order discounts, promo codes
 
 ### 🟢 NICE TO HAVE - Can Defer
 
@@ -301,11 +328,10 @@ Week 3: Testing & Polish
 ```
 Month 1:
 ├── Wishlist functionality
-├── Coupon/Promocode system
-└── Basic analytics integration (Google Analytics)
+├── Basic analytics integration (Google Analytics)
+└── Admin dashboard real metrics
 
 Month 2:
-├── Product variants refactoring
 ├── Advanced search & filters
 ├── Email templates redesign
 ├── SMS notifications
@@ -351,18 +377,18 @@ Month 2:
 | Category                 | Status   | Notes                                          |
 | ------------------------ | -------- | ---------------------------------------------- |
 | **Code Quality**         | ⭐⭐⭐⭐ | Good architecture, clean code, modern patterns |
-| **Feature Completeness** | ⭐⭐⭐   | Core features present, key gaps identified     |
-| **Production Readiness** | ⭐⭐⭐   | Needs payment gateway + minor features         |
+| **Feature Completeness** | ⭐⭐⭐⭐ | Core features present, variants & coupons done |
+| **Production Readiness** | ⭐⭐⭐   | Needs payment gateway                          |
 | **Testing**              | ⭐       | No tests - critical gap                        |
 | **Documentation**        | ⭐⭐⭐   | Good API docs, inline comments present         |
 
-### Overall Assessment: **80-85% Complete**
+### Overall Assessment: **88-90% Complete**
 
-The Dookan Life platform has a **solid foundation** with clean architecture and modern tech stack. The core e-commerce functionality is implemented, but **one critical gap** blocks immediate launch:
+The Dookan platform has a **solid foundation** with clean architecture and modern tech stack. Core e-commerce features including product variants, coupons/discounts, and reviews are fully implemented. **One critical gap** blocks immediate launch:
 
 1. **Payment Gateway** - bKash/Nagad for Bangladesh market
 
-With focused development over **1 week** (core) to **2 weeks** (with polish), this platform can be production-ready for an MVP launch. The remaining features (reviews, wishlist, advanced features) can be phased post-launch based on user feedback.
+With focused development over **1 week** (core) to **2 weeks** (with polish), this platform can be production-ready for an MVP launch. The remaining features (wishlist, advanced analytics) can be phased post-launch based on user feedback.
 
 ### Strengths
 
@@ -383,6 +409,6 @@ With focused development over **1 week** (core) to **2 weeks** (with polish), th
 
 ---
 
-_Generated: 2026-03-03_
+_Generated: 2026-03-20_
 _Review Type: Senior Software Engineer Assessment_
 _Scope: Full-stack production readiness evaluation_

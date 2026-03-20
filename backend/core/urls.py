@@ -48,6 +48,8 @@ urlpatterns = [
     path("api/v1/products/", include("products.urls", namespace="products")),
     # Orders
     path("api/v1/orders/", include("orders.urls", namespace="orders")),
+    # Coupons
+    path("api/v1/coupons/", include("coupons.urls", namespace="coupons")),
 ]
 
 if settings.DEBUG:

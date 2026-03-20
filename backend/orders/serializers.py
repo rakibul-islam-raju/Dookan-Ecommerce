@@ -9,6 +9,7 @@ from rest_framework import serializers
 
 from users.models import OTPVerification
 from utils.email import send_order_confirmation_email
+from coupons.models import Coupon
 from .models import (
     Order,
     OrderItem,
@@ -89,6 +90,9 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     items = OrderItemSerializer(many=True, write_only=True)
     shipping_address = ShippingAddressSerializer(write_only=True)
+    coupon_code = serializers.CharField(
+        max_length=50, required=False, allow_blank=True, write_only=True
+    )
 
     class Meta:
         model = Order
@@ -101,6 +105,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             "items",
             "shipping_address",
             "delivery_type",
+            "coupon_code",
         ]
 
     def validate_items(self, value):
@@ -165,6 +170,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         """
         items_data = validated_data.pop("items")
         shipping_data = validated_data.pop("shipping_address")
+        coupon_code = validated_data.pop("coupon_code", "").strip().upper()
 
         # Generate unique order number
         order_number = self._generate_order_number()
@@ -192,6 +198,34 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 }
             )
 
+        # Apply coupon discount
+        coupon = None
+        discount_amount = Decimal("0.00")
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+                if coupon.is_valid:
+                    # Check per-user limit
+                    request = self.context.get("request")
+                    can_use = True
+                    if (
+                        request
+                        and request.user.is_authenticated
+                        and coupon.max_uses_per_user
+                    ):
+                        user_usage = Order.objects.filter(
+                            user=request.user, coupon=coupon
+                        ).exclude(status="cancelled").count()
+                        if user_usage >= coupon.max_uses_per_user:
+                            can_use = False
+
+                    if can_use:
+                        discount_amount = coupon.calculate_discount(subtotal)
+                        coupon.used_count += 1
+                        coupon.save()
+            except Coupon.DoesNotExist:
+                pass  # Invalid coupon code silently ignored during order creation
+
         # Calculate tax and shipping (you can customize this logic)
         tax_rate = Decimal("0.00")  # 0% tax for now
         tax_amount = subtotal * tax_rate
@@ -199,15 +233,18 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         # Free shipping over certain amount, else flat rate
         shipping_amount = Decimal("0.00") if subtotal >= 1000 else Decimal("50.00")
 
-        total_amount = subtotal + tax_amount + shipping_amount
+        total_amount = subtotal - discount_amount + tax_amount + shipping_amount
 
         # Create order
         order = Order.objects.create(
             order_number=order_number,
             subtotal=subtotal,
+            discount_amount=discount_amount,
             tax_amount=tax_amount,
             shipping_amount=shipping_amount,
             total_amount=total_amount,
+            coupon=coupon if discount_amount > 0 else None,
+            coupon_code=coupon_code if discount_amount > 0 else "",
             **validated_data,
         )
 
@@ -266,6 +303,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             "status",
             "payment_status",
             "payment_method",
+            "coupon_code",
             "subtotal",
             "discount_amount",
             "tax_amount",

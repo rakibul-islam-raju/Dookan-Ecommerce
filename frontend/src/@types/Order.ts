@@ -37,6 +37,7 @@ export interface ICreateOrderRequest {
 	customer_email?: string;
 	payment_method: "cod" | "online" | "card" | "upi";
 	customer_note?: string;
+	coupon_code?: string;
 
 	// Order items
 	items: IOrderItemRequest[];
@@ -75,6 +76,7 @@ export interface IOrderResponse {
 	status: IOrderStatus;
 	payment_status: IOrderPaymentStatus;
 	payment_method: "cod" | "online" | "card" | "upi";
+	coupon_code?: string;
 	subtotal: string; // Decimal as string
 	discount_amount: string;
 	tax_amount: string;

@@ -18,6 +18,7 @@ from products.models import (
 )
 from products.serializers import (
     CategorySerializer,
+    CategoryCreateUpdateSerializer,
     ProductCreateSerializer,
     VendorProductListSerializer,
     ConsumerProductListSerializer,
@@ -36,7 +37,6 @@ from products.serializers import (
 
 
 class CategoryCreateListAPIView(generics.ListCreateAPIView):
-    serializer_class = CategorySerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["name"]
     filterset_fields = ["is_active"]
@@ -45,6 +45,11 @@ class CategoryCreateListAPIView(generics.ListCreateAPIView):
         if self.request.user.is_staff:
             return Category.objects.all()
         return Category.objects.filter(is_active=True)
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return CategoryCreateUpdateSerializer
+        return CategorySerializer
 
     def get_permissions(self):
         if self.request.method == "GET":
@@ -56,8 +61,12 @@ class CategoryCreateListAPIView(generics.ListCreateAPIView):
 
 class CategoryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
-    serializer_class = CategorySerializer
     permission_classes = [IsAdminUser]
+
+    def get_serializer_class(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return CategoryCreateUpdateSerializer
+        return CategorySerializer
 
 
 class ProductCreateListAPIView(generics.ListCreateAPIView):

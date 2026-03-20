@@ -12,6 +12,7 @@ import {
 	ShoppingCart,
 	Store,
 	SwatchBook,
+	Tag,
 	Users,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -24,6 +25,7 @@ const sidebarItems = [
 	{ icon: Grid2X2Check, label: "Categories", href: "/categories" },
 	{ icon: SwatchBook, label: "Variant Types", href: "/variant-types" },
 	{ icon: MessageSquareText, label: "Reviews", href: "/reviews" },
+	{ icon: Tag, label: "Coupons", href: "/coupons" },
 ];
 
 const storeItems = [

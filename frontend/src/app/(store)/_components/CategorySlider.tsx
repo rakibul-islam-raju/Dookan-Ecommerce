@@ -118,13 +118,19 @@ export const CategorySlider = () => {
 										<div className="relative w-full aspect-square rounded-2xl bg-card border transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-lg overflow-hidden">
 											<div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 											<div className="relative w-full h-full p-6 flex items-center justify-center">
-												<Image
-													src={"/images/cat1.png"}
-													alt={category.name}
-													className="object-contain transition-transform duration-300 group-hover:scale-110"
-													fill
-													sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-												/>
+												{category.image ? (
+													<Image
+														src={category.image}
+														alt={category.name}
+														className="object-contain transition-transform duration-300 group-hover:scale-110"
+														fill
+														sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+													/>
+												) : (
+													<span className="text-4xl font-bold text-muted-foreground/50">
+														{category.name.charAt(0)}
+													</span>
+												)}
 											</div>
 										</div>
 

@@ -6,6 +6,7 @@ import { BaseForm } from "@/components/ui/@form/BaseForm";
 import { TextField } from "@/components/ui/@form/TextField";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Separator } from "@/components/ui/separator";
 import { env } from "@/config/env";
@@ -14,9 +15,20 @@ import { useCart } from "@/lib/hooks/useCart";
 import { useCreateOrder } from "@/lib/hooks/useOrders";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Loader2, Lock, ShieldCheck, Truck } from "lucide-react";
+import { couponClientApi } from "@/lib/api/coupons";
+import type { CouponValidateResponse } from "@/lib/api/coupons";
+import {
+	ArrowLeft,
+	Check,
+	Loader2,
+	Lock,
+	ShieldCheck,
+	Tag,
+	Truck,
+	X,
+} from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
@@ -42,12 +54,22 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 
 	const user = useAuthStore((state) => state.user);
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
 	const { data: cart, isLoading: cartLoading } = useCart();
 	const createOrder = useCreateOrder();
+
+	// Coupon state
+	const [couponCode, setCouponCode] = useState(
+		searchParams.get("coupon") || ""
+	);
+	const [couponLoading, setCouponLoading] = useState(false);
+	const [couponError, setCouponError] = useState("");
+	const [appliedCoupon, setAppliedCoupon] =
+		useState<CouponValidateResponse | null>(null);
 
 	const form = useZodForm(checkoutSchema, {
 		defaultValues: {
@@ -68,6 +90,9 @@ export default function CheckoutPage() {
 	// Calculate totals
 	const items = cart?.items || [];
 	const subtotal = cart?.subtotal || 0;
+	const discount = appliedCoupon
+		? parseFloat(appliedCoupon.discount_amount)
+		: 0;
 	const [selectedDeliveryType, setSelectedDeliveryType] = useState<
 		"inside_dhaka" | "outside_dhaka"
 	>("inside_dhaka");
@@ -84,7 +109,34 @@ export default function CheckoutPage() {
 	const baseShipping = selectedDeliveryType === "inside_dhaka" ? 60 : 120;
 	const shipping = subtotal >= 1000 ? 0 : baseShipping;
 	const tax = 0; // No tax for now
-	const total = subtotal + shipping + tax;
+	const total = subtotal - discount + shipping + tax;
+
+	const handleApplyCoupon = async () => {
+		if (!couponCode.trim()) return;
+		setCouponLoading(true);
+		setCouponError("");
+		try {
+			const result = await couponClientApi.validate({
+				code: couponCode.trim(),
+				subtotal,
+			});
+			setAppliedCoupon(result);
+		} catch (err: unknown) {
+			const axiosErr = err as { response?: { data?: { code?: string[] } } };
+			const message =
+				axiosErr?.response?.data?.code?.[0] || "Invalid coupon code";
+			setCouponError(message);
+			setAppliedCoupon(null);
+		} finally {
+			setCouponLoading(false);
+		}
+	};
+
+	const handleRemoveCoupon = () => {
+		setAppliedCoupon(null);
+		setCouponCode("");
+		setCouponError("");
+	};
 
 	const deliveryType = form.watch("delivery_type");
 
@@ -102,6 +154,7 @@ export default function CheckoutPage() {
 			payment_method: "cod", // Only COD supported
 			delivery_type: data.delivery_type,
 			customer_note: data.customer_note || undefined,
+			coupon_code: appliedCoupon?.code || undefined,
 			items: items.map((item) => ({
 				product_id: item.product.id,
 				quantity: item.quantity,
@@ -144,6 +197,20 @@ export default function CheckoutPage() {
 		if (image.startsWith("http")) return image;
 		return `${env.api.baseAppUrl}${image.startsWith("/") ? "" : "/"}${image}`;
 	};
+
+	// Auto-validate coupon from URL params
+	useEffect(() => {
+		const couponParam = searchParams.get("coupon");
+		if (couponParam && subtotal > 0 && !appliedCoupon) {
+			setCouponCode(couponParam);
+			couponClientApi
+				.validate({ code: couponParam, subtotal })
+				.then((result) => setAppliedCoupon(result))
+				.catch(() => {
+					// Silently ignore invalid coupon from URL
+				});
+		}
+	}, [searchParams, subtotal]);
 
 	useEffect(() => {
 		if (user) {
@@ -430,6 +497,83 @@ export default function CheckoutPage() {
 							</div>
 						</section>
 
+						{/* Coupon Code */}
+						<section className="space-y-4">
+							<h2 className="text-xl font-semibold flex items-center gap-2">
+								<Tag className="size-5" />
+								Discount Code
+							</h2>
+							{appliedCoupon ? (
+								<div className="flex items-center justify-between bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3">
+									<div className="flex items-center gap-2">
+										<Check className="size-4 text-green-600" />
+										<span className="font-mono font-semibold text-green-700 dark:text-green-400">
+											{appliedCoupon.code}
+										</span>
+										<span className="text-sm text-green-600 dark:text-green-400">
+											(-৳
+											{parseFloat(
+												appliedCoupon.discount_amount
+											).toFixed(2)}
+											)
+										</span>
+									</div>
+									<button
+										type="button"
+										onClick={handleRemoveCoupon}
+										className="text-muted-foreground hover:text-destructive transition-colors"
+									>
+										<X className="size-4" />
+									</button>
+								</div>
+							) : (
+								<div>
+									<div className="flex gap-2">
+										<Input
+											placeholder="Enter coupon code"
+											value={couponCode}
+											onChange={(e) => {
+												setCouponCode(
+													e.target.value.toUpperCase()
+												);
+												setCouponError("");
+											}}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													e.preventDefault();
+													handleApplyCoupon();
+												}
+											}}
+											className={
+												couponError ? "border-red-500" : ""
+											}
+										/>
+										<Button
+											type="button"
+											variant="outline"
+											onClick={handleApplyCoupon}
+											disabled={
+												couponLoading || !couponCode.trim()
+											}
+										>
+											{couponLoading ? (
+												<Loader2 className="size-4 animate-spin" />
+											) : (
+												"Apply"
+											)}
+										</Button>
+									</div>
+									{couponError && (
+										<p className="text-sm text-red-500 mt-2">
+											{couponError}
+										</p>
+									)}
+								</div>
+							)}
+						</section>
+
+						<Separator />
+
 						{/* Order Notes */}
 						<section className="space-y-4">
 							<h2 className="text-xl font-semibold">Order Notes (Optional)</h2>
@@ -499,9 +643,21 @@ export default function CheckoutPage() {
 									</span>
 									<span>৳{subtotal.toFixed(2)}</span>
 								</div>
+								{discount > 0 && (
+									<div className="flex justify-between text-green-600">
+										<span>Discount ({appliedCoupon?.code})</span>
+										<span>-৳{discount.toFixed(2)}</span>
+									</div>
+								)}
 								<div className="flex justify-between">
 									<span className="text-muted-foreground">Shipping</span>
-									<span>৳{deliveryType === "inside_dhaka" ? 60 : 120}</span>
+									<span>
+										{shipping === 0 ? (
+											<span className="text-green-600">FREE</span>
+										) : (
+											`৳${shipping}`
+										)}
+									</span>
 								</div>
 								{tax > 0 && (
 									<div className="flex justify-between">
@@ -525,10 +681,7 @@ export default function CheckoutPage() {
 										BDT
 									</span>
 									<span className="font-bold text-xl">
-										৳
-										{(
-											total + (deliveryType === "inside_dhaka" ? 60 : 120)
-										).toFixed(2)}
+										৳{total.toFixed(2)}
 									</span>
 								</div>
 							</div>

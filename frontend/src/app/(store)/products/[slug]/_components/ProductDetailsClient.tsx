@@ -30,7 +30,7 @@ export const ProductDetailsClient = ({
 	product,
 }: ProductDetailsClientProps) => {
 	const [selectedImage, setSelectedImage] = useState(
-		product.images.find((img) => img.is_primary) || product.images[0]
+		product.images.find((img) => img.is_primary) || product.images[0] || null
 	);
 	const [quantity, setQuantity] = useState(1);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -128,14 +128,19 @@ export const ProductDetailsClient = ({
 				{/* Product Images */}
 				<div className="space-y-4">
 					<div className="aspect-square relative overflow-hidden rounded-xl border bg-muted">
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<Image
-							src={selectedImage.image}
-							alt={selectedImage.alt_text}
-							className="object-cover w-full h-full transition-all duration-300 hover:scale-105"
-							unoptimized
-							fill
-						/>
+						{selectedImage ? (
+							<Image
+								src={selectedImage.image}
+								alt={selectedImage.alt_text}
+								className="object-cover w-full h-full transition-all duration-300 hover:scale-105"
+								unoptimized
+								fill
+							/>
+						) : (
+							<div className="w-full h-full flex items-center justify-center text-muted-foreground">
+								No image available
+							</div>
+						)}
 						{activeDiscount > 0 && (
 							<Badge className="absolute top-4 left-4 bg-destructive text-white border-none text-sm px-3 py-1">
 								-{activeDiscount}%
@@ -149,7 +154,7 @@ export const ProductDetailsClient = ({
 								onClick={() => setSelectedImage(img)}
 								className={cn(
 									"aspect-square rounded-lg overflow-hidden border-2 transition-all",
-									selectedImage.id === img.id
+									selectedImage?.id === img.id
 										? "border-primary ring-2 ring-primary/20"
 										: "border-transparent hover:border-muted-foreground/25"
 								)}

@@ -192,6 +192,11 @@ class OrderCancelView(APIView):
         order.status = "cancelled"
         order.save()
 
+        # Restore coupon usage count
+        if order.coupon and order.coupon.used_count > 0:
+            order.coupon.used_count -= 1
+            order.coupon.save()
+
         # Restore stock
         for item in order.items.all():
             product = item.product

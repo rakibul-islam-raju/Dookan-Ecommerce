@@ -2,6 +2,7 @@
 
 import { useCategories } from "@/lib/hooks/useCategories";
 import { ChevronDown, LayoutGrid, Loader2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import {
@@ -45,8 +46,18 @@ export const CategoryDropdownMenu = () => {
 									href={`/shop?category=${category.id}`}
 									className="flex items-center gap-3 p-2 cursor-pointer rounded-md focus:bg-accent focus:text-accent-foreground"
 								>
-									<div className="size-8 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
-										{category.name.charAt(0)}
+									<div className="size-8 rounded-md bg-muted flex items-center justify-center text-muted-foreground overflow-hidden">
+										{category.image ? (
+											<Image
+												src={category.image}
+												alt={category.name}
+												width={32}
+												height={32}
+												className="object-cover size-full"
+											/>
+										) : (
+											category.name.charAt(0)
+										)}
 									</div>
 									<div className="flex flex-col">
 										<span className="font-medium leading-none">

@@ -4,6 +4,7 @@ import { ForgotPassword } from "@/features/auth/ForgotPassword";
 import { Login } from "@/features/auth/Login";
 import { SetPassword } from "@/features/auth/SetPassword";
 import { CategoryList } from "@/features/categories/CategoryList";
+import { CouponList } from "@/features/coupons/CouponList";
 import { VariantTypeList } from "@/features/variants/VariantTypeList";
 import { CustomerList } from "@/features/customers/CustomerList";
 import { ReviewList } from "@/features/reviews/ReviewList";
@@ -67,6 +68,10 @@ export const router = createBrowserRouter([
 			{
 				path: "variant-types",
 				element: <VariantTypeList />,
+			},
+			{
+				path: "coupons",
+				element: <CouponList />,
 			},
 			{
 				path: "store/banners",
