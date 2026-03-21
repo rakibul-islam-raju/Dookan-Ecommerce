@@ -2,7 +2,7 @@
 
 > Comprehensive review of the Dookan e-commerce platform
 >
-> **Date:** 2026-03-20
+> **Date:** 2026-03-21
 >
 > **Reviewer:** Senior Software Engineer Assessment
 
@@ -12,11 +12,11 @@
 
 Dookan is an e-commerce platform for organic products consisting of three independent applications:
 
-| Component    | Tech Stack                                           | Status                |
-| ------------ | ---------------------------------------------------- | --------------------- |
-| **Backend**  | Django 5.2, DRF 3.16, PostgreSQL 17, Python 3.13     | ⚠️ Partially Complete |
-| **Frontend** | Next.js 16, React 19, TanStack Query, TypeScript 5.9 | ✅ Mostly Complete    |
-| **Admin**    | Vite 7, React 19, React Router 7, TypeScript 5.9     | ✅ Mostly Complete    |
+| Component    | Tech Stack                                           | Status             |
+| ------------ | ---------------------------------------------------- | ------------------ |
+| **Backend**  | Django 5.2, DRF 3.16, PostgreSQL 17, Python 3.13     | ✅ Mostly Complete |
+| **Frontend** | Next.js 16, React 19, TanStack Query, TypeScript 5.9 | ✅ Mostly Complete |
+| **Admin**    | Vite 7, React 19, React Router 7, TypeScript 5.9     | ✅ Mostly Complete |
 
 ---
 
@@ -52,41 +52,42 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 
 ### ✅ Fully Implemented Features
 
-| Feature                         | Backend | Frontend | Admin | Notes                                |
-| ------------------------------- | ------- | -------- | ----- | ------------------------------------ |
-| **User Authentication (JWT)**   | ✅      | ✅       | ✅    | Login/register with token refresh    |
-| **Email Verification (OTP)**    | ✅      | ✅       | ❌    | OTP-based email confirmation         |
-| **Password Reset**              | ✅      | ✅       | ✅    | Email-based reset flow               |
-| **Product Catalog**             | ✅      | ✅       | ✅    | Full CRUD operations                 |
-| **Product Search**              | ✅      | ✅       | ✅    | Name-based search                    |
-| **Category Management**         | ✅      | ✅       | ✅    | Hierarchical categories              |
-| **Product Images (Multiple)**   | ✅      | ✅       | ✅    | Primary image selection              |
-| **Shopping Cart (Client-side)** | ✅      | ✅       | ❌    | localStorage persistence (by design) |
-| **Guest Checkout**              | ✅      | ✅       | ❌    | OTP-based order tracking             |
-| **Order Creation**              | ✅      | ✅       | ✅    | Supports guest & registered          |
-| **Order History**               | ✅      | ✅       | ✅    | User order listing                   |
-| **Order Status Tracking**       | ✅      | ✅       | ✅    | 7 status types                       |
-| **Guest Order Tracking (OTP)**  | ✅      | ✅       | ❌    | Email + OTP verification             |
-| **User Addresses**              | ✅      | ✅       | ❌    | Home/work/other types                |
-| **Inventory Tracking**          | ✅      | ✅       | ✅    | Stock quantity, low stock alerts     |
-| **Banner Management**           | ✅      | ✅       | ✅    | Date-range scheduled                 |
-| **Announcement System**         | ✅      | ✅       | ✅    | Time-bound announcements             |
-| **Site Configuration**          | ✅      | ❌       | ✅    | Store settings, social links         |
-| **SEO (Meta tags, Schema)**     | ✅      | ✅       | ❌    | Structured data, OpenGraph           |
-| **Mobile Responsive**           | ❌      | ✅       | ✅    | Mobile-first design                  |
-| **Product Reviews**             | ✅      | ✅       | ✅    | Ratings, moderation, SEO integration |
+| Feature                         | Backend | Frontend | Admin | Notes                                   |
+| ------------------------------- | ------- | -------- | ----- | --------------------------------------- |
+| **User Authentication (JWT)**   | ✅      | ✅       | ✅    | Login/register with token refresh       |
+| **Email Verification (OTP)**    | ✅      | ✅       | ❌    | OTP-based email confirmation            |
+| **Change Password**             | ✅      | ✅       | ❌    | Authenticated password change           |
+| **Product Catalog**             | ✅      | ✅       | ✅    | Full CRUD operations                    |
+| **Product Search**              | ✅      | ✅       | ✅    | Name-based search                       |
+| **Category Management**         | ✅      | ✅       | ✅    | Hierarchical categories with images     |
+| **Product Images (Multiple)**   | ✅      | ✅       | ✅    | Primary image selection                 |
+| **Shopping Cart (Client-side)** | ❌      | ✅       | ❌    | localStorage persistence (by design)    |
+| **Guest Checkout**              | ✅      | ✅       | ❌    | OTP-based order tracking                |
+| **Order Creation**              | ✅      | ✅       | ✅    | Supports guest & registered             |
+| **Order History**               | ✅      | ✅       | ✅    | User order listing                      |
+| **Order Status Tracking**       | ✅      | ✅       | ✅    | 7 status types                          |
+| **Guest Order Tracking (OTP)**  | ✅      | ✅       | ❌    | Email + OTP verification                |
+| **User Addresses**              | ✅      | ✅       | ❌    | Home/work/other types                   |
+| **Inventory Tracking**          | ✅      | ✅       | ✅    | Stock quantity, low stock alerts        |
+| **Banner Management**           | ✅      | ✅       | ✅    | Date-range scheduled                    |
+| **Announcement System**         | ✅      | ✅       | ✅    | Time-bound announcements                |
+| **Site Configuration**          | ✅      | ❌       | ✅    | Store settings, social links            |
+| **SEO (Meta tags, Schema)**     | ✅      | ✅       | ❌    | Structured data, OpenGraph              |
+| **Mobile Responsive**           | ❌      | ✅       | ✅    | Mobile-first design                     |
+| **Product Reviews**             | ✅      | ✅       | ✅    | Ratings, moderation, SEO integration    |
 | **Product Variants**            | ✅      | ✅       | ✅    | Size, weight, color options per product |
 | **Coupons/Discounts**           | ✅      | ✅       | ✅    | Percentage & fixed amount, usage limits |
-| **Customer Management**         | ✅      | ❌       | ✅    | Admin customer list with filters     |
+| **Customer Management**         | ✅      | ❌       | ✅    | Admin customer list with filters        |
+| **Password Reset (OTP)**        | ✅      | ✅       | ✅    | OTP-based forgot/reset password flow    |
+| **Admin Dashboard Metrics**     | ✅      | ❌       | ✅    | Real revenue, orders, customers, stock  |
+| **Admin Category Images**       | ✅      | ✅       | ✅    | Image upload in category form + list    |
+| **Seed Data**                   | ✅      | ❌       | ❌    | `manage.py seed_data` command           |
 
 ### ⚠️ Partially Implemented Features
 
-| Feature                 | Backend  | Frontend        | Admin       | Gap Description                                         |
-| ----------------------- | -------- | --------------- | ----------- | ------------------------------------------------------- |
-| **Shopping Cart**       | ❌       | ✅ (local only) | ❌          | Client-side only (by design) - persists in localStorage |
-| **Payments**            | COD only | COD only        | COD only    | No payment gateway integration (bKash, Nagad, Stripe)   |
-| **Customer Management** | ✅       | ❌              | ✅          | Admin customer list with search/filter                  |
-| **Dashboard Analytics** | ❌       | ❌              | ❌          | All placeholder data, no real metrics                   |
+| Feature                 | Backend  | Frontend        | Admin           | Gap Description                                         |
+| ----------------------- | -------- | --------------- | --------------- | ------------------------------------------------------- |
+| **Payments**            | COD only | COD only        | COD only        | No payment gateway integration (bKash, Nagad, Stripe)    |
 
 ### ❌ Missing Features
 
@@ -94,7 +95,6 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 | ---------------------------- | ----------- | ------------------------------------------------------------------- |
 | **Payment Gateway**          | 🔴 Critical | bKash, Nagad, Stripe integration for Bangladesh market              |
 | **Wishlist**                 | 🟡 High     | Save products for later purchase                                    |
-| **Admin Dashboard Metrics**  | 🟡 High     | Real analytics (sales, orders, customers)                           |
 | **Refund System**            | 🟢 Medium   | Return/refund workflow automation                                   |
 | **Email Templates**          | 🟢 Medium   | Styled transactional emails (currently plain text)                  |
 | **Product Recommendations**  | 🟢 Low      | Related products/upselling feature                                  |
@@ -115,6 +115,8 @@ POST   /verify-email/          Email verification with OTP
 POST   /resend-verification/   Resend verification email
 POST   /refresh/               JWT refresh token
 POST   /logout/                Logout (blacklist token)
+POST   /password-reset/        Request password reset OTP
+POST   /password-reset/confirm/ Reset password with OTP
 ```
 
 ### Users (`/api/v1/users/`)
@@ -129,7 +131,7 @@ POST   /profile/addresses/     Create new address
 GET    /profile/addresses/{id}/ Get address details
 PUT    /profile/addresses/{id}/ Update address
 DELETE /profile/addresses/{id}/ Delete address
-POST   /profile/change-password/ Change password
+POST   /profile/change-password/ Change password (authenticated)
 ```
 
 ### Products (`/api/v1/products/`)
@@ -156,9 +158,28 @@ DELETE /reviews/{id}/           Delete review (admin)
 GET    /{id}/reviews/           Product reviews (public)
 ```
 
+### Products - Variants (`/api/v1/products/`)
+
+```
+GET    /variant-types/                      List variant types (admin)
+POST   /variant-types/                      Create variant type (admin)
+GET    /variant-types/{id}/                 Variant type details (admin)
+PUT    /variant-types/{id}/                 Update variant type (admin)
+DELETE /variant-types/{id}/                 Delete variant type (admin)
+GET    /variant-types/{id}/options/         List options for type (admin)
+POST   /variant-types/{id}/options/         Create option (admin)
+DELETE /variant-options/{id}/               Delete option (admin)
+GET    /{product_id}/variants/              List product variants (admin)
+POST   /{product_id}/variants/              Create product variant (admin)
+GET    /variants/{id}/                      Variant details (admin)
+PUT    /variants/{id}/                      Update variant (admin)
+DELETE /variants/{id}/                      Delete variant (admin)
+```
+
 ### Orders (`/api/v1/orders/`)
 
 ```
+GET    /dashboard/metrics/     Admin dashboard metrics
 POST   /create/                Create order (guest/registered)
 GET    /                       Order list (own for users, all for admin)
 GET    /my-orders/             Current user's orders
@@ -183,24 +204,6 @@ PUT    /{id}/                  Update coupon (admin)
 DELETE /{id}/                  Delete coupon (admin)
 ```
 
-### Products - Variants (`/api/v1/products/`)
-
-```
-GET    /variant-types/                      List variant types (admin)
-POST   /variant-types/                      Create variant type (admin)
-GET    /variant-types/{id}/                 Variant type details (admin)
-PUT    /variant-types/{id}/                 Update variant type (admin)
-DELETE /variant-types/{id}/                 Delete variant type (admin)
-GET    /variant-types/{id}/options/         List options for type (admin)
-POST   /variant-types/{id}/options/         Create option (admin)
-DELETE /variant-options/{id}/               Delete option (admin)
-GET    /{product_id}/variants/              List product variants (admin)
-POST   /{product_id}/variants/              Create product variant (admin)
-GET    /variants/{id}/                      Variant details (admin)
-PUT    /variants/{id}/                      Update variant (admin)
-DELETE /variants/{id}/                      Delete variant (admin)
-```
-
 ### Store (`/api/v1/store/`)
 
 ```
@@ -223,8 +226,8 @@ DELETE /announcements/{id}/    Delete announcement
 
 ### Users App
 
-- **User**: Custom user model with UUID, email/mobile verification
-- **OTPVerification**: OTP tracking for registration, orders, password reset
+- **User**: Custom user model with UUID, email/mobile verification, password_reset_token field
+- **OTPVerification**: OTP tracking for registration, guest orders, password reset
 - **UserAddress**: Saved addresses with type (home/work/other)
 
 ### Products App
@@ -246,13 +249,25 @@ DELETE /announcements/{id}/    Delete announcement
 
 ### Coupons App
 
-- **Coupon**: Percentage/fixed discounts, min order amount, usage limits, date validity
+- **Coupon**: Percentage/fixed discounts, min order amount, max discount cap, usage limits (total + per-user), date validity
 
 ### Store App
 
 - **Announcement**: Time-bound announcements
 - **SiteConfig**: Singleton for site-wide configuration
 - **Banner**: Campaign banners with date ranges
+
+### Seed Data
+
+A management command populates the database with sample data for development:
+
+```bash
+cd backend
+uv run python manage.py seed_data          # Seed categories, products, variants
+uv run python manage.py seed_data --flush   # Clear existing data first, then seed
+```
+
+Seeds 10 categories, 25+ products across all categories, variant types (Size, Weight), and product variants with options.
 
 ---
 
@@ -266,13 +281,10 @@ DELETE /announcements/{id}/    Delete announcement
 - **Problem:** Bangladesh market expects digital payments (bKash, Nagad)
 - **Impact:** Significantly limits sales potential
 - **Recommended:** Start with bKash (most popular)
-- **Effort:** 5-7 days
 
 ### 🟡 HIGHLY RECOMMENDED - Should Have
 
-1. **Admin Dashboard Real Data** (1-2 days)
-   - Replace placeholders with actual metrics
-   - Sales today/week/month, order counts, customer counts
+1. **Production Email Service** - Switch from Gmail SMTP to SendGrid/Mailgun for reliability
 
 ### 🟢 NICE TO HAVE - Can Defer
 
@@ -289,19 +301,18 @@ DELETE /announcements/{id}/    Delete announcement
 
 ## Technical Debt & Issues
 
-| Issue                 | Severity | Location     | Recommendation                      |
-| --------------------- | -------- | ------------ | ----------------------------------- |
-| No testing suite      | High     | All projects | Add basic tests before scaling      |
-| No error monitoring   | Medium   | All projects | Add Sentry for production           |
-| Gmail SMTP for emails | Medium   | Backend      | Use SendGrid/Mailgun for production |
-| React Compiler impact | Low      | Admin        | Monitor build performance           |
-| Mobile SMS incomplete | Low      | Backend      | SMS provider integration            |
+| Issue                        | Severity | Location     | Recommendation                      |
+| ---------------------------- | -------- | ------------ | ----------------------------------- |
+| No testing suite             | High     | All projects | Add basic tests before scaling      |
+| No error monitoring          | Medium   | All projects | Add Sentry for production           |
+| Gmail SMTP for emails        | Medium   | Backend      | Use SendGrid/Mailgun for production |
+| React Compiler impact        | Low      | Admin        | Monitor build performance           |
 
 ---
 
 ## Launch Roadmap
 
-### Minimum Viable Launch (1 week core, 2 weeks with polish)
+### Minimum Viable Launch (1 week)
 
 ```
 Week 1: Critical Features
@@ -309,18 +320,9 @@ Week 1: Critical Features
 │   ├── bKash sandbox setup
 │   ├── Payment endpoints
 │   └── Checkout flow updates
-└── Bug fixes & edge cases
-
-Optional Week 2: High Priority Items
-├── Admin Dashboard real metrics
 ├── Production email setup (SendGrid/Mailgun)
-└── Security audit
-
-Week 3: Testing & Polish
-├── End-to-end user flows
-├── Mobile testing
-├── Performance optimization
-└── Launch preparation
+├── Security audit & testing
+└── Bug fixes & edge cases
 ```
 
 ### Post-Launch Roadmap (1-2 months)
@@ -329,13 +331,14 @@ Week 3: Testing & Polish
 Month 1:
 ├── Wishlist functionality
 ├── Basic analytics integration (Google Analytics)
-└── Admin dashboard real metrics
+├── Error monitoring (Sentry)
+└── Email templates redesign
 
 Month 2:
 ├── Advanced search & filters
-├── Email templates redesign
 ├── SMS notifications
-└── Admin reporting features
+├── Admin reporting features
+└── Testing suite (unit + integration)
 ```
 
 ---
@@ -345,8 +348,14 @@ Month 2:
 ### Pre-Launch
 
 - [ ] Payment gateway integrated (at least bKash)
-- [ ] Admin dashboard showing real data
+- [x] Password reset flow fully working
+- [x] Admin dashboard showing real data
 - [x] Customer management page complete
+- [x] Product variants fully implemented
+- [x] Coupons/discounts fully implemented
+- [x] Product reviews with moderation
+- [x] Category images support
+- [x] Seed data command available
 - [ ] Production email service configured
 - [ ] Environment variables secured
 - [ ] CORS properly configured
@@ -378,37 +387,38 @@ Month 2:
 | ------------------------ | -------- | ---------------------------------------------- |
 | **Code Quality**         | ⭐⭐⭐⭐ | Good architecture, clean code, modern patterns |
 | **Feature Completeness** | ⭐⭐⭐⭐ | Core features present, variants & coupons done |
-| **Production Readiness** | ⭐⭐⭐   | Needs payment gateway                          |
+| **Production Readiness** | ⭐⭐⭐⭐ | Needs payment gateway for full launch           |
 | **Testing**              | ⭐       | No tests - critical gap                        |
-| **Documentation**        | ⭐⭐⭐   | Good API docs, inline comments present         |
+| **Documentation**        | ⭐⭐⭐   | Good API docs, seed data, inline comments      |
 
-### Overall Assessment: **88-90% Complete**
+### Overall Assessment: **90-93% Complete**
 
-The Dookan platform has a **solid foundation** with clean architecture and modern tech stack. Core e-commerce features including product variants, coupons/discounts, and reviews are fully implemented. **One critical gap** blocks immediate launch:
+The Dookan platform has a **solid foundation** with clean architecture and modern tech stack. Core e-commerce features including product variants, coupons/discounts, reviews, category images, password reset, and admin dashboard metrics are fully implemented. **One critical gap** blocks immediate launch:
 
-1. **Payment Gateway** - bKash/Nagad for Bangladesh market
+1. **Payment Gateway** - bKash/Nagad for Bangladesh market (currently COD only)
 
-With focused development over **1 week** (core) to **2 weeks** (with polish), this platform can be production-ready for an MVP launch. The remaining features (wishlist, advanced analytics) can be phased post-launch based on user feedback.
+With focused development over **~1 week**, this platform can be production-ready for an MVP launch. The remaining features (wishlist, advanced analytics, testing) can be phased post-launch based on user feedback.
 
 ### Strengths
 
 - Modern, scalable architecture
 - Clean, well-organized codebase
-- Comprehensive API design
+- Comprehensive API design with full variant/coupon support
 - Good security practices (JWT, email verification)
-- SEO-optimized frontend
+- SEO-optimized frontend with structured data
 - Responsive design across all apps
+- Seed data for rapid development setup
 
 ### Areas for Improvement
 
 - Add testing suite (unit, integration, E2E)
 - Implement payment gateway(s)
-- Add error monitoring
+- Add error monitoring (Sentry)
 - Improve email templates
-- Add basic analytics
+- Switch to production email service (SendGrid/Mailgun)
 
 ---
 
-_Generated: 2026-03-20_
+_Updated: 2026-03-21_
 _Review Type: Senior Software Engineer Assessment_
 _Scope: Full-stack production readiness evaluation_
