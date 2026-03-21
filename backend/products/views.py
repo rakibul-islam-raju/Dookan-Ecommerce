@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
+from utils.permissions import HasModulePermission
+
 from products.filters import ProductFilter
 from products.models import (
     Category,
@@ -61,13 +63,13 @@ class CategoryCreateListAPIView(generics.ListCreateAPIView):
         if self.request.method == "GET":
             permission_classes = [AllowAny]
         else:
-            permission_classes = [IsAdminUser]
+            permission_classes = [HasModulePermission("manage_categories")]
         return [permission() for permission in permission_classes]
 
 
 class CategoryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.select_related("parent").prefetch_related("children").all()
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_categories")]
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -87,7 +89,7 @@ class ProductCreateListAPIView(generics.ListCreateAPIView):
         if self.request.method == "GET":
             permission_classes = [AllowAny]
         else:
-            permission_classes = [IsAdminUser]
+            permission_classes = [HasModulePermission("manage_products")]
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
@@ -137,7 +139,7 @@ class ProductRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
         if self.request.method == "GET":
             permission_classes = [AllowAny]
         else:
-            permission_classes = [IsAdminUser]
+            permission_classes = [HasModulePermission("manage_products")]
         return [permission() for permission in permission_classes]
 
 
@@ -170,13 +172,13 @@ class ProductImageListCreateAPIView(generics.ListCreateAPIView):
         if self.request.method == "GET":
             permission_classes = [AllowAny]
         else:
-            permission_classes = [IsAdminUser]
+            permission_classes = [HasModulePermission("manage_products")]
         return [permission() for permission in permission_classes]
 
 
 class ProductImageDestroyAPIView(generics.DestroyAPIView):
     queryset = ProductImage.objects.all()
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_products")]
 
 
 class ProductReviewListAPIView(generics.ListAPIView):
@@ -213,7 +215,7 @@ class AdminReviewListAPIView(generics.ListAPIView):
     """
 
     serializer_class = ProductReviewSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_reviews")]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     filterset_fields = ["is_approved", "is_active", "rating"]
     search_fields = ["product__name", "user__email", "title", "comment"]
@@ -228,7 +230,7 @@ class AdminReviewStatusUpdateAPIView(APIView):
     PATCH /products/reviews/<id>/status/
     """
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_reviews")]
 
     def patch(self, request, pk):
         try:
@@ -258,7 +260,7 @@ class AdminReviewDeleteAPIView(generics.DestroyAPIView):
     """
 
     queryset = ProductReview.objects.all()
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_reviews")]
 
 
 # ============================================================
@@ -273,9 +275,8 @@ class VariantTypeListCreateAPIView(generics.ListCreateAPIView):
     """
 
     queryset = VariantType.objects.prefetch_related("options").all()
-    permission_classes = [IsAdminUser]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ["name"]
+    permission_classes = [HasModulePermission("manage_products")]
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -290,7 +291,7 @@ class VariantTypeRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIV
     """
 
     queryset = VariantType.objects.prefetch_related("options").all()
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_products")]
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -305,7 +306,7 @@ class VariantOptionListCreateAPIView(generics.ListCreateAPIView):
     """
 
     serializer_class = VariantOptionSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_products")]
 
     def get_queryset(self):
         return VariantOption.objects.filter(
@@ -323,7 +324,7 @@ class VariantOptionDestroyAPIView(generics.DestroyAPIView):
     """
 
     queryset = VariantOption.objects.all()
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_products")]
 
 
 # ============================================================
@@ -337,7 +338,8 @@ class ProductVariantListCreateAPIView(generics.ListCreateAPIView):
     GET/POST /products/<product_id>/variants/
     """
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_products")]
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -362,7 +364,7 @@ class ProductVariantRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyA
     """
 
     queryset = ProductVariant.objects.prefetch_related("options__variant_type").all()
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_products")]
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:

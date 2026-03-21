@@ -18,9 +18,23 @@ import {
 	Users,
 	AlertTriangle,
 } from "lucide-react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
-const STATUS_BADGE_MAP: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "success" | "warning" | "info" | "purple" | "cyan" }> = {
+const STATUS_BADGE_MAP: Record<
+	string,
+	{
+		label: string;
+		variant:
+			| "default"
+			| "secondary"
+			| "destructive"
+			| "success"
+			| "warning"
+			| "info"
+			| "purple"
+			| "cyan";
+	}
+> = {
 	pending: { label: "Pending", variant: "warning" },
 	confirmed: { label: "Confirmed", variant: "info" },
 	processing: { label: "Processing", variant: "purple" },
@@ -30,7 +44,13 @@ const STATUS_BADGE_MAP: Record<string, { label: string; variant: "default" | "se
 	refunded: { label: "Refunded", variant: "secondary" },
 };
 
-const PAYMENT_BADGE_MAP: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "success" | "warning" }> = {
+const PAYMENT_BADGE_MAP: Record<
+	string,
+	{
+		label: string;
+		variant: "default" | "secondary" | "destructive" | "success" | "warning";
+	}
+> = {
 	pending: { label: "Pending", variant: "warning" },
 	paid: { label: "Paid", variant: "success" },
 	failed: { label: "Failed", variant: "destructive" },
@@ -52,11 +72,18 @@ function formatDate(dateStr: string) {
 }
 
 function ChangeIndicator({ value }: { value: number }) {
-	if (value === 0) return <span className="text-xs text-muted-foreground">No change</span>;
+	if (value === 0)
+		return <span className="text-xs text-muted-foreground">No change</span>;
 	const isPositive = value > 0;
 	return (
-		<span className={`flex items-center gap-0.5 text-xs ${isPositive ? "text-green-600" : "text-red-600"}`}>
-			{isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+		<span
+			className={`flex items-center gap-0.5 text-xs ${isPositive ? "text-green-600" : "text-red-600"}`}
+		>
+			{isPositive ? (
+				<ArrowUp className="h-3 w-3" />
+			) : (
+				<ArrowDown className="h-3 w-3" />
+			)}
 			{Math.abs(value)}% from last month
 		</span>
 	);
@@ -83,7 +110,9 @@ export function Dashboard() {
 	if (isError) {
 		return (
 			<div className="flex items-center justify-center h-64">
-				<p className="text-muted-foreground">Failed to load dashboard metrics.</p>
+				<p className="text-muted-foreground">
+					Failed to load dashboard metrics.
+				</p>
 			</div>
 		);
 	}
@@ -103,11 +132,15 @@ export function Dashboard() {
 					<>
 						<Card>
 							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+								<CardTitle className="text-sm font-medium">
+									Total Revenue
+								</CardTitle>
 								<DollarSign className="h-4 w-4 text-muted-foreground" />
 							</CardHeader>
 							<CardContent>
-								<div className="text-2xl font-bold">{formatCurrency(metrics.revenue.total)}</div>
+								<div className="text-2xl font-bold">
+									{formatCurrency(metrics.revenue.total)}
+								</div>
 								<ChangeIndicator value={metrics.revenue.change_percent} />
 							</CardContent>
 						</Card>
@@ -127,7 +160,9 @@ export function Dashboard() {
 								<Users className="h-4 w-4 text-muted-foreground" />
 							</CardHeader>
 							<CardContent>
-								<div className="text-2xl font-bold">{metrics.customers.total}</div>
+								<div className="text-2xl font-bold">
+									{metrics.customers.total}
+								</div>
 								<ChangeIndicator value={metrics.customers.change_percent} />
 							</CardContent>
 						</Card>
@@ -137,7 +172,9 @@ export function Dashboard() {
 								<Package className="h-4 w-4 text-muted-foreground" />
 							</CardHeader>
 							<CardContent>
-								<div className="text-2xl font-bold">{metrics.products.total}</div>
+								<div className="text-2xl font-bold">
+									{metrics.products.total}
+								</div>
 								<p className="text-xs text-muted-foreground">
 									{metrics.products.out_of_stock} out of stock
 								</p>
@@ -156,7 +193,10 @@ export function Dashboard() {
 							<Card key={status} className="py-3">
 								<CardContent className="px-4 py-0 flex flex-col items-center gap-1">
 									<span className="text-lg font-semibold">{count}</span>
-									<Badge variant={badge?.variant ?? "secondary"} className="text-[10px]">
+									<Badge
+										variant={badge?.variant ?? "secondary"}
+										className="text-[10px]"
+									>
 										{badge?.label ?? status}
 									</Badge>
 								</CardContent>
@@ -211,15 +251,22 @@ export function Dashboard() {
 													<span className="text-sm font-medium">
 														{order.order_number}
 													</span>
-													<Badge variant={statusBadge?.variant ?? "secondary"} className="text-[10px]">
+													<Badge
+														variant={statusBadge?.variant ?? "secondary"}
+														className="text-[10px]"
+													>
 														{statusBadge?.label ?? order.status}
 													</Badge>
-													<Badge variant={paymentBadge?.variant ?? "secondary"} className="text-[10px]">
+													<Badge
+														variant={paymentBadge?.variant ?? "secondary"}
+														className="text-[10px]"
+													>
 														{paymentBadge?.label ?? order.payment_status}
 													</Badge>
 												</div>
 												<span className="text-xs text-muted-foreground">
-													{order.customer_name} &middot; {formatDate(order.created_at)}
+													{order.customer_name} &middot;{" "}
+													{formatDate(order.created_at)}
 												</span>
 											</div>
 											<span className="font-medium text-sm">
@@ -243,7 +290,9 @@ export function Dashboard() {
 								<AlertTriangle className="h-4 w-4 text-yellow-500" />
 								Low Stock Alerts
 							</CardTitle>
-							<CardDescription>Products running low on inventory</CardDescription>
+							<CardDescription>
+								Products running low on inventory
+							</CardDescription>
 						</div>
 					</CardHeader>
 					<CardContent>
@@ -267,14 +316,20 @@ export function Dashboard() {
 										<span className="text-sm font-medium truncate mr-2">
 											{product.name}
 										</span>
-										<Badge variant={product.stock_quantity <= 3 ? "destructive" : "warning"}>
+										<Badge
+											variant={
+												product.stock_quantity <= 3 ? "destructive" : "warning"
+											}
+										>
 											{product.stock_quantity} left
 										</Badge>
 									</Link>
 								))}
 							</div>
 						) : (
-							<p className="text-sm text-muted-foreground">All products are well-stocked.</p>
+							<p className="text-sm text-muted-foreground">
+								All products are well-stocked.
+							</p>
 						)}
 					</CardContent>
 				</Card>
@@ -285,18 +340,26 @@ export function Dashboard() {
 				<div className="grid gap-4 md:grid-cols-3">
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
+							<CardTitle className="text-sm font-medium">
+								Avg Order Value
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">{formatCurrency(metrics.orders.avg_order_value)}</div>
+							<div className="text-2xl font-bold">
+								{formatCurrency(metrics.orders.avg_order_value)}
+							</div>
 						</CardContent>
 					</Card>
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="text-sm font-medium">This Month Revenue</CardTitle>
+							<CardTitle className="text-sm font-medium">
+								This Month Revenue
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">{formatCurrency(metrics.revenue.current_month)}</div>
+							<div className="text-2xl font-bold">
+								{formatCurrency(metrics.revenue.current_month)}
+							</div>
 							<p className="text-xs text-muted-foreground">
 								{metrics.orders.current_month} orders this month
 							</p>
@@ -304,10 +367,14 @@ export function Dashboard() {
 					</Card>
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="text-sm font-medium">New Customers This Month</CardTitle>
+							<CardTitle className="text-sm font-medium">
+								New Customers This Month
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">{metrics.customers.new_this_month}</div>
+							<div className="text-2xl font-bold">
+								{metrics.customers.new_this_month}
+							</div>
 							<ChangeIndicator value={metrics.customers.change_percent} />
 						</CardContent>
 					</Card>

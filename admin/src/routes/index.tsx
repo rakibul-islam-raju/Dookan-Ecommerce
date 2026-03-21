@@ -1,5 +1,6 @@
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PermissionGuard } from "@/components/common/PermissionGuard";
 import { ForgotPassword } from "@/features/auth/ForgotPassword";
 import { Login } from "@/features/auth/Login";
 import { SetPassword } from "@/features/auth/SetPassword";
@@ -18,6 +19,8 @@ import { ProductList } from "@/features/products/ProductList";
 import { AnnouncementList } from "@/features/store/AnnouncementList";
 import { BannerList } from "@/features/store/BannerList";
 import { SiteConfig } from "@/features/store/SiteConfig";
+import { StaffList } from "@/features/staff/StaffList";
+import { RoleList } from "@/features/roles/RoleList";
 import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter([
@@ -27,63 +30,139 @@ export const router = createBrowserRouter([
 		children: [
 			{
 				index: true,
-				element: <Dashboard />,
+				element: (
+					<PermissionGuard permission="view_dashboard">
+						<Dashboard />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "products",
-				element: <ProductList />,
+				element: (
+					<PermissionGuard permission="manage_products">
+						<ProductList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "products/:id",
-				element: <ProductDetails />,
+				element: (
+					<PermissionGuard permission="manage_products">
+						<ProductDetails />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "products/create",
-				element: <CreateProduct />,
+				element: (
+					<PermissionGuard permission="manage_products">
+						<CreateProduct />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "products/edit/:id",
-				element: <EditProduct />,
+				element: (
+					<PermissionGuard permission="manage_products">
+						<EditProduct />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "orders",
-				element: <OrderList />,
+				element: (
+					<PermissionGuard permission="manage_orders">
+						<OrderList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "orders/:id",
-				element: <OrderDetails />,
+				element: (
+					<PermissionGuard permission="manage_orders">
+						<OrderDetails />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "customers",
-				element: <CustomerList />,
+				element: (
+					<PermissionGuard permission="manage_customers">
+						<CustomerList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "categories",
-				element: <CategoryList />,
+				element: (
+					<PermissionGuard permission="manage_categories">
+						<CategoryList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "reviews",
-				element: <ReviewList />,
+				element: (
+					<PermissionGuard permission="manage_reviews">
+						<ReviewList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "variant-types",
-				element: <VariantTypeList />,
+				element: (
+					<PermissionGuard permission="manage_products">
+						<VariantTypeList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "coupons",
-				element: <CouponList />,
+				element: (
+					<PermissionGuard permission="manage_coupons">
+						<CouponList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "store/banners",
-				element: <BannerList />,
+				element: (
+					<PermissionGuard permission="manage_banners">
+						<BannerList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "store/announcements",
-				element: <AnnouncementList />,
+				element: (
+					<PermissionGuard permission="manage_announcements">
+						<AnnouncementList />
+					</PermissionGuard>
+				),
 			},
 			{
 				path: "store/settings",
-				element: <SiteConfig />,
+				element: (
+					<PermissionGuard permission="manage_settings">
+						<SiteConfig />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "staff",
+				element: (
+					<PermissionGuard permission="manage_staff">
+						<StaffList />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "roles",
+				element: (
+					<PermissionGuard permission="manage_staff">
+						<RoleList />
+					</PermissionGuard>
+				),
 			},
 		],
 	},

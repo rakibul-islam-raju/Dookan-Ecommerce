@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, OTPVerification, UserAddress
+from .models import User, OTPVerification, UserAddress, Role
 
 
 @admin.register(User)
@@ -26,6 +26,13 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ["first_name", "last_name", "email", "mobile_number"]
     ordering = ["-created_at"]
     date_hierarchy = "created_at"
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ["name", "permissions", "created_at"]
+    search_fields = ["name"]
+    ordering = ["name"]
 
 
 @admin.register(OTPVerification)

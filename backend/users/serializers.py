@@ -3,7 +3,7 @@ from django.conf import settings
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.password_validation import validate_password
-from .models import OTPVerification, UserAddress
+from .models import OTPVerification, UserAddress, Role
 from django.utils import timezone
 from datetime import timedelta
 import random
@@ -139,6 +139,18 @@ class UserSerializer(serializers.ModelSerializer):
         # serialize the primary address
         primary_address_serializer = UserAddressSerializer(primary_address)
         data["default_address"] = primary_address_serializer.data
+
+        # Add permissions data for staff/admin users
+        if instance.is_superuser:
+            data["permissions"] = Role.ALL_PERMISSIONS
+            data["role_name"] = "Superuser"
+        elif instance.is_staff and instance.role:
+            data["permissions"] = instance.role.permissions
+            data["role_name"] = instance.role.name
+        else:
+            data["permissions"] = []
+            data["role_name"] = None
+
         return data
 
 
@@ -177,4 +189,111 @@ class UserListSerializer(serializers.ModelSerializer):
             "is_mobile_verified",
             "created_at",
             "updated_at",
+        ]
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    """
+    Role CRUD serializer
+    """
+
+    user_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Role
+        fields = [
+            "id",
+            "name",
+            "description",
+            "permissions",
+            "user_count",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_user_count(self, obj):
+        return obj.users.count()
+
+    def validate_permissions(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Permissions must be a list.")
+        valid = {code for code, _ in Role.PERMISSION_CHOICES}
+        invalid = set(value) - valid
+        if invalid:
+            raise serializers.ValidationError(f"Invalid permissions: {invalid}")
+        return value
+
+
+class StaffListSerializer(serializers.ModelSerializer):
+    """
+    Staff list/detail serializer
+    """
+
+    role_name = serializers.CharField(source="role.name", read_only=True, default=None)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "mobile_number",
+            "is_active",
+            "is_superuser",
+            "role",
+            "role_name",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class StaffCreateSerializer(serializers.ModelSerializer):
+    """
+    Staff creation serializer
+    """
+
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "mobile_number",
+            "role",
+            "password",
+        ]
+        read_only_fields = ["id"]
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        user = User.objects.create_user(
+            is_staff=True,
+            is_active=True,
+            is_email_verified=True,
+            **validated_data,
+        )
+        user.set_password(password)
+        user.save()
+        return user
+
+
+class StaffUpdateSerializer(serializers.ModelSerializer):
+    """
+    Staff update serializer
+    """
+
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "mobile_number",
+            "role",
+            "is_active",
         ]

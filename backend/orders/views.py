@@ -7,6 +7,8 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 
+from utils.permissions import HasModulePermission
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from utils.permissions import IsOwnerOrAdmin
@@ -107,7 +109,7 @@ class OrderStatusUpdateView(APIView):
     PATCH /api/orders/{id}/status/
     """
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_orders")]
 
     def patch(self, request, id):
         order = get_object_or_404(Order, id=id)
@@ -160,7 +162,7 @@ class OrderPaymentUpdateView(generics.UpdateAPIView):
     """
 
     serializer_class = OrderPaymentUpdateSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_orders")]
     queryset = Order.objects.all()
     lookup_field = "id"
 
@@ -335,7 +337,7 @@ class ProductOrdersView(generics.ListAPIView):
     """
 
     serializer_class = OrderListSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_orders")]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = OrderFilter
     ordering_fields = ["created_at", "status"]

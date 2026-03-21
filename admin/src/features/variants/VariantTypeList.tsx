@@ -25,7 +25,7 @@ import {
 } from "@/lib/api/variant";
 import { useQuery } from "@tanstack/react-query";
 import { Edit, Loader2, Plus, Trash, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export function VariantTypeList() {
@@ -75,17 +75,20 @@ export function VariantTypeList() {
 				</Card>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					{variantTypes.map((vt) => (
+					{variantTypes?.map((vt) => (
 						<VariantTypeCard key={vt.id} variantType={vt} onEdit={handleEdit} />
 					))}
 				</div>
 			)}
 
-			<VariantTypeFormDialog
-				open={isFormOpen}
-				onOpenChange={setIsFormOpen}
-				variantType={editingType}
-			/>
+			{isFormOpen && (
+				<VariantTypeFormDialog
+					key={editingType?.id ?? "new"}
+					open={isFormOpen}
+					onOpenChange={setIsFormOpen}
+					variantType={editingType}
+				/>
+			)}
 		</div>
 	);
 }
@@ -101,19 +104,19 @@ function VariantTypeCard({
 	variantType: VariantType;
 	onEdit: (vt: VariantType) => void;
 }) {
-	const { mutate: deleteType, isPending: isDeleting } =
-		useDeleteVariantType();
+	const { mutate: deleteType, isPending: isDeleting } = useDeleteVariantType();
 
 	const handleDelete = () => {
 		if (
 			!confirm(
-				`Delete "${variantType.name}" and all its options? This may affect existing product variants.`
+				`Delete "${variantType.name}" and all its options? This may affect existing product variants.`,
 			)
 		)
 			return;
 		deleteType(variantType.id, {
 			onSuccess: () => toast.success("Variant type deleted"),
-			onError: () => toast.error("Failed to delete. It may be in use by product variants."),
+			onError: () =>
+				toast.error("Failed to delete. It may be in use by product variants."),
 		});
 	};
 
@@ -179,33 +182,22 @@ function VariantTypeFormDialog({
 	variantType,
 }: VariantTypeFormDialogProps) {
 	const isEdit = !!variantType;
-	const { mutate: createType, isPending: isCreating } =
-		useCreateVariantType();
-	const { mutate: updateType, isPending: isUpdating } =
-		useUpdateVariantType();
+	const { mutate: createType, isPending: isCreating } = useCreateVariantType();
+	const { mutate: updateType, isPending: isUpdating } = useUpdateVariantType();
 	const isPending = isCreating || isUpdating;
 
-	const [name, setName] = useState("");
-	const [options, setOptions] = useState<{ value: string; display_order: number }[]>(
-		[]
-	);
-	const [newOption, setNewOption] = useState("");
+	// Initialize state from variantType (component re-mounts when variantType changes via key prop)
+	const initialName = variantType?.name ?? "";
+	const initialOptions =
+		variantType?.options.map((o) => ({
+			value: o.value,
+			display_order: o.display_order,
+		})) ?? [];
 
-	useEffect(() => {
-		if (variantType) {
-			setName(variantType.name);
-			setOptions(
-				variantType.options.map((o) => ({
-					value: o.value,
-					display_order: o.display_order,
-				}))
-			);
-		} else {
-			setName("");
-			setOptions([]);
-		}
-		setNewOption("");
-	}, [variantType, open]);
+	const [name, setName] = useState(initialName);
+	const [options, setOptions] =
+		useState<{ value: string; display_order: number }[]>(initialOptions);
+	const [newOption, setNewOption] = useState("");
 
 	const addOption = () => {
 		const trimmed = newOption.trim();
@@ -240,7 +232,7 @@ function VariantTypeFormDialog({
 						onOpenChange(false);
 					},
 					onError: () => toast.error("Failed to update variant type"),
-				}
+				},
 			);
 		} else {
 			createType(payload, {
@@ -289,11 +281,7 @@ function VariantTypeFormDialog({
 						{options.length > 0 && (
 							<div className="flex flex-wrap gap-2 mt-2">
 								{options.map((option, index) => (
-									<Badge
-										key={index}
-										variant="secondary"
-										className="gap-1 pr-1"
-									>
+									<Badge key={index} variant="secondary" className="gap-1 pr-1">
 										{option.value}
 										<button
 											type="button"

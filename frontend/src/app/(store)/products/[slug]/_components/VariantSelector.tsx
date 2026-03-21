@@ -1,9 +1,6 @@
 "use client";
 
-import type {
-	IProductVariant,
-	IProductVariantType,
-} from "@/@types/Product";
+import type { IProductVariant, IProductVariantType } from "@/@types/Product";
 import { cn } from "@/lib/utils";
 
 interface VariantSelectorProps {
@@ -33,8 +30,8 @@ export const VariantSelector = ({
 		// Find a variant that matches all selected options
 		const match = variants.find((v) =>
 			Object.entries(newSelections).every(([, selectedOptId]) =>
-				v.options.some((o) => o.id === selectedOptId)
-			)
+				v.options.some((o) => o.id === selectedOptId),
+			),
 		);
 
 		onSelectVariant(match || null);
@@ -46,8 +43,8 @@ export const VariantSelector = ({
 		const testSelections = { ...selectedOptions, [typeId]: optionId };
 		return variants.some((v) =>
 			Object.entries(testSelections).every(([, selectedOptId]) =>
-				v.options.some((o) => o.id === selectedOptId)
-			)
+				v.options.some((o) => o.id === selectedOptId),
+			),
 		);
 	};
 
@@ -74,7 +71,7 @@ export const VariantSelector = ({
 											? "bg-primary text-primary-foreground border-primary ring-2 ring-primary/20"
 											: available
 												? "bg-background text-foreground border-border hover:border-primary/50 hover:bg-muted/50"
-												: "bg-muted/30 text-muted-foreground/50 border-border/50 cursor-not-allowed line-through"
+												: "bg-muted/30 text-muted-foreground/50 border-border/50 cursor-not-allowed line-through",
 									)}
 								>
 									{option.value}

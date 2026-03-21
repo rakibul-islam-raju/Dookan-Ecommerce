@@ -5,7 +5,8 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
-from users.models import User, UserAddress
+from users.models import User, UserAddress, Role
+from utils.permissions import HasModulePermission
 
 from .serializers import (
     UserListSerializer,
@@ -13,6 +14,10 @@ from .serializers import (
     ChangePasswordSerializer,
     UserAddressSerializer,
     UserAddressCreateSerializer,
+    RoleSerializer,
+    StaffListSerializer,
+    StaffCreateSerializer,
+    StaffUpdateSerializer,
 )
 
 
@@ -123,13 +128,13 @@ class ChangePasswordView(APIView):
 
 class UserListView(generics.ListAPIView):
     """
-    User list endpoint
+    User list endpoint (customers)
     GET /users/
     """
 
     queryset = User.objects.all()
     serializer_class = UserListSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_customers")]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     filterset_fields = ["is_active", "is_staff", "is_superuser", "is_mobile_verified"]
     search_fields = ["=email", "=mobile_number", "^first_name", "^last_name"]
@@ -143,7 +148,7 @@ class UserDetailView(generics.RetrieveAPIView):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_customers")]
     lookup_field = "id"
 
 
@@ -153,7 +158,7 @@ class UserStatusUpdateView(APIView):
     PATCH /users/<uuid:id>/status/
     """
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_customers")]
 
     def patch(self, request, id):
         try:
@@ -174,3 +179,77 @@ class UserStatusUpdateView(APIView):
         user.save(update_fields=["is_active"])
         serializer = UserListSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# --- Role Management ---
+
+
+class RoleListCreateView(generics.ListCreateAPIView):
+    """
+    List and create roles
+    GET/POST /users/roles/
+    """
+
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [HasModulePermission("manage_staff")]
+    pagination_class = None
+
+
+class RoleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, delete a role
+    GET/PUT/PATCH/DELETE /users/roles/<uuid:id>/
+    """
+
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [HasModulePermission("manage_staff")]
+    lookup_field = "id"
+
+
+# --- Staff Management ---
+
+
+class StaffListCreateView(generics.ListCreateAPIView):
+    """
+    List and create staff members
+    GET/POST /users/staff/
+    """
+
+    permission_classes = [HasModulePermission("manage_staff")]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["=email", "^first_name", "^last_name"]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return StaffCreateSerializer
+        return StaffListSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=True).select_related("role")
+
+
+class StaffDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, delete a staff member
+    GET/PUT/PATCH/DELETE /users/staff/<uuid:id>/
+    """
+
+    permission_classes = [HasModulePermission("manage_staff")]
+    lookup_field = "id"
+
+    def get_serializer_class(self):
+        if self.request.method in ("PUT", "PATCH"):
+            return StaffUpdateSerializer
+        return StaffListSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=True).select_related("role")
+
+    def perform_destroy(self, instance):
+        if instance.is_superuser:
+            from rest_framework.exceptions import ValidationError
+
+            raise ValidationError("Cannot delete a superuser account.")
+        instance.delete()

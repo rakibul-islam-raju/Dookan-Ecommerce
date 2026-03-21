@@ -2,7 +2,10 @@
  * Authentication API Service
  */
 
+import type { User } from "@/@types/User.type";
 import { clientApi } from "./axios";
+
+export type { User } from "@/@types/User.type";
 
 export interface LoginCredentials {
 	email: string;
@@ -26,13 +29,6 @@ export interface RegisterData {
 export interface AuthTokens {
 	access: string;
 	refresh: string;
-}
-
-export interface User {
-	id: string;
-	email: string;
-	first_name: string;
-	last_name: string;
 }
 
 /**

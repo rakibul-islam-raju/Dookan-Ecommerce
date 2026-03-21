@@ -17,13 +17,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
 	Table,
 	TableBody,
 	TableCell,
@@ -42,7 +35,7 @@ import {
 } from "@/lib/api/variant";
 import { useQuery } from "@tanstack/react-query";
 import { Edit, Loader2, Plus, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 interface ProductVariantsProps {
@@ -51,13 +44,13 @@ interface ProductVariantsProps {
 
 export const ProductVariants = ({ productId }: ProductVariantsProps) => {
 	const { data: variants = [], isLoading } = useQuery(
-		getProductVariants(productId)
+		getProductVariants(productId),
 	);
 	const { data: variantTypes = [] } = useQuery(getVariantTypes());
 
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(
-		null
+		null,
 	);
 
 	const handleAdd = () => {
@@ -124,13 +117,16 @@ export const ProductVariants = ({ productId }: ProductVariantsProps) => {
 				)}
 			</CardContent>
 
-			<VariantFormDialog
-				open={isFormOpen}
-				onOpenChange={setIsFormOpen}
-				productId={productId}
-				variant={editingVariant}
-				variantTypes={variantTypes}
-			/>
+			{isFormOpen && (
+				<VariantFormDialog
+					key={editingVariant?.id ?? "new"}
+					open={isFormOpen}
+					onOpenChange={setIsFormOpen}
+					productId={productId}
+					variant={editingVariant}
+					variantTypes={variantTypes}
+				/>
+			)}
 		</Card>
 	);
 };
@@ -215,7 +211,11 @@ interface VariantFormDialogProps {
 	onOpenChange: (open: boolean) => void;
 	productId: string;
 	variant: ProductVariant | null;
-	variantTypes: { id: string; name: string; options: { id: string; value: string }[] }[];
+	variantTypes: {
+		id: string;
+		name: string;
+		options: { id: string; value: string }[];
+	}[];
 }
 
 function VariantFormDialog({
@@ -232,23 +232,9 @@ function VariantFormDialog({
 		useUpdateProductVariant();
 	const isPending = isCreating || isUpdating;
 
-	const [formData, setFormData] = useState<CreateProductVariantRequest>({
-		sku: "",
-		name: "",
-		price: "",
-		compare_at_price: null,
-		cost_price: null,
-		stock_quantity: 0,
-		low_stock_threshold: 5,
-		weight: null,
-		is_active: true,
-		display_order: 0,
-		option_ids: [],
-	});
-
-	useEffect(() => {
-		if (variant) {
-			setFormData({
+	// Initialize form data from variant (component re-mounts when variant changes via key prop)
+	const initialFormData: CreateProductVariantRequest = variant
+		? {
 				sku: variant.sku,
 				name: variant.name,
 				price: variant.price,
@@ -260,9 +246,8 @@ function VariantFormDialog({
 				is_active: variant.is_active,
 				display_order: variant.display_order,
 				option_ids: variant.options.map((o) => o.id),
-			});
-		} else {
-			setFormData({
+			}
+		: {
 				sku: "",
 				name: "",
 				price: "",
@@ -274,9 +259,10 @@ function VariantFormDialog({
 				is_active: true,
 				display_order: 0,
 				option_ids: [],
-			});
-		}
-	}, [variant, open]);
+			};
+
+	const [formData, setFormData] =
+		useState<CreateProductVariantRequest>(initialFormData);
 
 	const handleOptionToggle = (optionId: string) => {
 		setFormData((prev) => ({
@@ -298,7 +284,7 @@ function VariantFormDialog({
 						onOpenChange(false);
 					},
 					onError: () => toast.error("Failed to update variant"),
-				}
+				},
 			);
 		} else {
 			createVariant(
@@ -309,7 +295,7 @@ function VariantFormDialog({
 						onOpenChange(false);
 					},
 					onError: () => toast.error("Failed to create variant"),
-				}
+				},
 			);
 		}
 	};
@@ -318,9 +304,7 @@ function VariantFormDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-lg">
 				<DialogHeader>
-					<DialogTitle>
-						{isEdit ? "Edit Variant" : "Add Variant"}
-					</DialogTitle>
+					<DialogTitle>{isEdit ? "Edit Variant" : "Add Variant"}</DialogTitle>
 				</DialogHeader>
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="grid grid-cols-2 gap-4">
@@ -429,7 +413,7 @@ function VariantFormDialog({
 					{variantTypes.length > 0 && (
 						<div className="space-y-3">
 							<Label>Variant Options</Label>
-							{variantTypes.map((vt) => (
+							{variantTypes?.map((vt) => (
 								<div key={vt.id} className="space-y-1.5">
 									<p className="text-sm text-muted-foreground font-medium">
 										{vt.name}

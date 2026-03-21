@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.views import APIView
 
+from utils.permissions import HasModulePermission
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Coupon
@@ -15,7 +17,7 @@ class CouponListCreateView(generics.ListCreateAPIView):
     List all coupons or create a new coupon (Admin only)
     """
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_coupons")]
     filterset_class = CouponFilter
     filter_backends = [DjangoFilterBackend]
 
@@ -34,7 +36,7 @@ class CouponDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
 
     serializer_class = CouponSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_coupons")]
     queryset = Coupon.objects.all()
     lookup_field = "id"
 

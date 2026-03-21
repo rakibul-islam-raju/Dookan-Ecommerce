@@ -6,7 +6,8 @@ from django.utils import timezone
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
+
+from utils.permissions import HasModulePermission
 
 from orders.models import Order
 from products.models import Product
@@ -19,7 +20,7 @@ class DashboardMetricsView(APIView):
     GET /api/v1/orders/dashboard/metrics/
     """
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("view_dashboard")]
 
     def get(self, request):
         now = timezone.now()

@@ -4,7 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.conf import settings
 from django.utils import timezone
 
-from users.models import User, OTPVerification
+from users.models import User, OTPVerification, Role
 from utils.email import send_verification_otp_email
 
 
@@ -23,6 +23,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 {"detail": "Please verify your email before logging in."}
             )
 
+        # Build permissions list
+        if self.user.is_superuser:
+            permissions = Role.ALL_PERMISSIONS
+            role_name = "Superuser"
+        elif self.user.is_staff and self.user.role:
+            permissions = self.user.role.permissions
+            role_name = self.user.role.name
+        else:
+            permissions = []
+            role_name = None
+
         # Add custom user data to response
         data["user"] = {
             "id": str(self.user.id),
@@ -33,6 +44,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "mobile_number": self.user.mobile_number,
             "is_mobile_verified": self.user.is_mobile_verified,
             "is_email_verified": self.user.is_email_verified,
+            "is_staff": self.user.is_staff,
+            "is_superuser": self.user.is_superuser,
+            "permissions": permissions,
+            "role_name": role_name,
         }
 
         return data

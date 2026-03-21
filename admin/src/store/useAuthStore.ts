@@ -1,5 +1,5 @@
 import { localStorageKeys } from "@/config";
-import type { User } from "@/lib/api/auth";
+import type { Permission, User } from "@/@types/User.type";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -12,11 +12,13 @@ interface AuthState {
 	logout: () => void;
 	setUser: (user: User) => void;
 	setTokens: (accessToken: string, refreshToken: string) => void;
+	hasPermission: (permission: Permission) => boolean;
+	hasAnyPermission: (permissions: Permission[]) => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
 	persist(
-		(set) => ({
+		(set, get) => ({
 			user: null,
 			accessToken: null,
 			refreshToken: null,
@@ -46,6 +48,18 @@ export const useAuthStore = create<AuthState>()(
 			},
 			setTokens: (accessToken, refreshToken) => {
 				set({ accessToken, refreshToken });
+			},
+			hasPermission: (permission) => {
+				const user = get().user;
+				if (!user) return false;
+				if (user.is_superuser) return true;
+				return user.permissions?.includes(permission) ?? false;
+			},
+			hasAnyPermission: (permissions) => {
+				const user = get().user;
+				if (!user) return false;
+				if (user.is_superuser) return true;
+				return permissions.some((p) => user.permissions?.includes(p) ?? false);
 			},
 		}),
 		{

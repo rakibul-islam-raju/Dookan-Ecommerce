@@ -1,6 +1,8 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAdminUser
 
+from utils.permissions import HasModulePermission
+
 from .models import Announcement, Banner, SiteConfig
 from .serializers import (
     AnnouncementSerializer,
@@ -19,7 +21,7 @@ class AnnouncementListCreateView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == "POST":
-            self.permission_classes = [IsAdminUser]
+            self.permission_classes = [HasModulePermission("manage_announcements")]
         else:
             self.permission_classes = [AllowAny]
         return super().get_permissions()
@@ -27,7 +29,7 @@ class AnnouncementListCreateView(generics.ListCreateAPIView):
 
 class AnnouncementRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AnnouncementSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_announcements")]
 
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -52,7 +54,7 @@ class SiteConfigView(generics.RetrieveUpdateAPIView):
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
-            self.permission_classes = [IsAdminUser]
+            self.permission_classes = [HasModulePermission("manage_settings")]
         else:
             self.permission_classes = [AllowAny]
         return super().get_permissions()
@@ -74,7 +76,7 @@ class BannerListCreateView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == "POST":
-            self.permission_classes = [IsAdminUser]
+            self.permission_classes = [HasModulePermission("manage_banners")]
         else:
             self.permission_classes = [AllowAny]
         return super().get_permissions()
@@ -87,7 +89,7 @@ class BannerRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     """
 
     serializer_class = BannerSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasModulePermission("manage_banners")]
 
     def get_queryset(self):
         if self.request.user.is_staff:

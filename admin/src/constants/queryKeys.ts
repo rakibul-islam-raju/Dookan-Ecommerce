@@ -13,4 +13,6 @@ export const queryKeys = {
 	variantTypes: "variantTypes",
 	productVariants: "productVariants",
 	coupons: "coupons",
+	staff: "staff",
+	roles: "roles",
 } as const;
