@@ -39,12 +39,18 @@ from products.serializers import (
 class CategoryCreateListAPIView(generics.ListCreateAPIView):
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["name"]
-    filterset_fields = ["is_active"]
+    filterset_fields = ["is_active", "parent"]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            return Category.objects.all()
-        return Category.objects.filter(is_active=True)
+        qs = Category.objects.all() if self.request.user.is_staff else Category.objects.filter(is_active=True)
+        qs = qs.select_related("parent").prefetch_related("children")
+
+        # Allow filtering for top-level categories (parent=null)
+        if "parent__isnull" in self.request.query_params:
+            is_null = self.request.query_params["parent__isnull"].lower() in ("true", "1")
+            qs = qs.filter(parent__isnull=is_null)
+
+        return qs
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -60,7 +66,7 @@ class CategoryCreateListAPIView(generics.ListCreateAPIView):
 
 
 class CategoryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.all()
+    queryset = Category.objects.select_related("parent").prefetch_related("children").all()
     permission_classes = [IsAdminUser]
 
     def get_serializer_class(self):

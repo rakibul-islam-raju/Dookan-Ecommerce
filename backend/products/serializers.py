@@ -12,12 +12,14 @@ from products.models import (
 )
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategoryChildSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for subcategories (one level deep)."""
+
     image = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = ["id", "name", "slug", "description", "image", "is_active", "display_order"]
+        fields = ["id", "name", "slug", "image", "display_order", "is_active"]
         read_only_fields = ["id"]
 
     def get_image(self, obj):
@@ -29,10 +31,46 @@ class CategorySerializer(serializers.ModelSerializer):
         return None
 
 
-class CategoryCreateUpdateSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    parent = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), required=False, allow_null=True
+    )
+    parent_name = serializers.CharField(source="parent.name", read_only=True, default=None)
+    children = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ["id", "name", "slug", "description", "image", "is_active", "display_order"]
+        fields = [
+            "id", "name", "slug", "description", "image", "is_active",
+            "display_order", "parent", "parent_name", "children",
+        ]
+        read_only_fields = ["id"]
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if obj.image:
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+    def get_children(self, obj):
+        children = obj.children.filter(is_active=True).order_by("display_order", "name")
+        return CategoryChildSerializer(children, many=True, context=self.context).data
+
+
+class CategoryCreateUpdateSerializer(serializers.ModelSerializer):
+    parent = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), required=False, allow_null=True
+    )
+
+    class Meta:
+        model = Category
+        fields = [
+            "id", "name", "slug", "description", "image", "is_active",
+            "display_order", "parent",
+        ]
         read_only_fields = ["id"]
 
 

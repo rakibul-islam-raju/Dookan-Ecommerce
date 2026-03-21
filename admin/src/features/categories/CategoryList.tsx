@@ -100,7 +100,16 @@ export function CategoryList() {
 		{
 			key: "name",
 			header: "Category Name",
-			render: (category) => <div className="font-medium">{category.name}</div>,
+			render: (category) => (
+				<div>
+					<div className="font-medium">{category.name}</div>
+					{category.parent_name && (
+						<span className="text-xs text-muted-foreground">
+							in {category.parent_name}
+						</span>
+					)}
+				</div>
+			),
 		},
 		{
 			key: "slug",

@@ -160,6 +160,21 @@ export function ShopContent() {
 		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
+	// Separate top-level categories from subcategories
+	const topLevelCategories = categories.filter((c) => !c.parent);
+
+	// Helper to find category name by ID (across all levels)
+	const findCategoryName = (id: string) => {
+		for (const cat of categories) {
+			if (cat.id === id) return cat.name;
+			if (cat.children) {
+				const child = cat.children.find((c) => c.id === id);
+				if (child) return child.name;
+			}
+		}
+		return id;
+	};
+
 	// Filter sidebar content (shared between desktop and mobile)
 	const FilterContent = ({
 		onCategorySelect,
@@ -173,7 +188,7 @@ export function ShopContent() {
 				{isCategoriesLoading ? (
 					<CategorySkeleton />
 				) : (
-					<div className="space-y-2">
+					<div className="space-y-1">
 						<button
 							onClick={() => {
 								updateFilters({ category: "" });
@@ -188,22 +203,44 @@ export function ShopContent() {
 						>
 							All Categories
 						</button>
-						{categories.map((cat) => (
-							<button
-								key={cat.id}
-								onClick={() => {
-									updateFilters({ category: cat.id });
-									onCategorySelect?.();
-								}}
-								className={cn(
-									"w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
-									categoryFilter === cat.id
-										? "bg-primary text-primary-foreground"
-										: "hover:bg-muted"
+						{topLevelCategories.map((cat) => (
+							<div key={cat.id}>
+								<button
+									onClick={() => {
+										updateFilters({ category: cat.id });
+										onCategorySelect?.();
+									}}
+									className={cn(
+										"w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors",
+										categoryFilter === cat.id
+											? "bg-primary text-primary-foreground"
+											: "hover:bg-muted"
+									)}
+								>
+									{cat.name}
+								</button>
+								{cat.children && cat.children.length > 0 && (
+									<div className="ml-3 border-l pl-2 space-y-0.5">
+										{cat.children.map((child) => (
+											<button
+												key={child.id}
+												onClick={() => {
+													updateFilters({ category: child.id });
+													onCategorySelect?.();
+												}}
+												className={cn(
+													"w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
+													categoryFilter === child.id
+														? "bg-primary text-primary-foreground"
+														: "text-muted-foreground hover:bg-muted hover:text-foreground"
+												)}
+											>
+												{child.name}
+											</button>
+										))}
+									</div>
 								)}
-							>
-								{cat.name}
-							</button>
+							</div>
 						))}
 					</div>
 				)}
@@ -401,8 +438,7 @@ export function ShopContent() {
 							)}
 							{categoryFilter && (
 								<Badge variant="secondary" className="gap-1">
-									{categories.find((c) => c.id === categoryFilter)?.name ||
-										categoryFilter}
+									{findCategoryName(categoryFilter)}
 									<button onClick={() => updateFilters({ category: "" })}>
 										<X className="size-3" />
 									</button>

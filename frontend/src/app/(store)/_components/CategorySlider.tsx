@@ -25,11 +25,11 @@ export const CategorySlider = () => {
 		if (emblaApi) emblaApi.scrollNext();
 	}, [emblaApi]);
 
-	// Filter active categories and sort by display_order
+	// Filter active top-level categories and sort by display_order
 	const filteredCategories = useMemo(() => {
 		if (!categoriesResponse?.results) return [];
 		return categoriesResponse.results
-			.filter((category) => category.is_active)
+			.filter((category) => category.is_active && !category.parent)
 			.sort((a, b) => a.display_order - b.display_order);
 	}, [categoriesResponse]);
 

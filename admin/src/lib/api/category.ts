@@ -16,12 +16,24 @@ import type {
 } from "../../@types/Common.type";
 import { clientApi } from "./axios";
 
+export interface CategoryChildItem {
+	id: string;
+	name: string;
+	slug: string;
+	image?: string;
+	display_order: number;
+	is_active: boolean;
+}
+
 export interface CategoryListItem extends BaseModel {
 	name: string;
 	slug: string;
 	description?: string;
 	image?: string;
 	display_order: number;
+	parent?: string | null;
+	parent_name?: string | null;
+	children?: CategoryChildItem[];
 }
 
 export interface CategoryListResponse
@@ -34,6 +46,7 @@ export interface CategoryCreateData {
 	image?: File | null;
 	display_order: number;
 	is_active?: boolean;
+	parent?: string | null;
 }
 
 export interface CategoryUpdateData extends Partial<CategoryCreateData> {}
@@ -111,6 +124,9 @@ function buildCategoryFormData(data: Partial<CategoryCreateData>): FormData {
 		formData.append("display_order", String(data.display_order));
 	if (data.is_active !== undefined)
 		formData.append("is_active", String(data.is_active));
+	if (data.parent !== undefined) {
+		formData.append("parent", data.parent || "");
+	}
 	if (data.image) formData.append("image", data.image);
 	return formData;
 }

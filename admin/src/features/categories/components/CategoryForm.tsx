@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
+	getCategories,
 	useCreateCategory,
 	useUpdateCategory,
 	type CategoryListItem,
 } from "@/lib/api/category";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { z } from "zod";
 import slugify from "slugify";
@@ -38,6 +40,7 @@ const categorySchema = z.object({
 		.max(500, "Description must not exceed 500 characters")
 		.optional()
 		.or(z.literal("")),
+	parent: z.string().nullable().optional(),
 	display_order: z.coerce
 		.number()
 		.int("Order must be a whole number")
@@ -71,11 +74,21 @@ export const CategoryForm = ({
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+	// Fetch categories for parent selector
+	const { data: categoriesData } = useQuery(
+		getCategories({ limit: 100, offset: 0 }),
+	);
+	// Filter out the current category (can't be its own parent) and subcategories
+	const parentOptions = (categoriesData?.results || []).filter(
+		(c) => c.id !== category?.id && !c.parent,
+	);
+
 	const form = useZodForm(categorySchema, {
 		defaultValues: {
 			name: "",
 			slug: "",
 			description: "",
+			parent: null,
 			display_order: intialOrder,
 			is_active: true,
 		},
@@ -106,14 +119,16 @@ export const CategoryForm = ({
 	};
 
 	const onSubmit = async (data: CategoryFormData) => {
+		const submitData = {
+			...data,
+			parent: data.parent || null,
+			...(imageFile && { image: imageFile }),
+		};
 		if (isEditMode && category) {
 			updateCategory(
 				{
 					id: category.id,
-					updateData: {
-						...data,
-						...(imageFile && { image: imageFile }),
-					},
+					updateData: submitData,
 				},
 				{
 					onSuccess: () => {
@@ -124,10 +139,7 @@ export const CategoryForm = ({
 			);
 		} else {
 			createCategory(
-				{
-					...data,
-					...(imageFile && { image: imageFile }),
-				},
+				submitData,
 				{
 					onSuccess: () => {
 						handleCancel();
@@ -176,6 +188,28 @@ export const CategoryForm = ({
 					placeholder="e.g., Electronics, Clothing, Home & Garden"
 					description="The display name of the category"
 				/>
+
+				<div className="space-y-2">
+					<Label htmlFor="parent-category">Parent Category</Label>
+					<select
+						id="parent-category"
+						value={form.watch("parent") || ""}
+						onChange={(e) =>
+							form.setValue("parent", e.target.value || null)
+						}
+						className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+					>
+						<option value="">None (Top-level category)</option>
+						{parentOptions.map((cat) => (
+							<option key={cat.id} value={cat.id}>
+								{cat.name}
+							</option>
+						))}
+					</select>
+					<p className="text-sm text-muted-foreground">
+						Select a parent to make this a subcategory
+					</p>
+				</div>
 
 				<div className="space-y-2">
 					<Label htmlFor="category-image">Category Image</Label>
