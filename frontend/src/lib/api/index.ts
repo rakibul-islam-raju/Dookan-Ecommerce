@@ -29,3 +29,6 @@ export { reviewClientApi, reviewServerApi } from "./reviews";
 
 // Store APIs (site config, banners)
 export { storeClientApi, storeServerApi } from "./store";
+
+// Wishlist APIs
+export { wishlistClientApi } from "./wishlists";

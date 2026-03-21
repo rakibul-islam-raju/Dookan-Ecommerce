@@ -3,9 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAddToCart } from "@/lib/hooks/useCart";
 import { cn } from "@/lib/utils";
-import { Eye, Heart, Loader2, ShoppingCart } from "lucide-react";
+import { Eye, Loader2, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { WishlistButton } from "./WishlistButton";
 
 interface ProductItemProps {
 	product: IConsumerProductListItem;
@@ -114,18 +115,7 @@ export const ProductItem = ({
 							<ShoppingCart className="h-5 w-5" />
 						)}
 					</Button>
-					<Button
-						variant="secondary"
-						size="icon"
-						className="rounded-full h-10 w-10 bg-white text-foreground hover:bg-white/90 hover:text-red-500 hover:scale-110 transition-all shadow-md"
-						onClick={(e) => {
-							e.preventDefault();
-							// Add to wishlist logic
-						}}
-						title="Add to Wishlist"
-					>
-						<Heart className="h-5 w-5" />
-					</Button>
+					<WishlistButton productId={product.id} />
 				</div>
 			</div>
 

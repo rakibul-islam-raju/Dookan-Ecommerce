@@ -267,9 +267,9 @@ export function ShopContent() {
 	);
 
 	return (
-		<div className="container py-8 md:py-12">
+		<div className="container py-6 md:py-8">
 			{/* Header */}
-			<div className="mb-8">
+			<div className="mb-6">
 				<h1 className="text-3xl font-bold font-serif mb-2">Shop</h1>
 				<p className="text-muted-foreground">
 					{isProductsLoading ? (

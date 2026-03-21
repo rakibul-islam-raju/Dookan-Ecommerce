@@ -92,8 +92,6 @@ export default async function Home() {
 
 	const activeBanners = banners.filter((b) => b.is_active);
 
-	console.log('banners ->', banners);
-
 	// Structured Data (JSON-LD) for SEO
 	const organizationSchema = {
 		"@context": "https://schema.org",

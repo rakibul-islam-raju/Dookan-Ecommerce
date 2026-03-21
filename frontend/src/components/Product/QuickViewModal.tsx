@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { env } from "@/config/env";
 import { useAddToCart } from "@/lib/hooks/useCart";
 import { cn } from "@/lib/utils";
-import { Check, Heart, Loader2, ShoppingCart, X } from "lucide-react";
+import { Check, Loader2, ShoppingCart, X } from "lucide-react";
+import { WishlistButton } from "./WishlistButton";
 import Image from "next/image";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -185,13 +186,11 @@ export const QuickViewModal = ({
 									)}
 									{addToCart.isPending ? "Adding..." : "Add to Cart"}
 								</Button>
-								<Button
-									variant="outline"
-									size="lg"
-									className="aspect-square p-0"
-								>
-									<Heart className="h-5 w-5" />
-								</Button>
+								<WishlistButton
+									productId={product.id}
+									variant="icon-outline"
+									className="h-10 w-10"
+								/>
 							</div>
 						</div>
 					</div>

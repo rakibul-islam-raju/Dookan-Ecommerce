@@ -3,7 +3,7 @@
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { cn } from "@/lib/utils";
-import { Home, MapPin, Package, User } from "lucide-react";
+import { Heart, Home, MapPin, Package, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -22,6 +22,11 @@ const sidebarItems = [
 		title: "Orders",
 		href: "/orders",
 		icon: Package,
+	},
+	{
+		title: "Wishlist",
+		href: "/wishlist",
+		icon: Heart,
 	},
 	{
 		title: "Addresses",

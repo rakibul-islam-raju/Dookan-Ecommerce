@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import {
 	AlertTriangle,
 	Check,
-	Heart,
 	Loader2,
 	Minus,
 	Plus,
@@ -19,6 +18,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { WishlistButton } from "@/components/Product/WishlistButton";
 import { ProductReviews } from "./ProductReviews";
 import { VariantSelector } from "./VariantSelector";
 
@@ -29,8 +29,9 @@ interface ProductDetailsClientProps {
 export const ProductDetailsClient = ({
 	product,
 }: ProductDetailsClientProps) => {
+	const images = product.images ?? [];
 	const [selectedImage, setSelectedImage] = useState(
-		product.images.find((img) => img.is_primary) || product.images[0] || null
+		images.find((img) => img.is_primary) || images[0] || null
 	);
 	const [quantity, setQuantity] = useState(1);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -84,7 +85,7 @@ export const ProductDetailsClient = ({
 					slug: product.slug,
 					price: activePrice,
 					discount_percentage: activeDiscount,
-					primary_image: product.images[0]?.image,
+					primary_image: images[0]?.image,
 				},
 				variant: selectedVariant
 					? {
@@ -148,7 +149,7 @@ export const ProductDetailsClient = ({
 						)}
 					</div>
 					<div className="grid grid-cols-4 gap-4">
-						{product.images.map((img) => (
+						{images.map((img) => (
 							<button
 								key={img.id}
 								onClick={() => setSelectedImage(img)}
@@ -305,14 +306,10 @@ export const ProductDetailsClient = ({
 										</>
 									)}
 								</Button>
-								<Button
-									size="lg"
-									variant="outline"
-									className="h-12 w-12 p-0"
-									aria-label="Add to wishlist"
-								>
-									<Heart className="size-5" />
-								</Button>
+								<WishlistButton
+									productId={product.id}
+									variant="icon-outline"
+								/>
 								<Button
 									size="lg"
 									variant="ghost"
