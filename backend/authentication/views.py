@@ -14,6 +14,8 @@ from .serializers import (
     UserRegistrationSerializer,
     EmailVerificationSerializer,
     ResendVerificationSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
 )
 
 
@@ -107,6 +109,67 @@ class ResendVerificationView(APIView):
 
             return Response(
                 {"message": "Verification email sent successfully."},
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetRequestView(APIView):
+    """
+    Request password reset OTP.
+    POST /auth/password-reset/
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user = getattr(serializer, "user", None)
+
+            if user:
+                send_verification_otp_email(
+                    email=user.email,
+                    user_name=f"{user.first_name} {user.last_name}",
+                    purpose="password_reset",
+                )
+
+            # Always return success to prevent email enumeration
+            return Response(
+                {"message": "If an account with this email exists, a password reset OTP has been sent."},
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    Confirm password reset with OTP and set new password.
+    POST /auth/password-reset/confirm/
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.validated_data["user"]
+            otp = serializer.validated_data["otp"]
+
+            # Mark OTP as verified
+            otp.is_verified = True
+            otp.save()
+
+            # Set new password
+            user.set_password(serializer.validated_data["new_password"])
+            user.save()
+
+            return Response(
+                {"message": "Password reset successfully. You can now login with your new password."},
                 status=status.HTTP_200_OK,
             )
 

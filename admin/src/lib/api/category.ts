@@ -31,8 +31,9 @@ export interface CategoryCreateData {
 	name: string;
 	slug: string;
 	description?: string;
-	image?: string;
+	image?: File | null;
 	display_order: number;
+	is_active?: boolean;
 }
 
 export interface CategoryUpdateData extends Partial<CategoryCreateData> {}
@@ -69,9 +70,10 @@ export const categoryApi = {
 	 * Create new category
 	 */
 	async create(categoryData: CategoryCreateData): Promise<CategoryListItem> {
+		const formData = buildCategoryFormData(categoryData);
 		const { data } = await clientApi.post<CategoryListItem>(
 			"/products/categories/",
-			categoryData
+			formData
 		);
 		return data;
 	},
@@ -83,9 +85,10 @@ export const categoryApi = {
 		id: string,
 		updateData: CategoryUpdateData
 	): Promise<CategoryListItem> {
-		const { data } = await clientApi.put<CategoryListItem>(
+		const formData = buildCategoryFormData(updateData);
+		const { data } = await clientApi.patch<CategoryListItem>(
 			`/products/categories/${id}/`,
-			updateData
+			formData
 		);
 		return data;
 	},
@@ -97,6 +100,20 @@ export const categoryApi = {
 		await clientApi.delete(`/products/categories/${id}/`);
 	},
 };
+
+function buildCategoryFormData(data: Partial<CategoryCreateData>): FormData {
+	const formData = new FormData();
+	if (data.name !== undefined) formData.append("name", data.name);
+	if (data.slug !== undefined) formData.append("slug", data.slug);
+	if (data.description !== undefined)
+		formData.append("description", data.description);
+	if (data.display_order !== undefined)
+		formData.append("display_order", String(data.display_order));
+	if (data.is_active !== undefined)
+		formData.append("is_active", String(data.is_active));
+	if (data.image) formData.append("image", data.image);
+	return formData;
+}
 
 export const getCategories = (params: CategoryFilter) =>
 	queryOptions({

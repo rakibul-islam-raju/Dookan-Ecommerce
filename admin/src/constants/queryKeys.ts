@@ -1,4 +1,5 @@
 export const queryKeys = {
+	dashboard: "dashboard",
 	me: "me",
 	products: "products",
 	productDetails: "productDetails",

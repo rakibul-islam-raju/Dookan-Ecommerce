@@ -12,10 +12,13 @@ from .views import (
     OrderPaymentUpdateView,
     ProductOrdersView,
 )
+from .dashboard import DashboardMetricsView
 
 app_name = "orders"
 
 urlpatterns = [
+    # Dashboard
+    path("dashboard/metrics/", DashboardMetricsView.as_view(), name="dashboard-metrics"),
     # Order management
     path("create/", OrderCreateView.as_view(), name="order-create"),
     path("", OrderListView.as_view(), name="order-list"),

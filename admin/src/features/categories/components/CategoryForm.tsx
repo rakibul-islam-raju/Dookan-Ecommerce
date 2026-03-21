@@ -1,6 +1,8 @@
 import { BaseForm } from "@/components/ui/@form/BaseForm";
 import { TextField } from "@/components/ui/@form/TextField";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
@@ -11,8 +13,9 @@ import {
 import { toast } from "react-toastify";
 import { z } from "zod";
 import slugify from "slugify";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CheckboxField } from "@/components/ui/@form/CheckboxField";
+import { X } from "lucide-react";
 
 // Zod schema for category form
 const categorySchema = z.object({
@@ -65,6 +68,9 @@ export const CategoryForm = ({
 	const isEditMode = mode === "edit";
 	const isPending = isCreating || isUpdating;
 
+	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [imagePreview, setImagePreview] = useState<string | null>(null);
+
 	const form = useZodForm(categorySchema, {
 		defaultValues: {
 			name: "",
@@ -78,16 +84,36 @@ export const CategoryForm = ({
 	const handleCancel = () => {
 		handleClose();
 		form.reset();
+		setImageFile(null);
+		setImagePreview(null);
+	};
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			setImageFile(file);
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setImagePreview(reader.result as string);
+			};
+			reader.readAsDataURL(file);
+		}
+	};
+
+	const handleRemoveImage = () => {
+		setImageFile(null);
+		setImagePreview(null);
 	};
 
 	const onSubmit = async (data: CategoryFormData) => {
-		console.log(data);
-
 		if (isEditMode && category) {
 			updateCategory(
 				{
 					id: category.id,
-					updateData: data,
+					updateData: {
+						...data,
+						...(imageFile && { image: imageFile }),
+					},
 				},
 				{
 					onSuccess: () => {
@@ -97,12 +123,18 @@ export const CategoryForm = ({
 				},
 			);
 		} else {
-			createCategory(data, {
-				onSuccess: () => {
-					handleCancel();
-					toast.success("Category created successfully");
+			createCategory(
+				{
+					...data,
+					...(imageFile && { image: imageFile }),
 				},
-			});
+				{
+					onSuccess: () => {
+						handleCancel();
+						toast.success("Category created successfully");
+					},
+				},
+			);
 		}
 	};
 
@@ -115,6 +147,9 @@ export const CategoryForm = ({
 	useEffect(() => {
 		if (category) {
 			form.reset(category);
+			if (category.image) {
+				setImagePreview(category.image);
+			}
 		}
 	}, [category]);
 
@@ -141,6 +176,38 @@ export const CategoryForm = ({
 					placeholder="e.g., Electronics, Clothing, Home & Garden"
 					description="The display name of the category"
 				/>
+
+				<div className="space-y-2">
+					<Label htmlFor="category-image">Category Image</Label>
+					<Input
+						id="category-image"
+						type="file"
+						accept="image/*"
+						onChange={handleImageChange}
+					/>
+					{imagePreview && (
+						<div className="relative mt-2 inline-block">
+							<img
+								src={imagePreview}
+								alt="Category preview"
+								className="max-h-32 rounded-md object-cover"
+							/>
+							<button
+								type="button"
+								onClick={handleRemoveImage}
+								className="absolute -top-2 -right-2 rounded-full bg-destructive p-0.5 text-white hover:bg-destructive/90"
+							>
+								<X className="h-3.5 w-3.5" />
+							</button>
+						</div>
+					)}
+					<p className="text-sm text-muted-foreground">
+						{isEditMode
+							? "Leave empty to keep the current image"
+							: "Optional image for the category"}
+					</p>
+				</div>
+
 				<TextField
 					name="display_order"
 					label="Order"

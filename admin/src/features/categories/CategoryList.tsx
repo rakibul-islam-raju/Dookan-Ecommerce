@@ -81,6 +81,23 @@ export function CategoryList() {
 
 	const columns: Column<CategoryListItem>[] = [
 		{
+			key: "image",
+			header: "Image",
+			render: (category) =>
+				category.image ? (
+					<img
+						src={category.image}
+						alt={category.name}
+						className="h-10 w-10 rounded-md object-cover"
+					/>
+				) : (
+					<div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">
+						N/A
+					</div>
+				),
+			className: "w-[60px]",
+		},
+		{
 			key: "name",
 			header: "Category Name",
 			render: (category) => <div className="font-medium">{category.name}</div>,

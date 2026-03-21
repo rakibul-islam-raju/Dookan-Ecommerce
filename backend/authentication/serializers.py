@@ -146,3 +146,65 @@ class ResendVerificationSerializer(serializers.Serializer):
         except User.DoesNotExist:
             raise serializers.ValidationError("No user found with this email.")
         return value
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """
+    Serializer for requesting a password reset OTP.
+    """
+
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            self.user = User.objects.get(email=value)
+        except User.DoesNotExist:
+            # Don't reveal whether email exists
+            pass
+        return value
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Serializer for confirming password reset with OTP.
+    """
+
+    email = serializers.EmailField()
+    otp_code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(
+        write_only=True, validators=[validate_password]
+    )
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        otp_code = attrs.get("otp_code")
+
+        try:
+            otp = OTPVerification.objects.filter(
+                email=email,
+                purpose="password_reset",
+                is_verified=False,
+                expires_at__gt=timezone.now(),
+            ).latest("created_at")
+
+            if otp.attempts >= settings.OTP_MAX_ATTEMPTS:
+                raise serializers.ValidationError(
+                    {"detail": "Maximum attempts exceeded. Please request a new OTP."}
+                )
+
+            if otp.otp_code != otp_code:
+                otp.attempts += 1
+                otp.save()
+                raise serializers.ValidationError({"detail": "Invalid OTP code."})
+
+            attrs["otp"] = otp
+
+        except OTPVerification.DoesNotExist:
+            raise serializers.ValidationError({"detail": "Invalid or expired OTP."})
+
+        try:
+            attrs["user"] = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({"detail": "User not found."})
+
+        return attrs

@@ -102,20 +102,29 @@ export const authApi = {
 	},
 
 	/**
-	 * Request password reset
+	 * Request password reset OTP
 	 */
-	async requestPasswordReset(email: string): Promise<void> {
-		await clientApi.post("/auth/password-reset/", { email });
+	async requestPasswordReset(email: string): Promise<{ message: string }> {
+		const { data } = await clientApi.post<{ message: string }>(
+			"/auth/password-reset/",
+			{ email }
+		);
+		return data;
 	},
 
 	/**
-	 * Confirm password reset
+	 * Confirm password reset with OTP
 	 */
-	async confirmPasswordReset(token: string, password: string): Promise<void> {
-		await clientApi.post("/auth/password-reset/confirm/", {
-			token,
-			password,
-		});
+	async confirmPasswordReset(
+		email: string,
+		otp_code: string,
+		new_password: string
+	): Promise<{ message: string }> {
+		const { data } = await clientApi.post<{ message: string }>(
+			"/auth/password-reset/confirm/",
+			{ email, otp_code, new_password }
+		);
+		return data;
 	},
 
 	/**
