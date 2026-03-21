@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from utils.permissions import IsOwnerOrAdmin
-from utils.email import send_guest_order_tracking_otp
+from utils.email import send_guest_order_tracking_otp, send_order_status_update_email
 from orders.models import Order, OrderStatusHistory
 from orders.filters import OrderFilter
 from orders.serializers import (
@@ -142,6 +142,9 @@ class OrderStatusUpdateView(APIView):
                 created_by=request.user,
             )
 
+            # Send status update email to customer
+            send_order_status_update_email(order, new_status, note)
+
             return Response(
                 OrderDetailSerializer(order).data,
                 status=status.HTTP_200_OK,
@@ -205,12 +208,16 @@ class OrderCancelView(APIView):
                 product.save()
 
         # Create status history
+        cancel_note = f'Order cancelled by {"admin" if request.user.is_staff else "customer"}'
         OrderStatusHistory.objects.create(
             order=order,
             status="cancelled",
-            note=f'Order cancelled by {"admin" if request.user.is_staff else "customer"}',
+            note=cancel_note,
             created_by=request.user if request.user.is_authenticated else None,
         )
+
+        # Send cancellation email to customer
+        send_order_status_update_email(order, "cancelled", cancel_note)
 
         return Response(
             OrderDetailSerializer(order).data,

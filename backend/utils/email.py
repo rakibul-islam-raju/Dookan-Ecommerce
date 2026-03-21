@@ -163,3 +163,96 @@ def send_guest_order_tracking_otp(email):
         user_name="Customer",
         purpose="guest_order",
     )
+
+
+def send_welcome_email(email, user_name):
+    """
+    Send welcome email after successful email verification.
+
+    Args:
+        email: User's email address
+        user_name: User's display name
+    """
+    html_message = render_to_string(
+        "emails/welcome.html",
+        {"user_name": user_name},
+    )
+    plain_message = strip_tags(html_message)
+
+    send_mail(
+        subject="Welcome to Dookan!",
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[email],
+        html_message=html_message,
+        fail_silently=True,
+    )
+
+
+def send_order_status_update_email(order, new_status, note=""):
+    """
+    Send order status update email to customer.
+
+    Args:
+        order: Order instance
+        new_status: New status string
+        note: Optional note about the status change
+    """
+    customer_email = order.customer_email
+    if not customer_email:
+        return
+
+    status_display_map = {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled",
+        "refunded": "Refunded",
+    }
+
+    html_message = render_to_string(
+        "emails/order_status_update.html",
+        {
+            "customer_name": order.customer_name,
+            "order_number": order.order_number,
+            "new_status": new_status,
+            "new_status_display": status_display_map.get(new_status, new_status.title()),
+            "note": note,
+        },
+    )
+    plain_message = strip_tags(html_message)
+
+    send_mail(
+        subject=f"Order Update: {order.order_number} - {status_display_map.get(new_status, new_status.title())}",
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[customer_email],
+        html_message=html_message,
+        fail_silently=True,
+    )
+
+
+def send_password_reset_success_email(email, user_name):
+    """
+    Send confirmation email after successful password reset.
+
+    Args:
+        email: User's email address
+        user_name: User's display name
+    """
+    html_message = render_to_string(
+        "emails/password_reset_success.html",
+        {"user_name": user_name},
+    )
+    plain_message = strip_tags(html_message)
+
+    send_mail(
+        subject="Password Reset Successful - Dookan",
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[email],
+        html_message=html_message,
+        fail_silently=True,
+    )

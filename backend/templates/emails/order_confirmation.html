@@ -3,20 +3,20 @@
 {% block title %}Order Confirmation - Dookan{% endblock %}
 
 {% block content %}
-<h2>Order Confirmation</h2>
+<h2>Order Confirmed!</h2>
 <p>Hello {{ customer_name }},</p>
-<p>Thank you for your order! Your order has been received and is being processed.</p>
+<p>Thank you for your order! We've received it and it's now being processed. Here's a summary of your purchase.</p>
 
 <div class="highlight">
     <p style="margin: 0;"><strong>Order Number:</strong> {{ order_number }}</p>
-    <p style="margin: 5px 0 0 0;"><strong>Order Date:</strong> {{ order_date }}</p>
+    <p><strong>Order Date:</strong> {{ order_date }}</p>
     {% if payment_method %}
-    <p style="margin: 5px 0 0 0;"><strong>Payment Method:</strong> {{ payment_method|title }}</p>
+    <p style="margin: 0;"><strong>Payment Method:</strong> {{ payment_method|title }}</p>
     {% endif %}
 </div>
 
 <h3>Order Items</h3>
-<table>
+<table class="order-table">
     <thead>
         <tr>
             <th>Product</th>
@@ -37,22 +37,22 @@
     </tbody>
 </table>
 
-<div style="text-align: right; margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 4px;">
-    <p style="margin: 5px 0;"><strong>Subtotal:</strong> {{ subtotal }} BDT</p>
+<div class="totals-section">
+    <p><strong>Subtotal:</strong> {{ subtotal }} BDT</p>
     {% if discount_amount %}
-    <p style="margin: 5px 0; color: #4CAF50;"><strong>Discount:</strong> -{{ discount_amount }} BDT</p>
+    <p style="color: #2d6a4f;"><strong>Discount:</strong> -{{ discount_amount }} BDT</p>
     {% endif %}
     {% if tax_amount %}
-    <p style="margin: 5px 0;"><strong>Tax:</strong> {{ tax_amount }} BDT</p>
+    <p><strong>Tax:</strong> {{ tax_amount }} BDT</p>
     {% endif %}
-    <p style="margin: 5px 0;"><strong>Shipping:</strong> {{ shipping_amount }} BDT</p>
-    <hr style="margin: 10px 0; border: none; border-top: 1px solid #ddd;">
-    <p style="margin: 5px 0; font-size: 18px;"><strong>Total:</strong> {{ total_amount }} BDT</p>
+    <p><strong>Shipping:</strong> {{ shipping_amount }} BDT</p>
+    <hr class="divider" style="margin: 12px 0;">
+    <p class="total-amount"><strong>Total:</strong> {{ total_amount }} BDT</p>
 </div>
 
 {% if shipping_address %}
 <h3>Shipping Address</h3>
-<div class="highlight">
+<div class="info-box">
     <p style="margin: 0;">
         <strong>{{ shipping_address.full_name }}</strong><br>
         {{ shipping_address.address_line1 }}<br>
@@ -65,12 +65,12 @@
 
 <h3>What's Next?</h3>
 <ul>
-    <li>We'll send you an email when your order is shipped.</li>
-    <li>You can track your order status in your account.</li>
-    <li>If you have any questions, please contact our support team.</li>
+    <li>We'll notify you via email when your order ships.</li>
+    <li>You can track your order status from your account dashboard.</li>
+    <li>For any questions, reach out to our support team.</li>
 </ul>
 
-<p>Thank you for choosing Dookan!</p>
-
-<p>Best regards,<br>The Dookan Team</p>
+<div class="signature">
+    <p>Thank you for choosing Dookan!<br><strong>The Dookan Team</strong></p>
+</div>
 {% endblock %}

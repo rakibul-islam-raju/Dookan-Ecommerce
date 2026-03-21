@@ -1,0 +1,26 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Welcome to Dookan!{% endblock %}
+
+{% block content %}
+<h2>Welcome to Dookan!</h2>
+<p>Hello {{ user_name }},</p>
+<p>Your email has been verified and your account is all set up. We're thrilled to have you as part of the Dookan family!</p>
+
+<div class="highlight">
+    <p style="margin: 0; font-size: 16px;"><strong>You're ready to start shopping!</strong></p>
+    <p>Browse our curated selection of organic products, from fresh produce to pantry essentials.</p>
+</div>
+
+<h3>Here's what you can do:</h3>
+<ul>
+    <li><strong>Browse Products</strong> - Explore our full range of organic goods</li>
+    <li><strong>Save Favorites</strong> - Add items to your wishlist for later</li>
+    <li><strong>Track Orders</strong> - Monitor your deliveries in real time</li>
+    <li><strong>Manage Your Profile</strong> - Update your addresses and preferences</li>
+</ul>
+
+<div class="signature">
+    <p>Happy shopping!<br><strong>The Dookan Team</strong></p>
+</div>
+{% endblock %}

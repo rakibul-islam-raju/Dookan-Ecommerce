@@ -96,7 +96,7 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 | **Payment Gateway**          | 🔴 Critical | bKash, Nagad, Stripe integration for Bangladesh market              |
 | **Wishlist**                 | 🟡 High     | Save products for later purchase                                    |
 | **Refund System**            | 🟢 Medium   | Return/refund workflow automation                                   |
-| **Email Templates**          | 🟢 Medium   | Styled transactional emails (currently plain text)                  |
+| ~~**Email Templates**~~      | ✅ Done      | Styled transactional emails (verification, order confirmation, status updates, welcome, password reset) |
 | **Product Recommendations**  | 🟢 Low      | Related products/upselling feature                                  |
 | **SMS Notifications**        | 🟢 Low      | Mobile number verification via SMS                                  |
 | **Role-Based Access**        | 🟢 Low      | Admin permissions and roles                                         |

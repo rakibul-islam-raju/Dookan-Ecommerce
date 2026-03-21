@@ -1,0 +1,52 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Order Update - {{ order_number }} - Dookan{% endblock %}
+
+{% block content %}
+<h2>Order Status Update</h2>
+<p>Hello {{ customer_name }},</p>
+
+{% if new_status == "confirmed" %}
+<p>Great news! Your order has been <strong>confirmed</strong> and is being prepared.</p>
+{% elif new_status == "processing" %}
+<p>Your order is now being <strong>processed</strong>. We're carefully packing your items.</p>
+{% elif new_status == "shipped" %}
+<p>Your order has been <strong>shipped</strong> and is on its way to you!</p>
+{% elif new_status == "delivered" %}
+<p>Your order has been <strong>delivered</strong>. We hope you enjoy your products!</p>
+{% elif new_status == "cancelled" %}
+<p>Your order has been <strong>cancelled</strong>.</p>
+{% elif new_status == "refunded" %}
+<p>Your order has been <strong>refunded</strong>. The refund will be processed shortly.</p>
+{% else %}
+<p>There's an update on your order.</p>
+{% endif %}
+
+<div class="highlight">
+    <p style="margin: 0;"><strong>Order Number:</strong> {{ order_number }}</p>
+    <p style="margin: 8px 0 0 0;">
+        <strong>Status:</strong>
+        <span class="status-badge status-{{ new_status }}">{{ new_status_display }}</span>
+    </p>
+</div>
+
+{% if note %}
+<div class="info-box">
+    <p style="margin: 0;"><strong>Note:</strong> {{ note }}</p>
+</div>
+{% endif %}
+
+{% if new_status == "confirmed" %}
+<p>We'll let you know once your order ships. You can track your order status anytime from your account.</p>
+{% elif new_status == "shipped" %}
+<p>Your package is on its way! You'll receive another update once it's delivered.</p>
+{% elif new_status == "delivered" %}
+<p>If everything looks good, we'd love to hear your feedback. Consider leaving a review for the products you purchased!</p>
+{% elif new_status == "cancelled" %}
+<p>If you have any questions about this cancellation, please don't hesitate to contact our support team.</p>
+{% endif %}
+
+<div class="signature">
+    <p>Best regards,<br><strong>The Dookan Team</strong></p>
+</div>
+{% endblock %}

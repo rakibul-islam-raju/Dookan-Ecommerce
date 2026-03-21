@@ -1,78 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{% block title %}Dookan{% endblock %}</title>
+    <!--[if mso]>
+    <style type="text/css">
+        table { border-collapse: collapse; }
+        .fallback-font { font-family: Arial, sans-serif; }
+    </style>
+    <![endif]-->
     <style>
+        /* Reset */
+        body, table, td, p, a, li { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #1a1a2e;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f0f4f0;
+            width: 100%;
+        }
+        .wrapper {
+            width: 100%;
+            padding: 32px 0;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
         }
         .header {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
             color: white;
-            padding: 20px;
+            padding: 32px 24px;
             text-align: center;
         }
         .header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .header .tagline {
+            margin: 8px 0 0 0;
+            font-size: 13px;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
         }
         .content {
-            padding: 30px;
+            padding: 36px 32px;
             background-color: #ffffff;
         }
-        .footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 12px;
-            color: #666;
-            background-color: #f9f9f9;
-            border-top: 1px solid #eee;
+        .content h2 {
+            color: #2d6a4f;
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+        }
+        .content h3 {
+            color: #2d6a4f;
+            font-size: 17px;
+            font-weight: 600;
+            margin: 24px 0 12px 0;
+        }
+        .content p {
+            margin: 0 0 16px 0;
+            color: #374151;
+            font-size: 15px;
+        }
+        .content ul {
+            margin: 8px 0 16px 0;
+            padding-left: 20px;
+            color: #374151;
+        }
+        .content li {
+            margin-bottom: 6px;
+            font-size: 15px;
         }
         .otp-code {
-            font-size: 32px;
-            font-weight: bold;
-            color: #4CAF50;
-            letter-spacing: 8px;
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d6a4f;
+            letter-spacing: 10px;
             text-align: center;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            margin: 20px 0;
+            padding: 24px;
+            background-color: #f0faf4;
+            border: 2px dashed #b7e4c7;
+            border-radius: 10px;
+            margin: 24px 0;
         }
         .btn {
             display: inline-block;
-            padding: 12px 24px;
-            background-color: #4CAF50;
-            color: white;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            color: #ffffff !important;
             text-decoration: none;
-            border-radius: 4px;
-            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            margin: 8px 0;
+            text-align: center;
         }
-        table {
+        .btn:hover {
+            background: linear-gradient(135deg, #245a42 0%, #368a5e 100%);
+        }
+        .btn-outline {
+            display: inline-block;
+            padding: 12px 28px;
+            background: transparent;
+            color: #2d6a4f !important;
+            text-decoration: none;
+            border: 2px solid #2d6a4f;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            margin: 8px 0;
+            text-align: center;
+        }
+        table.order-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 16px 0;
         }
-        th, td {
-            padding: 12px;
+        table.order-table th {
+            padding: 12px 16px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #4CAF50;
+            background-color: #2d6a4f;
             color: white;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        table.order-table th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+        table.order-table th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+        table.order-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #374151;
+        }
+        table.order-table tr:last-child td {
+            border-bottom: none;
         }
         .text-right {
             text-align: right;
@@ -81,25 +164,105 @@
             text-align: center;
         }
         .highlight {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 15px 0;
+            background-color: #f0faf4;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2d6a4f;
+            margin: 20px 0;
+        }
+        .highlight p {
+            margin: 4px 0;
+        }
+        .info-box {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin: 20px 0;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-confirmed { background-color: #dbeafe; color: #1e40af; }
+        .status-processing { background-color: #fef3c7; color: #92400e; }
+        .status-shipped { background-color: #e0e7ff; color: #3730a3; }
+        .status-delivered { background-color: #d1fae5; color: #065f46; }
+        .status-cancelled { background-color: #fee2e2; color: #991b1b; }
+        .status-refunded { background-color: #f3e8ff; color: #6b21a8; }
+        .divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 24px 0;
+            border: none;
+        }
+        .totals-section {
+            text-align: right;
+            margin-top: 16px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+        }
+        .totals-section p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+        .totals-section .total-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d6a4f;
+        }
+        .footer {
+            text-align: center;
+            padding: 24px 32px;
+            font-size: 12px;
+            color: #9ca3af;
+            background-color: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+        }
+        .footer p {
+            margin: 4px 0;
+        }
+        .footer a {
+            color: #2d6a4f;
+            text-decoration: none;
+        }
+        .signature {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        @media only screen and (max-width: 620px) {
+            .wrapper { padding: 16px 8px; }
+            .content { padding: 24px 20px; }
+            .header { padding: 24px 20px; }
+            .otp-code { font-size: 28px; letter-spacing: 6px; padding: 18px; }
+            table.order-table th, table.order-table td { padding: 10px 8px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Dookan</h1>
-            <p style="margin: 5px 0 0 0; font-size: 14px;">Organic Products for a Healthy Life</p>
-        </div>
-        <div class="content">
-            {% block content %}{% endblock %}
-        </div>
-        <div class="footer">
-            <p>&copy; 2024 Dookan. All rights reserved.</p>
-            <p>This is an automated message. Please do not reply to this email.</p>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <h1>Dookan</h1>
+                <p class="tagline">Organic Products for a Healthy Life</p>
+            </div>
+            <div class="content">
+                {% block content %}{% endblock %}
+            </div>
+            <div class="footer">
+                <p>&copy; {% now "Y" %} Dookan. All rights reserved.</p>
+                <p>This is an automated message. Please do not reply to this email.</p>
+            </div>
         </div>
     </div>
 </body>

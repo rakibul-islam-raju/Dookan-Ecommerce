@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
 from users.serializers import UserSerializer
-from utils.email import send_verification_otp_email
+from utils.email import send_verification_otp_email, send_welcome_email, send_password_reset_success_email
 
 from .serializers import (
     CustomTokenObtainPairSerializer,
@@ -73,6 +73,11 @@ class EmailVerificationView(APIView):
                 user.is_email_verified = True
                 user.is_active = True
                 user.save()
+
+                send_welcome_email(
+                    email=user.email,
+                    user_name=f"{user.first_name} {user.last_name}".strip() or "there",
+                )
 
                 return Response(
                     {"message": "Email verified successfully. You can now login."},
@@ -167,6 +172,11 @@ class PasswordResetConfirmView(APIView):
             # Set new password
             user.set_password(serializer.validated_data["new_password"])
             user.save()
+
+            send_password_reset_success_email(
+                email=user.email,
+                user_name=f"{user.first_name} {user.last_name}".strip() or "there",
+            )
 
             return Response(
                 {"message": "Password reset successfully. You can now login with your new password."},
