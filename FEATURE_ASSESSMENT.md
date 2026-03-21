@@ -28,7 +28,7 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 - **Database:** PostgreSQL 17 (via Docker)
 - **Authentication:** JWT (1-day access, 30-day refresh tokens)
 - **Package Manager:** uv
-- **Apps:** `authentication`, `users`, `products`, `orders`, `coupons`, `store`, `utils`
+- **Apps:** `authentication`, `users`, `products`, `orders`, `coupons`, `wishlists`, `store`, `utils`
 
 ### Frontend (`frontend/`)
 
@@ -81,6 +81,8 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 | **Password Reset (OTP)**        | ✅      | ✅       | ✅    | OTP-based forgot/reset password flow    |
 | **Admin Dashboard Metrics**     | ✅      | ❌       | ✅    | Real revenue, orders, customers, stock  |
 | **Admin Category Images**       | ✅      | ✅       | ✅    | Image upload in category form + list    |
+| **Wishlist**                    | ✅      | ✅       | ❌    | Toggle, account page, optimistic UI     |
+| **Email Templates**             | ✅      | ❌       | ❌    | Styled transactional emails (6 types)   |
 | **Seed Data**                   | ✅      | ❌       | ❌    | `manage.py seed_data` command           |
 
 ### ⚠️ Partially Implemented Features
@@ -94,9 +96,7 @@ Dookan is an e-commerce platform for organic products consisting of three indepe
 | Feature                      | Priority    | Description                                                         |
 | ---------------------------- | ----------- | ------------------------------------------------------------------- |
 | **Payment Gateway**          | 🔴 Critical | bKash, Nagad, Stripe integration for Bangladesh market              |
-| ~~**Wishlist**~~             | ✅ Done      | Save products for later (backend API, toggle buttons on cards/detail, account wishlist page) |
 | **Refund System**            | 🟢 Medium   | Return/refund workflow automation                                   |
-| ~~**Email Templates**~~      | ✅ Done      | Styled transactional emails (verification, order confirmation, status updates, welcome, password reset) |
 | **Product Recommendations**  | 🟢 Low      | Related products/upselling feature                                  |
 | **SMS Notifications**        | 🟢 Low      | Mobile number verification via SMS                                  |
 | **Role-Based Access**        | 🟢 Low      | Admin permissions and roles                                         |
@@ -204,6 +204,16 @@ PUT    /{id}/                  Update coupon (admin)
 DELETE /{id}/                  Delete coupon (admin)
 ```
 
+### Wishlists (`/api/v1/wishlists/`)
+
+```
+GET    /                       List wishlist items (authenticated)
+POST   /add/                   Add product to wishlist
+DELETE /remove/{product_id}/   Remove product from wishlist
+POST   /toggle/                Toggle product in wishlist (add/remove)
+GET    /product-ids/           Get wishlisted product IDs (lightweight)
+```
+
 ### Store (`/api/v1/store/`)
 
 ```
@@ -247,6 +257,10 @@ DELETE /announcements/{id}/    Delete announcement
 - **ShippingAddress**: Complete address details
 - **OrderStatusHistory**: Audit trail for status changes
 
+### Wishlists App
+
+- **WishlistItem**: User-product link with unique constraint, timestamps
+
 ### Coupons App
 
 - **Coupon**: Percentage/fixed discounts, min order amount, max discount cap, usage limits (total + per-user), date validity
@@ -288,7 +302,6 @@ Seeds 10 categories, 25+ products across all categories, variant types (Size, We
 
 ### 🟢 NICE TO HAVE - Can Defer
 
-- Wishlist functionality
 - Advanced analytics/reporting
 - SMS notifications
 - Role-based permissions
@@ -329,16 +342,16 @@ Week 1: Critical Features
 
 ```
 Month 1:
-├── Wishlist functionality
 ├── Basic analytics integration (Google Analytics)
 ├── Error monitoring (Sentry)
-└── Email templates redesign
+├── Testing suite (unit + integration)
+└── Refund system
 
 Month 2:
 ├── Advanced search & filters
 ├── SMS notifications
 ├── Admin reporting features
-└── Testing suite (unit + integration)
+└── Product recommendations
 ```
 
 ---
@@ -386,24 +399,25 @@ Month 2:
 | Category                 | Status   | Notes                                          |
 | ------------------------ | -------- | ---------------------------------------------- |
 | **Code Quality**         | ⭐⭐⭐⭐ | Good architecture, clean code, modern patterns |
-| **Feature Completeness** | ⭐⭐⭐⭐ | Core features present, variants & coupons done |
+| **Feature Completeness** | ⭐⭐⭐⭐ | Core features present, variants, coupons, wishlist, email templates done |
 | **Production Readiness** | ⭐⭐⭐⭐ | Needs payment gateway for full launch           |
 | **Testing**              | ⭐       | No tests - critical gap                        |
 | **Documentation**        | ⭐⭐⭐   | Good API docs, seed data, inline comments      |
 
-### Overall Assessment: **90-93% Complete**
+### Overall Assessment: **93-95% Complete**
 
-The Dookan platform has a **solid foundation** with clean architecture and modern tech stack. Core e-commerce features including product variants, coupons/discounts, reviews, category images, password reset, and admin dashboard metrics are fully implemented. **One critical gap** blocks immediate launch:
+The Dookan platform has a **solid foundation** with clean architecture and modern tech stack. Core e-commerce features including product variants, coupons/discounts, reviews, wishlist, styled email templates, category images, password reset, and admin dashboard metrics are fully implemented. **One critical gap** blocks immediate launch:
 
 1. **Payment Gateway** - bKash/Nagad for Bangladesh market (currently COD only)
 
-With focused development over **~1 week**, this platform can be production-ready for an MVP launch. The remaining features (wishlist, advanced analytics, testing) can be phased post-launch based on user feedback.
+With focused development over **~1 week**, this platform can be production-ready for an MVP launch. The remaining features (advanced analytics, testing) can be phased post-launch based on user feedback.
 
 ### Strengths
 
 - Modern, scalable architecture
 - Clean, well-organized codebase
-- Comprehensive API design with full variant/coupon support
+- Comprehensive API design with full variant/coupon/wishlist support
+- Styled transactional email templates (6 types)
 - Good security practices (JWT, email verification)
 - SEO-optimized frontend with structured data
 - Responsive design across all apps
@@ -414,7 +428,6 @@ With focused development over **~1 week**, this platform can be production-ready
 - Add testing suite (unit, integration, E2E)
 - Implement payment gateway(s)
 - Add error monitoring (Sentry)
-- Improve email templates
 - Switch to production email service (SendGrid/Mailgun)
 
 ---
