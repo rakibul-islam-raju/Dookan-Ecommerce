@@ -169,7 +169,7 @@ function VariantRow({
 				</div>
 			</TableCell>
 			<TableCell className="text-right font-medium">
-				BDT {Number(variant.price).toFixed(2)}
+				BDT {Number(variant.base_price).toFixed(2)}
 			</TableCell>
 			<TableCell className="text-right">{variant.stock_quantity}</TableCell>
 			<TableCell>
@@ -237,8 +237,7 @@ function VariantFormDialog({
 		? {
 				sku: variant.sku,
 				name: variant.name,
-				price: variant.price,
-				compare_at_price: variant.compare_at_price || null,
+				base_price: variant.base_price,
 				cost_price: variant.cost_price || null,
 				stock_quantity: variant.stock_quantity,
 				low_stock_threshold: variant.low_stock_threshold,
@@ -250,8 +249,7 @@ function VariantFormDialog({
 		: {
 				sku: "",
 				name: "",
-				price: "",
-				compare_at_price: null,
+				base_price: "",
 				cost_price: null,
 				stock_quantity: 0,
 				low_stock_threshold: 5,
@@ -332,33 +330,18 @@ function VariantFormDialog({
 						</div>
 					</div>
 
-					<div className="grid grid-cols-3 gap-4">
+					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="variant-price">Price *</Label>
+							<Label htmlFor="variant-base-price">Base Price (MRP) *</Label>
 							<Input
-								id="variant-price"
+								id="variant-base-price"
 								type="number"
 								step="0.01"
-								value={formData.price}
+								value={formData.base_price}
 								onChange={(e) =>
-									setFormData((p) => ({ ...p, price: e.target.value }))
+									setFormData((p) => ({ ...p, base_price: e.target.value }))
 								}
 								required
-							/>
-						</div>
-						<div className="space-y-2">
-							<Label htmlFor="variant-compare-price">Compare Price</Label>
-							<Input
-								id="variant-compare-price"
-								type="number"
-								step="0.01"
-								value={formData.compare_at_price ?? ""}
-								onChange={(e) =>
-									setFormData((p) => ({
-										...p,
-										compare_at_price: e.target.value || null,
-									}))
-								}
 							/>
 						</div>
 						<div className="space-y-2">

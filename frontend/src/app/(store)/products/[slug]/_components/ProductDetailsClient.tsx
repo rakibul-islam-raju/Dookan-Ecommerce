@@ -44,15 +44,16 @@ export const ProductDetailsClient = ({
 	const addToCartMutation = useAddToCart();
 
 	// Derive active pricing and stock from variant or base product
-	const activePrice = selectedVariant
-		? selectedVariant.price
-		: product.price;
-	const activeComparePrice = selectedVariant
-		? selectedVariant.compare_at_price
-		: product.compare_at_price;
+	const activeBasePrice = selectedVariant
+		? selectedVariant.base_price
+		: product.base_price;
+	const activeSalePrice = selectedVariant
+		? selectedVariant.sale_price
+		: product.sale_price;
 	const activeDiscount = selectedVariant
-		? selectedVariant.discount_percentage
-		: product.discount_percentage;
+		? selectedVariant.sale_discount_percentage
+		: product.sale_discount_percentage;
+	const activePrice = activeSalePrice ?? activeBasePrice;
 	const activeStock = selectedVariant
 		? selectedVariant.stock_quantity
 		: product.stock_quantity;
@@ -83,8 +84,8 @@ export const ProductDetailsClient = ({
 					id: product.id,
 					name: product.name,
 					slug: product.slug,
-					price: activePrice,
-					discount_percentage: activeDiscount,
+					sale_price: activeSalePrice ? Number(activeSalePrice) : null,
+					base_price: Number(activeBasePrice),
 					primary_image: images[0]?.image,
 				},
 				variant: selectedVariant
@@ -92,7 +93,7 @@ export const ProductDetailsClient = ({
 							id: selectedVariant.id,
 							name: selectedVariant.name,
 							sku: selectedVariant.sku,
-							price: Number(selectedVariant.price),
+							price: Number(selectedVariant.sale_price ?? selectedVariant.base_price),
 						}
 					: undefined,
 				quantity,
@@ -213,9 +214,9 @@ export const ProductDetailsClient = ({
 							<span className="text-4xl font-bold text-primary">
 								৳{activePrice}
 							</span>
-							{activeDiscount > 0 && activeComparePrice && (
+							{activeDiscount > 0 && activeSalePrice && (
 								<span className="text-xl text-muted-foreground line-through">
-									৳{activeComparePrice}
+									৳{activeBasePrice}
 								</span>
 							)}
 						</div>

@@ -6,6 +6,7 @@ import { Login } from "@/features/auth/Login";
 import { SetPassword } from "@/features/auth/SetPassword";
 import { CategoryList } from "@/features/categories/CategoryList";
 import { CouponList } from "@/features/coupons/CouponList";
+import { SaleList } from "@/features/sales/SaleList";
 import { VariantTypeList } from "@/features/variants/VariantTypeList";
 import { CustomerList } from "@/features/customers/CustomerList";
 import { ReviewList } from "@/features/reviews/ReviewList";
@@ -121,6 +122,14 @@ export const router = createBrowserRouter([
 				element: (
 					<PermissionGuard permission="manage_coupons">
 						<CouponList />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "sales",
+				element: (
+					<PermissionGuard permission="manage_sales">
+						<SaleList />
 					</PermissionGuard>
 				),
 			},

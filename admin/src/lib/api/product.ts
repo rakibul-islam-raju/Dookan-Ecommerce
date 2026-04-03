@@ -22,8 +22,7 @@ export interface CreateProductRequest {
 	description?: string | null;
 	short_description?: string | null;
 	category: string;
-	price: string;
-	compare_at_price?: string | null;
+	base_price: string;
 	cost_price?: string | null;
 	stock_quantity?: number;
 	low_stock_threshold?: number;
@@ -44,8 +43,7 @@ export interface ProductListItem extends BaseModel {
 	description: string;
 	short_description: string;
 	category: ProductCategory;
-	price: string;
-	compare_at_price?: string;
+	base_price: string;
 	cost_price?: string;
 	stock_quantity?: number;
 	low_stock_threshold?: number;
@@ -95,10 +93,8 @@ export interface ProductDetailsResponse {
 	description: string;
 	short_description: string;
 	category: ProductCategory;
-	price: string;
-	compare_at_price: string;
+	base_price: string;
 	cost_price: string;
-	discount_percentage: string;
 	stock_quantity: number;
 	is_low_stock: boolean;
 	is_in_stock: boolean;

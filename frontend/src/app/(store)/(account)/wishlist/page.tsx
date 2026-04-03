@@ -85,11 +85,11 @@ export default function WishlistPage() {
 								</p>
 								<div className="flex items-baseline gap-2 mt-2">
 									<span className="text-lg font-bold text-primary">
-										৳{product.price}
+										৳{product.sale_price ?? product.base_price}
 									</span>
-									{product.compare_at_price && (
+									{product.sale_price && (
 										<span className="text-sm text-muted-foreground line-through">
-											৳{product.compare_at_price}
+											৳{product.base_price}
 										</span>
 									)}
 								</div>

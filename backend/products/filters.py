@@ -13,13 +13,13 @@ class ProductFilter(filters.FilterSet):
     search = filters.CharFilter(method="filter_search")
 
     # price range
-    min_price = filters.NumberFilter(field_name="price", lookup_expr="gte")
-    max_price = filters.NumberFilter(field_name="price", lookup_expr="lte")
+    min_price = filters.NumberFilter(field_name="base_price", lookup_expr="gte")
+    max_price = filters.NumberFilter(field_name="base_price", lookup_expr="lte")
 
     # ordering
     ordering = filters.OrderingFilter(
         fields=(
-            ("price", "price"),
+            ("base_price", "price"),
             ("created_at", "created_at"),
         )
     )

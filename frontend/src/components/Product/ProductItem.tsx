@@ -24,13 +24,15 @@ export const ProductItem = ({
 	const {
 		name,
 		category,
-		price,
-		compare_at_price,
-		discount_percentage,
+		base_price,
+		sale_price,
+		sale_discount_percentage,
 		primary_image,
 		is_in_stock,
 		is_low_stock,
 	} = product;
+
+	const displayPrice = sale_price ?? base_price;
 
 	
 
@@ -60,9 +62,9 @@ export const ProductItem = ({
 
 				{/* Badges */}
 				<div className="absolute left-3 top-3 flex flex-col gap-2 z-10">
-					{discount_percentage && discount_percentage > 0 && (
+					{sale_discount_percentage > 0 && (
 						<Badge variant="destructive" className="font-bold shadow-sm">
-							-{discount_percentage}%
+							-{sale_discount_percentage}%
 						</Badge>
 					)}
 					{!is_in_stock ? (
@@ -130,16 +132,16 @@ export const ProductItem = ({
 
 				<div className="mt-auto pt-2 flex items-center justify-between border-t border-border/50">
 					<div className="flex flex-col">
-						{compare_at_price ? (
+						{sale_price ? (
 							<div className="flex items-baseline gap-2">
-								<span className="text-lg font-bold text-primary">৳{price}</span>
+								<span className="text-lg font-bold text-primary">৳{sale_price}</span>
 								<span className="text-sm text-muted-foreground line-through decoration-muted-foreground/50">
-									৳{compare_at_price}
+									৳{base_price}
 								</span>
 							</div>
 						) : (
 							<span className="text-lg font-bold text-foreground">
-								৳{price}
+								৳{displayPrice}
 							</span>
 						)}
 					</div>

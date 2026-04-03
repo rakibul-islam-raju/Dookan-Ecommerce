@@ -21,12 +21,12 @@ export interface IProductVariant {
 	id: string;
 	sku: string;
 	name: string;
-	price: string;
-	compare_at_price?: string;
+	base_price: string;
+	sale_price: string | null;
+	sale_discount_percentage: number;
 	stock_quantity: number;
 	is_in_stock: boolean;
 	is_low_stock: boolean;
-	discount_percentage: number;
 	display_order: number;
 	options: IProductVariantOption[];
 }
@@ -47,9 +47,10 @@ export interface IConsumerProductListItem {
 		name: string;
 		slug: string;
 	};
-	price: number;
-	compare_at_price?: number;
-	discount_percentage?: number;
+	base_price: number;
+	sale_price: number | null;
+	sale_discount_percentage: number;
+	sale_name?: string;
 	stock_quantity: number;
 	is_low_stock: boolean;
 	is_in_stock: boolean;
@@ -59,7 +60,7 @@ export interface IConsumerProductListItem {
 	is_active: boolean;
 	primary_image?: string;
 	has_variants: boolean;
-	min_variant_price?: string | null;
+	min_variant_base_price?: string | null;
 }
 
 export interface IConsumerProductDetail {
@@ -70,9 +71,10 @@ export interface IConsumerProductDetail {
 	description?: string;
 	short_description?: string;
 	category: ICategory;
-	price: string;
-	compare_at_price?: string;
-	discount_percentage: number;
+	base_price: string;
+	sale_price: string | null;
+	sale_discount_percentage: number;
+	sale_name?: string;
 	stock_quantity: number;
 	is_low_stock: boolean;
 	is_in_stock: boolean;

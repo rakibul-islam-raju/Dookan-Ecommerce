@@ -47,8 +47,7 @@ const productSchema = z
 			.optional()
 			.nullable(),
 		category: z.string().min(1, "Category is required"),
-		price: z.coerce.number().min(0, "Price is required"),
-		compare_at_price: z.coerce.number().optional(),
+		base_price: z.coerce.number().min(0.01, "Base price is required"),
 		cost_price: z.coerce.number().optional(),
 		stock_quantity: z.coerce.number().min(0, "Stock quantity is required"),
 		low_stock_threshold: z.coerce
@@ -65,32 +64,12 @@ const productSchema = z
 	})
 	.refine(
 		(data) => {
-			if (!data.compare_at_price) return true;
-			return data.price < data.compare_at_price;
-		},
-		{
-			path: ["price"],
-			message: "Selling price must be less than original price",
-		}
-	)
-	.refine(
-		(data) => {
 			if (!data.cost_price) return true;
-			return data.price > data.cost_price;
+			return data.base_price > data.cost_price;
 		},
 		{
-			path: ["price"],
-			message: "Selling price must be greater than cost price",
-		}
-	)
-	.refine(
-		(data) => {
-			if (!data.cost_price || !data.compare_at_price) return true;
-			return data.compare_at_price > data.cost_price;
-		},
-		{
-			path: ["compare_at_price"],
-			message: "Original price must be greater than cost price",
+			path: ["base_price"],
+			message: "Base price must be greater than cost price",
 		}
 	);
 
@@ -103,8 +82,7 @@ const productDefaultValues: ProductFormData = {
 	description: "",
 	short_description: "",
 	category: "",
-	compare_at_price: 0,
-	price: 0,
+	base_price: 0,
 	cost_price: 0,
 	stock_quantity: 0,
 	low_stock_threshold: 0,
@@ -156,8 +134,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 	) => {
 		const requestData: CreateProductRequest = {
 			...data,
-			price: data.price.toString(),
-			compare_at_price: data.compare_at_price?.toString() ?? null,
+			base_price: data.base_price.toString(),
 			cost_price: data.cost_price?.toString() ?? null,
 			weight: data.weight?.toString() ?? null,
 		};
@@ -208,10 +185,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 	};
 
 	const nameValue = form.watch("name");
-	const compareAtPriceValue = form.watch("compare_at_price");
-	const discountPrice = compareAtPriceValue
-		? compareAtPriceValue - form.watch("price")
-		: undefined;
 
 	useEffect(() => {
 		if (!isEditMode) {
@@ -263,58 +236,27 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 					<CardDescription>Manage your product pricing.</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField
 							name="cost_price"
 							label="Cost Price"
 							type="number"
 							placeholder="e.g., 100"
 							helpText="Your internal cost for this item. Not visible to customers."
-							required
 						/>
 						<TextField
-							name="compare_at_price"
-							label="Original Price"
+							name="base_price"
+							label="Base Price (MRP)"
 							type="number"
-							placeholder="e.g., 100"
-							helpText="The original price before discount. Shows a 'Sale' badge if higher than Selling Price."
-						/>
-						<TextField
-							name="price"
-							label="Selling Price"
-							type="number"
-							placeholder="e.g., 100"
-							helpText="The actual price customers will pay."
+							placeholder="e.g., 250"
+							helpText="The original/MRP price. Sale discounts are applied via the Sales module."
 							required
 						/>
 					</div>
-
-					{discountPrice && discountPrice > 0 && (
-						<div className="rounded-lg bg-green-50 border border-green-200 p-3">
-							<div className="flex items-center gap-3">
-								<div className="flex flex-col">
-									<span className="text-base font-medium text-green-700">
-										BDT {Number(form.watch("price")).toFixed(2)}
-									</span>
-								</div>
-								<div className="ml-auto flex gap-4 items-center">
-									<span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded">
-										{Math.round(
-											((Number(form.watch("compare_at_price")) -
-												Number(form.watch("price"))) /
-												Number(form.watch("compare_at_price"))) *
-												100
-										) || 0}
-										% OFF
-									</span>
-									<span className="text-xs text-green-700">{`Save: BDT ${(
-										Number(form.watch("compare_at_price")) -
-										Number(form.watch("price"))
-									).toFixed(2)}`}</span>
-								</div>
-							</div>
-						</div>
-					)}
+					<p className="text-xs text-muted-foreground">
+						To offer a sale discount on this product, create a sale in the{" "}
+						<a href="/sales" className="underline text-primary">Sales</a> section.
+					</p>
 				</CardContent>
 			</Card>
 

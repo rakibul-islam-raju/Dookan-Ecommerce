@@ -9,7 +9,8 @@ export type Permission =
 	| "manage_banners"
 	| "manage_announcements"
 	| "manage_settings"
-	| "manage_staff";
+	| "manage_staff"
+	| "manage_sales";
 
 export interface User {
 	id: string;

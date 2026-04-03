@@ -2,6 +2,7 @@
 
 import django.core.validators
 import uuid
+from decimal import Decimal
 from django.db import migrations, models
 
 
@@ -9,11 +10,13 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = []
+    dependencies = [
+        ("products", "0001_initial"),
+    ]
 
     operations = [
         migrations.CreateModel(
-            name="Coupon",
+            name="Sale",
             fields=[
                 (
                     "id",
@@ -27,7 +30,7 @@ class Migration(migrations.Migration):
                 ("is_active", models.BooleanField(default=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("code", models.CharField(db_index=True, max_length=50, unique=True)),
+                ("name", models.CharField(max_length=200)),
                 ("description", models.TextField(blank=True)),
                 (
                     "discount_type",
@@ -44,59 +47,57 @@ class Migration(migrations.Migration):
                     "discount_value",
                     models.DecimalField(
                         decimal_places=2,
+                        help_text="Percentage (0-100) or fixed amount",
                         max_digits=10,
-                        validators=[django.core.validators.MinValueValidator(0)],
+                        validators=[
+                            django.core.validators.MinValueValidator(Decimal("0.01"))
+                        ],
                     ),
                 ),
                 (
-                    "min_order_amount",
-                    models.DecimalField(
-                        decimal_places=2,
-                        default=0,
-                        help_text="Minimum order subtotal required to use this coupon",
-                        max_digits=10,
-                        validators=[django.core.validators.MinValueValidator(0)],
+                    "applies_to",
+                    models.CharField(
+                        choices=[
+                            ("all_products", "All Products"),
+                            ("specific_categories", "Specific Categories"),
+                            ("specific_products", "Specific Products"),
+                        ],
+                        default="specific_products",
+                        max_length=25,
                     ),
                 ),
-                (
-                    "max_discount_amount",
-                    models.DecimalField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="Maximum discount amount (for percentage coupons)",
-                        max_digits=10,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(0)],
-                    ),
-                ),
-                (
-                    "max_uses",
-                    models.PositiveIntegerField(
-                        blank=True,
-                        help_text="Maximum total uses. Leave blank for unlimited.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "max_uses_per_user",
-                    models.PositiveIntegerField(
-                        blank=True,
-                        help_text="Maximum uses per user. Leave blank for unlimited.",
-                        null=True,
-                    ),
-                ),
-                ("used_count", models.PositiveIntegerField(default=0)),
                 ("valid_from", models.DateTimeField()),
                 ("valid_until", models.DateTimeField()),
+                (
+                    "allow_coupon_stacking",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Allow coupon codes to be applied on top of this sale discount",
+                    ),
+                ),
+                (
+                    "categories",
+                    models.ManyToManyField(
+                        blank=True, related_name="sales", to="products.category"
+                    ),
+                ),
+                (
+                    "products",
+                    models.ManyToManyField(
+                        blank=True, related_name="sales", to="products.product"
+                    ),
+                ),
             ],
             options={
-                "db_table": "coupons",
+                "db_table": "sales",
                 "ordering": ["-created_at"],
                 "indexes": [
-                    models.Index(fields=["code"], name="coupons_code_94ae53_idx"),
                     models.Index(
-                        fields=["valid_from", "valid_until"],
-                        name="coupons_valid_f_012901_idx",
+                        fields=["is_active", "valid_from", "valid_until"],
+                        name="sales_is_acti_5f3f1b_idx",
+                    ),
+                    models.Index(
+                        fields=["applies_to"], name="sales_applies_106f06_idx"
                     ),
                 ],
             },

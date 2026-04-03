@@ -21,7 +21,7 @@ export async function generateMetadata({
 	try {
 		const product = await productServerApi.getProductBySlug(slug);
 
-		const price = parseFloat(product.price);
+		const price = parseFloat(product.sale_price ?? product.base_price);
 
 		const primaryImage =
 			product.images.find((img) => img.is_primary)?.image ||
@@ -137,7 +137,7 @@ export default async function ProductDetailsPage({ params }: ProductPageProps) {
 			"@type": "Offer",
 			url: `${store.url}/products/${product.slug}`,
 			priceCurrency: "BDT",
-			price: product.price,
+			price: product.sale_price ?? product.base_price,
 			priceValidUntil: futureDate.toISOString(),
 			availability:
 				product.is_in_stock === true

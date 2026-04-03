@@ -10,7 +10,8 @@ export interface CartItem {
 		id: string;
 		name: string;
 		slug: string;
-		price: number;
+		price: number;       // effective price (sale_price if on sale, else base_price)
+		base_price?: number; // original MRP — present only when item is on sale
 		primary_image?: string;
 	};
 	variant?: {

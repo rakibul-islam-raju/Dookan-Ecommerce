@@ -15,4 +15,5 @@ export const queryKeys = {
 	coupons: "coupons",
 	staff: "staff",
 	roles: "roles",
+	sales: "sales",
 } as const;

@@ -146,6 +146,19 @@ class OrderItem(BaseModel):
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    # Sale discount snapshot
+    sale_discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Per-unit sale discount applied at time of order",
+    )
+    sale_name = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Name of the sale that was active at time of order",
+    )
+
     class Meta:
         db_table = "order_items"
         indexes = [

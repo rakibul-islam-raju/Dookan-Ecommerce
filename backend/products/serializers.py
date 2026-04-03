@@ -211,8 +211,7 @@ class ProductVariantSerializer(serializers.ModelSerializer):
             "product",
             "sku",
             "name",
-            "price",
-            "compare_at_price",
+            "base_price",
             "cost_price",
             "stock_quantity",
             "low_stock_threshold",
@@ -220,7 +219,6 @@ class ProductVariantSerializer(serializers.ModelSerializer):
             "is_active",
             "is_in_stock",
             "is_low_stock",
-            "discount_percentage",
             "display_order",
             "options",
         ]
@@ -238,8 +236,7 @@ class ProductVariantCreateSerializer(serializers.ModelSerializer):
             "id",
             "sku",
             "name",
-            "price",
-            "compare_at_price",
+            "base_price",
             "cost_price",
             "stock_quantity",
             "low_stock_threshold",
@@ -284,6 +281,8 @@ class ConsumerProductVariantSerializer(serializers.ModelSerializer):
     """Lightweight variant serializer for consumer product detail"""
 
     options = ProductVariantOptionSerializer(many=True, read_only=True)
+    sale_price = serializers.SerializerMethodField()
+    sale_discount_percentage = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductVariant
@@ -291,15 +290,34 @@ class ConsumerProductVariantSerializer(serializers.ModelSerializer):
             "id",
             "sku",
             "name",
-            "price",
-            "compare_at_price",
+            "base_price",
+            "sale_price",
+            "sale_discount_percentage",
             "stock_quantity",
             "is_in_stock",
             "is_low_stock",
-            "discount_percentage",
             "display_order",
             "options",
         ]
+
+    def get_sale_price(self, obj):
+        # Variants inherit the parent product's sale from context
+        sale_prices = self.context.get("sale_prices", {})
+        product_id = str(obj.product_id)
+        if product_id in sale_prices:
+            sale, _, _ = sale_prices[product_id]
+            return str(sale.calculate_sale_price(obj.base_price))
+        return None
+
+    def get_sale_discount_percentage(self, obj):
+        sale_prices = self.context.get("sale_prices", {})
+        product_id = str(obj.product_id)
+        if product_id in sale_prices:
+            sale, _, _ = sale_prices[product_id]
+            sale_price = sale.calculate_sale_price(obj.base_price)
+            if obj.base_price > 0:
+                return int(((obj.base_price - sale_price) / obj.base_price) * 100)
+        return 0
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
@@ -313,8 +331,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             "description",
             "short_description",
             "category",
-            "price",
-            "compare_at_price",
+            "base_price",
             "cost_price",
             "stock_quantity",
             "low_stock_threshold",
@@ -342,9 +359,7 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             "sku",
             "short_description",
             "category",
-            "price",
-            "compare_at_price",
-            "discount_percentage",
+            "base_price",
             "cost_price",
             "stock_quantity",
             "unit",
@@ -368,7 +383,10 @@ class ConsumerProductListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
     category = ProductCategorySerializer(read_only=True)
     has_variants = serializers.SerializerMethodField()
-    min_variant_price = serializers.SerializerMethodField()
+    min_variant_base_price = serializers.SerializerMethodField()
+    sale_price = serializers.SerializerMethodField()
+    sale_discount_percentage = serializers.SerializerMethodField()
+    sale_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -378,9 +396,10 @@ class ConsumerProductListSerializer(serializers.ModelSerializer):
             "slug",
             "short_description",
             "category",
-            "price",
-            "compare_at_price",
-            "discount_percentage",
+            "base_price",
+            "sale_price",
+            "sale_discount_percentage",
+            "sale_name",
             "stock_quantity",
             "is_low_stock",
             "is_in_stock",
@@ -390,15 +409,31 @@ class ConsumerProductListSerializer(serializers.ModelSerializer):
             "is_active",
             "primary_image",
             "has_variants",
-            "min_variant_price",
+            "min_variant_base_price",
         ]
+
+    def _get_sale_data(self, obj):
+        sale_prices = self.context.get("sale_prices", {})
+        return sale_prices.get(str(obj.id))
+
+    def get_sale_price(self, obj):
+        data = self._get_sale_data(obj)
+        return str(data[1]) if data else None
+
+    def get_sale_discount_percentage(self, obj):
+        data = self._get_sale_data(obj)
+        return data[2] if data else 0
+
+    def get_sale_name(self, obj):
+        data = self._get_sale_data(obj)
+        return data[0].name if data else None
 
     def get_has_variants(self, obj):
         return obj.variants.filter(is_active=True).exists()
 
-    def get_min_variant_price(self, obj):
-        variant = obj.variants.filter(is_active=True).order_by("price").first()
-        return str(variant.price) if variant else None
+    def get_min_variant_base_price(self, obj):
+        variant = obj.variants.filter(is_active=True).order_by("base_price").first()
+        return str(variant.base_price) if variant else None
 
     def get_primary_image(self, obj):
         image = obj.images.filter(is_primary=True).order_by("display_order").first()
@@ -428,6 +463,10 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
     variant_types = serializers.SerializerMethodField()
     has_variants = serializers.SerializerMethodField()
 
+    sale_price = serializers.SerializerMethodField()
+    sale_discount_percentage = serializers.SerializerMethodField()
+    sale_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = [
@@ -438,9 +477,10 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
             "description",
             "short_description",
             "category",
-            "price",
-            "compare_at_price",
-            "discount_percentage",
+            "base_price",
+            "sale_price",
+            "sale_discount_percentage",
+            "sale_name",
             "stock_quantity",
             "is_low_stock",
             "is_in_stock",
@@ -458,6 +498,22 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
             "variant_types",
         ]
 
+    def _get_sale_data(self, obj):
+        sale_prices = self.context.get("sale_prices", {})
+        return sale_prices.get(str(obj.id))
+
+    def get_sale_price(self, obj):
+        data = self._get_sale_data(obj)
+        return str(data[1]) if data else None
+
+    def get_sale_discount_percentage(self, obj):
+        data = self._get_sale_data(obj)
+        return data[2] if data else 0
+
+    def get_sale_name(self, obj):
+        data = self._get_sale_data(obj)
+        return data[0].name if data else None
+
     def get_has_variants(self, obj):
         return obj.variants.filter(is_active=True).exists()
 
@@ -465,7 +521,10 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
         active_variants = obj.variants.filter(is_active=True).prefetch_related(
             "options__variant_type"
         )
-        return ConsumerProductVariantSerializer(active_variants, many=True).data
+        # Pass sale_prices context so variants can compute their sale prices
+        return ConsumerProductVariantSerializer(
+            active_variants, many=True, context=self.context
+        ).data
 
     def get_variant_types(self, obj):
         """Return the variant types used by this product's variants"""

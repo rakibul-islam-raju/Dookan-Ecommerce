@@ -176,9 +176,6 @@ export default function CheckoutPage() {
 
 			// For guest users, show success modal instead of redirecting to orders page
 			if (!isAuthenticated) {
-				console.log("result ==>", result);
-				console.log("result.order_number ==>", result.order_number);
-				console.log("result.id ==>", result.id);
 				setGuestOrderNumber(result.order_number);
 				setShowGuestSuccessModal(true);
 			} else {
@@ -186,7 +183,15 @@ export default function CheckoutPage() {
 				router.push(`/orders/${result.id}`);
 			}
 		} catch (error) {
-			// Error is handled by the mutation
+			const axiosErr = error as {
+				response?: { data?: { coupon_code?: string[] } };
+			};
+			const couponStakingError = axiosErr?.response?.data?.coupon_code?.[0];
+			if (couponStakingError) {
+				setCouponError(couponStakingError);
+				setAppliedCoupon(null);
+				setCouponCode("");
+			}
 			console.error("Order creation failed:", error);
 		}
 	};

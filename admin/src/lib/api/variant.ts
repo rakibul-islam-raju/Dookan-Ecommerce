@@ -38,8 +38,7 @@ export interface ProductVariant {
 	product: string;
 	sku: string;
 	name: string;
-	price: string;
-	compare_at_price?: string | null;
+	base_price: string;
 	cost_price?: string | null;
 	stock_quantity: number;
 	low_stock_threshold: number;
@@ -47,7 +46,6 @@ export interface ProductVariant {
 	is_active: boolean;
 	is_in_stock: boolean;
 	is_low_stock: boolean;
-	discount_percentage: number;
 	display_order: number;
 	options: ProductVariantOption[];
 }
@@ -55,8 +53,7 @@ export interface ProductVariant {
 export interface CreateProductVariantRequest {
 	sku: string;
 	name?: string;
-	price: string;
-	compare_at_price?: string | null;
+	base_price: string;
 	cost_price?: string | null;
 	stock_quantity?: number;
 	low_stock_threshold?: number;

@@ -83,7 +83,9 @@ class ProductCreateListAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         if self.request.user.is_staff:
             return Product.objects.all().prefetch_related("images", "variants")
-        return Product.objects.filter(is_active=True).prefetch_related("images", "variants")
+        return Product.objects.filter(is_active=True).prefetch_related(
+            "images", "variants", "category__parent"
+        )
 
     def get_permissions(self):
         if self.request.method == "GET":
@@ -103,15 +105,31 @@ class ProductCreateListAPIView(generics.ListCreateAPIView):
             return ProductCreateSerializer
         return ProductCreateSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.request.method == "GET" and not getattr(self.request.user, "is_staff", False):
+            from sales.utils import get_sale_prices_bulk
+            context["sale_prices"] = get_sale_prices_bulk(self.get_queryset())
+        return context
+
 
 class ProductDetailsAPIView(generics.RetrieveAPIView):
     queryset = Product.objects.filter(is_active=True).prefetch_related(
-        "images", "variants__options__variant_type"
+        "images", "variants__options__variant_type", "category__parent"
     )
     serializer_class = ConsumerProductDetailsSerializer
     permission_classes = [AllowAny]
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        from sales.utils import get_sale_prices_bulk
+        product = self.get_object()
+        context["sale_prices"] = get_sale_prices_bulk(
+            Product.objects.filter(id=product.id).select_related("category__parent")
+        )
+        return context
 
 
 class ProductRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):

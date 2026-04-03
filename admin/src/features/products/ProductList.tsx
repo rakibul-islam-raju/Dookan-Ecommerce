@@ -69,10 +69,10 @@ export function ProductList() {
 			),
 		},
 		{
-			key: "price",
-			header: "Price",
+			key: "base_price",
+			header: "Base Price",
 			render: (product) => (
-				<span className="font-medium">৳ {product.price}</span>
+				<span className="font-medium">৳ {product.base_price}</span>
 			),
 			className: "text-right",
 		},

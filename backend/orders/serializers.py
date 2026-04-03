@@ -57,6 +57,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "unit_price",
             "quantity",
             "total_price",
+            "sale_discount_amount",
+            "sale_name",
             "product_details",
         ]
         read_only_fields = [
@@ -65,6 +67,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "product_sku",
             "unit_price",
             "total_price",
+            "sale_discount_amount",
+            "sale_name",
         ]
 
     def get_product_details(self, obj):
@@ -175,17 +179,29 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         # Generate unique order number
         order_number = self._generate_order_number()
 
-        # Calculate totals
+        # Calculate totals — apply sale prices per item
+        from sales.utils import get_best_sale_for_product, get_active_sales
+
         subtotal = Decimal("0.00")
         order_items = []
+        has_non_stackable_sale = False
+        active_sales = list(get_active_sales())
 
         for item_data in items_data:
-            product = Product.objects.get(id=item_data["product_id"])
+            product = Product.objects.select_related("category__parent").get(
+                id=item_data["product_id"]
+            )
             quantity = item_data["quantity"]
-            unit_price = product.price
+
+            sale, sale_price = get_best_sale_for_product(product, active_sales)
+            sale_discount_per_unit = product.base_price - sale_price
+            unit_price = sale_price
             total_price = unit_price * quantity
 
             subtotal += total_price
+
+            if sale and not sale.allow_coupon_stacking:
+                has_non_stackable_sale = True
 
             order_items.append(
                 {
@@ -195,13 +211,24 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     "unit_price": unit_price,
                     "quantity": quantity,
                     "total_price": total_price,
+                    "sale_discount_amount": sale_discount_per_unit,
+                    "sale_name": sale.name if sale else "",
                 }
             )
 
-        # Apply coupon discount
+        # Apply coupon discount (only if no non-stackable sale blocks it)
         coupon = None
         discount_amount = Decimal("0.00")
         if coupon_code:
+            if has_non_stackable_sale:
+                raise serializers.ValidationError(
+                    {
+                        "coupon_code": (
+                            "A coupon cannot be applied to orders containing items "
+                            "with a non-stackable sale discount."
+                        )
+                    }
+                )
             try:
                 coupon = Coupon.objects.get(code=coupon_code)
                 if coupon.is_valid:

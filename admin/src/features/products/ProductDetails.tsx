@@ -331,42 +331,17 @@ export const ProductDetails = () => {
 									</p>
 								</div>
 							</div>
-							{/* base pricing */}
+							{/* base price (MRP) */}
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Base Original Price
+									Base Price (MRP)
 								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
 									<p className="font-medium">
-										BDT {Number(product.compare_at_price ?? 0).toFixed(2)}
+										BDT {Number(product.base_price).toFixed(2)}
 									</p>
 								</div>
 							</div>
-
-							{/* selling price */}
-							<div>
-								<p className="text-sm text-muted-foreground mb-1.5">
-									Selling Price
-								</p>
-								<div className="px-3 py-2 bg-muted/50 rounded-md">
-									<p className="font-medium">
-										BDT {Number(product.price).toFixed(2)}
-									</p>
-								</div>
-							</div>
-
-							{product.discount_percentage && (
-								<div>
-									<p className="text-sm text-muted-foreground mb-1.5">
-										Discount Percentage (%)
-									</p>
-									<div className="px-3 py-2 bg-muted/50 rounded-md">
-										<p className="font-medium">
-											{product.discount_percentage}%
-										</p>
-									</div>
-								</div>
-							)}
 						</CardContent>
 					</Card>
 				</div>

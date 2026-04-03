@@ -183,9 +183,16 @@ export default function CartPage() {
 														{item.variant.name}
 													</p>
 												)}
-												<p className="text-muted-foreground mt-1">
-													৳{item.variant ? item.variant.price : item.product.price}
-												</p>
+												<div className="flex items-baseline gap-1.5 mt-1">
+													<span className="text-muted-foreground">
+														৳{item.variant ? item.variant.price : item.product.price}
+													</span>
+													{!item.variant && item.product.base_price && (
+														<span className="text-xs text-muted-foreground line-through">
+															৳{item.product.base_price}
+														</span>
+													)}
+												</div>
 											</div>
 											<div className="text-right font-medium hidden sm:block">
 												৳{item.subtotal}

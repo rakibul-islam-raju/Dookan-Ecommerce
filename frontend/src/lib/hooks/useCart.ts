@@ -85,7 +85,9 @@ const useCartStore = create<CartStore>()(
 					return existingKey === itemKey;
 				});
 
-				const effectivePrice = variant ? variant.price : Number(product.price);
+				const effectivePrice = variant
+					? variant.price
+					: Number(product.sale_price ?? product.base_price ?? product.price);
 				let newItems: CartItem[];
 
 				if (existingItem) {
@@ -104,13 +106,19 @@ const useCartStore = create<CartStore>()(
 					});
 				} else {
 					// Add new item with full product details
+					const basePrice = product.base_price
+						? Number(product.base_price)
+						: undefined;
 					const newItem: CartItem = {
 						id: `${itemKey}-${Date.now()}`, // Unique ID for cart item
 						product: {
 							id: product.id,
 							name: product.name,
 							slug: product.slug,
-							price: Number(product.price),
+							price: effectivePrice,
+							...(basePrice && basePrice !== effectivePrice
+								? { base_price: basePrice }
+								: {}),
 							primary_image: product.primary_image,
 						},
 						variant: variant || null,

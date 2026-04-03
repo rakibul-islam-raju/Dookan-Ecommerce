@@ -17,9 +17,9 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug", "price", "stock_quantity", "is_active"]
-    list_filter = ["name", "slug", "price", "stock_quantity", "is_active"]
-    search_fields = ["name", "slug", "price", "stock_quantity", "is_active"]
+    list_display = ["name", "slug", "base_price", "stock_quantity", "is_active"]
+    list_filter = ["name", "slug", "base_price", "stock_quantity", "is_active"]
+    search_fields = ["name", "slug", "stock_quantity"]
     prepopulated_fields = {"slug": ("name",)}
 
     inlines = [ProductImageInline]
@@ -39,6 +39,6 @@ class VariantTypeAdmin(admin.ModelAdmin):
 
 @admin.register(ProductVariant)
 class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ["product", "name", "sku", "price", "stock_quantity", "is_active"]
+    list_display = ["product", "name", "sku", "base_price", "stock_quantity", "is_active"]
     list_filter = ["is_active", "product"]
     search_fields = ["name", "sku", "product__name"]

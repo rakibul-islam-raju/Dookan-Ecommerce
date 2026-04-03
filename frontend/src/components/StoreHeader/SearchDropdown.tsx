@@ -96,10 +96,12 @@ export function SearchDropdown({
 									</p>
 								</div>
 								<div className="flex-shrink-0">
-									<p className="text-sm font-semibold">৳{product.price}</p>
-									{product.compare_at_price && (
+									<p className="text-sm font-semibold">
+										৳{product.sale_price ?? product.base_price}
+									</p>
+									{product.sale_price && (
 										<p className="text-xs text-muted-foreground line-through">
-											৳{product.compare_at_price}
+											৳{product.base_price}
 										</p>
 									)}
 								</div>

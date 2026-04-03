@@ -11,6 +11,7 @@ import {
 	Megaphone,
 	MessageSquareText,
 	Package,
+	Percent,
 	Settings,
 	ShieldCheck,
 	ShoppingCart,
@@ -38,6 +39,7 @@ const sidebarItems: SidebarItem[] = [
 	{ icon: SwatchBook, label: "Variant Types", href: "/variant-types", permission: "manage_products" },
 	{ icon: MessageSquareText, label: "Reviews", href: "/reviews", permission: "manage_reviews" },
 	{ icon: Tag, label: "Coupons", href: "/coupons", permission: "manage_coupons" },
+	{ icon: Percent, label: "Sales", href: "/sales", permission: "manage_sales" },
 ];
 
 const storeItems: SidebarItem[] = [

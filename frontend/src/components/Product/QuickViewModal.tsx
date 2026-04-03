@@ -41,9 +41,9 @@ export const QuickViewModal = ({
 	const {
 		name,
 		category,
-		price,
-		compare_at_price,
-		discount_percentage,
+		base_price,
+		sale_price,
+		sale_discount_percentage,
 		primary_image,
 		short_description,
 		is_in_stock,
@@ -51,6 +51,8 @@ export const QuickViewModal = ({
 		unit_value,
 		is_low_stock,
 	} = product;
+
+	const displayPrice = sale_price ?? base_price;
 
 	const imageUrl = primary_image
 		? primary_image.startsWith("http")
@@ -118,21 +120,21 @@ export const QuickViewModal = ({
 						</div>
 
 						<div className="mb-6 flex items-baseline gap-3">
-							{discount_percentage && discount_percentage > 0 ? (
+							{sale_price && sale_discount_percentage > 0 ? (
 								<>
 									<span className="text-3xl font-bold text-primary">
-										${price}
+										৳{sale_price}
 									</span>
 									<span className="text-xl text-zinc-400 line-through">
-										${compare_at_price}
+										৳{base_price}
 									</span>
 									<span className="text-sm font-medium text-red-500">
-										{discount_percentage}% OFF
+										{sale_discount_percentage}% OFF
 									</span>
 								</>
 							) : (
 								<span className="text-3xl font-bold text-foreground">
-									${price}
+									৳{displayPrice}
 								</span>
 							)}
 						</div>

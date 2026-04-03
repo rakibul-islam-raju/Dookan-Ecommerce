@@ -68,18 +68,11 @@ class Product(BaseModel):
     )
 
     # Pricing
-    price = models.DecimalField(
+    base_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
-        help_text="Product price",
-    )
-    compare_at_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        help_text="Original price for showing discount",
+        help_text="Base price (MRP) before any sale discounts",
     )
     cost_price = models.DecimalField(
         max_digits=10,
@@ -122,7 +115,7 @@ class Product(BaseModel):
             models.Index(fields=["sku"]),
             models.Index(fields=["category", "is_active"]),
             models.Index(fields=["is_featured", "is_active"]),
-            models.Index(fields=["price"]),
+            models.Index(fields=["base_price"]),
         ]
 
     def __str__(self):
@@ -149,13 +142,6 @@ class Product(BaseModel):
             return False
         return 0 < self.stock_quantity <= self.low_stock_threshold
 
-    @property
-    def discount_percentage(self):
-        if self.compare_at_price and self.compare_at_price > self.price:
-            return int(
-                ((self.compare_at_price - self.price) / self.compare_at_price) * 100
-            )
-        return 0
 
 
 class ProductImage(BaseModel):
@@ -256,13 +242,11 @@ class ProductVariant(BaseModel):
     )
 
     # Pricing
-    price = models.DecimalField(
+    base_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
-    )
-    compare_at_price = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True
+        help_text="Base price (MRP) before any sale discounts",
     )
     cost_price = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True
@@ -300,14 +284,6 @@ class ProductVariant(BaseModel):
     @property
     def is_low_stock(self):
         return 0 < self.stock_quantity <= self.low_stock_threshold
-
-    @property
-    def discount_percentage(self):
-        if self.compare_at_price and self.compare_at_price > self.price:
-            return int(
-                ((self.compare_at_price - self.price) / self.compare_at_price) * 100
-            )
-        return 0
 
     def save(self, *args, **kwargs):
         # Auto-generate name from options if not provided
