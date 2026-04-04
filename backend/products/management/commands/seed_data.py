@@ -428,9 +428,11 @@ class Command(BaseCommand):
 
     def _seed_products(self):
         created = 0
+        repaired_names = 0
         for prod_data in PRODUCTS:
             category = Category.objects.get(name=prod_data["category"])
             defaults = {
+                "name": prod_data["name"],
                 "slug": slugify(prod_data["name"]),
                 "description": prod_data.get("description", ""),
                 "short_description": prod_data.get("short_description", ""),
@@ -441,13 +443,23 @@ class Command(BaseCommand):
                 "unit_value": prod_data["unit_value"],
                 "is_featured": prod_data.get("is_featured", False),
             }
-            _, was_created = Product.objects.get_or_create(
+            product, was_created = Product.objects.get_or_create(
                 sku=prod_data["sku"],
                 defaults=defaults,
             )
             if was_created:
                 created += 1
-        self.stdout.write(f"  Products: {created} created, {len(PRODUCTS) - created} already existed")
+            elif not (product.name or "").strip():
+                # Backfill products created previously without a name.
+                product.name = prod_data["name"]
+                if not product.slug:
+                    product.slug = slugify(prod_data["name"])
+                product.save(update_fields=["name", "slug", "updated_at"])
+                repaired_names += 1
+        self.stdout.write(
+            f"  Products: {created} created, {len(PRODUCTS) - created} already existed"
+            f", {repaired_names} repaired names"
+        )
 
     def _seed_variant_types(self):
         created_types = 0

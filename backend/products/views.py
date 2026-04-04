@@ -44,12 +44,19 @@ class CategoryCreateListAPIView(generics.ListCreateAPIView):
     filterset_fields = ["is_active", "parent"]
 
     def get_queryset(self):
-        qs = Category.objects.all() if self.request.user.is_staff else Category.objects.filter(is_active=True)
+        qs = (
+            Category.objects.all()
+            if self.request.user.is_staff
+            else Category.objects.filter(is_active=True)
+        )
         qs = qs.select_related("parent").prefetch_related("children")
 
         # Allow filtering for top-level categories (parent=null)
         if "parent__isnull" in self.request.query_params:
-            is_null = self.request.query_params["parent__isnull"].lower() in ("true", "1")
+            is_null = self.request.query_params["parent__isnull"].lower() in (
+                "true",
+                "1",
+            )
             qs = qs.filter(parent__isnull=is_null)
 
         return qs
@@ -68,7 +75,9 @@ class CategoryCreateListAPIView(generics.ListCreateAPIView):
 
 
 class CategoryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.select_related("parent").prefetch_related("children").all()
+    queryset = (
+        Category.objects.select_related("parent").prefetch_related("children").all()
+    )
     permission_classes = [HasModulePermission("manage_categories")]
 
     def get_serializer_class(self):
@@ -95,8 +104,10 @@ class ProductCreateListAPIView(generics.ListCreateAPIView):
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
+        # if requested user is admin
         if self.request.method == "GET" and self.request.user.is_staff:
             return VendorProductListSerializer
+        # if requested user is not admin or not authenticated, return consumer serializer
         elif self.request.method == "GET" and (
             not self.request.user.is_staff or not self.request.user.is_authenticated
         ):
@@ -107,8 +118,11 @@ class ProductCreateListAPIView(generics.ListCreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        if self.request.method == "GET" and not getattr(self.request.user, "is_staff", False):
+        if self.request.method == "GET" and not getattr(
+            self.request.user, "is_staff", False
+        ):
             from sales.utils import get_sale_prices_bulk
+
             context["sale_prices"] = get_sale_prices_bulk(self.get_queryset())
         return context
 
@@ -125,6 +139,7 @@ class ProductDetailsAPIView(generics.RetrieveAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         from sales.utils import get_sale_prices_bulk
+
         product = self.get_object()
         context["sale_prices"] = get_sale_prices_bulk(
             Product.objects.filter(id=product.id).select_related("category__parent")
