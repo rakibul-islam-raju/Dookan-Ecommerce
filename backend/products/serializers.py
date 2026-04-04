@@ -93,6 +93,19 @@ class CategoryReorderSerializer(serializers.Serializer):
         return value
 
 
+class ProductBulkStatusSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+    )
+    is_active = serializers.BooleanField()
+
+    def validate_ids(self, value):
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError("Product IDs must be unique.")
+        return value
+
+
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category

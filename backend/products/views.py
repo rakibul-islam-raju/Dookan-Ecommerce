@@ -23,6 +23,7 @@ from products.serializers import (
     CategorySerializer,
     CategoryCreateUpdateSerializer,
     CategoryReorderSerializer,
+    ProductBulkStatusSerializer,
     ProductCreateSerializer,
     VendorProductListSerializer,
     ConsumerProductListSerializer,
@@ -205,6 +206,34 @@ class ProductRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
         else:
             permission_classes = [HasModulePermission("manage_products")]
         return [permission() for permission in permission_classes]
+
+
+class ProductBulkStatusUpdateAPIView(APIView):
+    permission_classes = [HasModulePermission("manage_products")]
+
+    def patch(self, request):
+        serializer = ProductBulkStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product_ids = serializer.validated_data["ids"]
+        is_active = serializer.validated_data["is_active"]
+
+        products = Product.objects.filter(id__in=product_ids)
+        if products.count() != len(product_ids):
+            return Response(
+                {"detail": "One or more products were not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        updated_count = products.update(is_active=is_active)
+
+        return Response(
+            {
+                "message": f"{updated_count} product(s) updated successfully.",
+                "updated_count": updated_count,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class ProductImageListCreateAPIView(generics.ListCreateAPIView):

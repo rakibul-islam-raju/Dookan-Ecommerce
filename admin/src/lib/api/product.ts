@@ -5,7 +5,7 @@ import type {
 } from "@/@types/Common.type";
 import type { ProductVariant } from "./variant";
 import { queryKeys } from "@/constants/queryKeys";
-import { queryOptions, useMutation } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryClient } from "../react-query";
 import { clientApi } from "./axios";
 
@@ -118,6 +118,11 @@ export interface ProductImageUploadRequest {
 	display_order: number;
 }
 
+export interface ProductBulkStatusResponse {
+	message: string;
+	updated_count: number;
+}
+
 export const productApi = {
 	async list(
 		params: ProductFilter
@@ -155,6 +160,16 @@ export const productApi = {
 	},
 	async delete(id: string): Promise<void> {
 		await clientApi.delete<void>(`/products/${id}/`);
+	},
+	async updateBulkStatus(
+		ids: string[],
+		is_active: boolean
+	): Promise<ProductBulkStatusResponse> {
+		const { data } = await clientApi.patch<ProductBulkStatusResponse>(
+			"/products/bulk-status/",
+			{ ids, is_active }
+		);
+		return data;
 	},
 	async uploadImages(
 		productId: string,
@@ -230,6 +245,23 @@ export const useDeleteProduct = () => {
 		mutationFn: (id: string) => productApi.delete(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [queryKeys.products] });
+		},
+	});
+};
+
+export const useBulkUpdateProductStatus = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: ({
+			ids,
+			is_active,
+		}: {
+			ids: string[];
+			is_active: boolean;
+		}) => productApi.updateBulkStatus(ids, is_active),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [queryKeys.products] });
+			queryClient.invalidateQueries({ queryKey: [queryKeys.productDetails] });
 		},
 	});
 };

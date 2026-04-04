@@ -3,18 +3,21 @@ import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { pagination } from "@/config";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilterParams } from "@/hooks/useFilterParams";
 import {
 	getProducts,
+	useBulkUpdateProductStatus,
 	type ProductFilter,
 	type ProductListItem,
 } from "@/lib/api/product";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { ProductFilterForm } from "./components/ProductFilterForm";
 
 const initialParams: ProductFilter = {
@@ -33,6 +36,7 @@ export function ProductList() {
 	const debouncedValue = useDebouncedValue(searchQuery);
 
 	const [currentPage, setCurrentPage] = useState(1);
+	const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
 	const { data, isFetching } = useQuery(
 		getProducts({
@@ -41,8 +45,70 @@ export function ProductList() {
 			offset: (currentPage - 1) * pagination.limit,
 		})
 	);
+	const bulkStatusMutation = useBulkUpdateProductStatus();
+	const products = data?.results || [];
+	const pageProductIds = products.map((product) => product.id);
+	const selectedOnPageCount = pageProductIds.filter((id) =>
+		selectedProductIds.includes(id)
+	).length;
+	const allOnPageSelected =
+		pageProductIds.length > 0 && selectedOnPageCount === pageProductIds.length;
+	const someOnPageSelected =
+		selectedOnPageCount > 0 && selectedOnPageCount < pageProductIds.length;
+
+	const toggleProductSelection = (productId: string, checked: boolean) => {
+		setSelectedProductIds((prev) =>
+			checked ? [...new Set([...prev, productId])] : prev.filter((id) => id !== productId)
+		);
+	};
+
+	const toggleSelectAllOnPage = (checked: boolean) => {
+		setSelectedProductIds((prev) => {
+			if (checked) {
+				return [...new Set([...prev, ...pageProductIds])];
+			}
+			return prev.filter((id) => !pageProductIds.includes(id));
+		});
+	};
+
+	const clearSelection = () => {
+		setSelectedProductIds([]);
+	};
+
+	const handleBulkStatusUpdate = (is_active: boolean) => {
+		if (selectedProductIds.length === 0) return;
+
+		bulkStatusMutation.mutate(
+			{ ids: selectedProductIds, is_active },
+			{
+				onSuccess: (response) => {
+					toast.success(response.message);
+					clearSelection();
+				},
+			}
+		);
+	};
 
 	const columns: Column<ProductListItem>[] = [
+		{
+			key: "select",
+			header: "",
+			render: (product) => (
+				<div
+					className="flex items-center justify-center"
+					onClick={(event) => event.stopPropagation()}
+				>
+					<Checkbox
+						checked={selectedProductIds.includes(product.id)}
+						onCheckedChange={(checked) =>
+							toggleProductSelection(product.id, checked === true)
+						}
+						aria-label={`Select ${product.name}`}
+					/>
+				</div>
+			),
+			className: "w-[44px] text-center",
+		},
 		{
 			key: "name",
 			header: "Product Name",
@@ -95,6 +161,7 @@ export function ProductList() {
 			...filter,
 			offset: 0,
 		});
+		clearSelection();
 		setCurrentPage(1);
 		setIsFilterOpen(false);
 	};
@@ -102,13 +169,13 @@ export function ProductList() {
 	const handleResetFilters = () => {
 		resetParams();
 		setSearchQuery("");
+		clearSelection();
 		setCurrentPage(1);
 		setIsFilterOpen(false);
 	};
 
 	// Calculate pagination
 	const totalPages = data ? Math.ceil(data.count / pagination.limit) : 0;
-	const products = data?.results || [];
 
 	return (
 		<div className="space-y-6">
@@ -130,7 +197,10 @@ export function ProductList() {
 			<div className="flex items-center gap-4">
 				<SearchBar
 					value={searchQuery}
-					onChange={(value) => setSearchQuery(value)}
+					onChange={(value) => {
+						setSearchQuery(value);
+						clearSelection();
+					}}
 					placeholder="Search products by name, SKU, or category..."
 					className="flex-1"
 				/>
@@ -144,6 +214,52 @@ export function ProductList() {
 				</FilterDrawer>
 			</div>
 
+			<div className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+				<div className="flex items-center gap-3">
+					<Checkbox
+						checked={
+							allOnPageSelected ? true : someOnPageSelected ? "indeterminate" : false
+						}
+						onCheckedChange={(checked) => toggleSelectAllOnPage(checked === true)}
+						aria-label="Select all products on this page"
+					/>
+					<p className="text-sm text-muted-foreground">
+						{selectedProductIds.length > 0
+							? `${selectedProductIds.length} product(s) selected`
+							: "Select products to apply a bulk status update"}
+					</p>
+				</div>
+				<div className="flex flex-wrap items-center gap-2">
+					<Button
+						variant="default"
+						disabled={
+							selectedProductIds.length === 0 || bulkStatusMutation.isPending
+						}
+						onClick={() => handleBulkStatusUpdate(true)}
+					>
+						<Plus className="mr-2 h-4 w-4" />
+						Mark Active
+					</Button>
+					<Button
+						variant="outline"
+						disabled={
+							selectedProductIds.length === 0 || bulkStatusMutation.isPending
+						}
+						onClick={() => handleBulkStatusUpdate(false)}
+					>
+						<Minus className="mr-2 h-4 w-4" />
+						Mark Inactive
+					</Button>
+					<Button
+						variant="ghost"
+						disabled={selectedProductIds.length === 0}
+						onClick={clearSelection}
+					>
+						Clear Selection
+					</Button>
+				</div>
+			</div>
+
 			{/* Products Table */}
 			<AppTable
 				data={products}
@@ -153,7 +269,10 @@ export function ProductList() {
 				pagination={{
 					currentPage,
 					totalPages,
-					onPageChange: setCurrentPage,
+					onPageChange: (page) => {
+						clearSelection();
+						setCurrentPage(page);
+					},
 					pageSize: pagination.limit,
 				}}
 			/>

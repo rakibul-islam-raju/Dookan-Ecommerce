@@ -4,6 +4,7 @@ from .views import (
     CategoryCreateListAPIView,
     CategoryReorderAPIView,
     CategoryRetrieveUpdateDestroyAPIView,
+    ProductBulkStatusUpdateAPIView,
     ProductCreateListAPIView,
     ProductDetailsAPIView,
     ProductRetrieveUpdateDestroyAPIView,
@@ -39,6 +40,11 @@ urlpatterns = [
         name="category-detail",
     ),
     path("", ProductCreateListAPIView.as_view(), name="product-list-create"),
+    path(
+        "bulk-status/",
+        ProductBulkStatusUpdateAPIView.as_view(),
+        name="product-bulk-status",
+    ),
     path(
         "images/<str:pk>/",
         ProductImageDestroyAPIView.as_view(),
