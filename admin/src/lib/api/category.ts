@@ -51,6 +51,11 @@ export interface CategoryCreateData {
 
 export interface CategoryUpdateData extends Partial<CategoryCreateData> {}
 
+export interface CategoryReorderItem {
+	id: string;
+	display_order: number;
+}
+
 export interface User {
 	id: string;
 	email: string;
@@ -111,6 +116,14 @@ export const categoryApi = {
 	 */
 	async delete(id: string): Promise<void> {
 		await clientApi.delete(`/products/categories/${id}/`);
+	},
+
+	async reorder(items: CategoryReorderItem[]): Promise<{ message: string }> {
+		const { data } = await clientApi.post<{ message: string }>(
+			"/products/categories/reorder/",
+			{ items }
+		);
+		return data;
 	},
 };
 
@@ -173,6 +186,18 @@ export const useDeleteCategory = () => {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (id: string) => categoryApi.delete(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: [queryKeys.categories],
+			});
+		},
+	});
+};
+
+export const useReorderCategories = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (items: CategoryReorderItem[]) => categoryApi.reorder(items),
 		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.categories],

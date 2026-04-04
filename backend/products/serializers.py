@@ -74,6 +74,25 @@ class CategoryCreateUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
+class CategoryReorderItemSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    display_order = serializers.IntegerField(min_value=1)
+
+
+class CategoryReorderSerializer(serializers.Serializer):
+    items = CategoryReorderItemSerializer(many=True)
+
+    def validate_items(self, value):
+        if not value:
+            raise serializers.ValidationError("At least one category is required.")
+
+        category_ids = [item["id"] for item in value]
+        if len(category_ids) != len(set(category_ids)):
+            raise serializers.ValidationError("Category IDs must be unique.")
+
+        return value
+
+
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category

@@ -5,6 +5,7 @@ from django.utils.html import strip_tags
 from django.utils import timezone
 from datetime import timedelta
 import random
+from urllib.parse import urlencode
 
 from users.models import OTPVerification
 
@@ -12,6 +13,27 @@ from users.models import OTPVerification
 def generate_otp():
     """Generate a random OTP code."""
     return "".join([str(random.randint(0, 9)) for _ in range(settings.OTP_LENGTH)])
+
+
+def create_email_otp(email, purpose):
+    """Create a fresh OTP for an email and purpose pair."""
+    otp_code = generate_otp()
+    expires_at = timezone.now() + timedelta(minutes=settings.OTP_EXPIRE_MINUTES)
+
+    OTPVerification.objects.filter(
+        email=email,
+        purpose=purpose,
+        is_verified=False,
+    ).update(is_verified=True)
+
+    OTPVerification.objects.create(
+        email=email,
+        otp_code=otp_code,
+        purpose=purpose,
+        expires_at=expires_at,
+    )
+
+    return otp_code
 
 
 def send_verification_otp_email(email, user_name, purpose="registration"):
@@ -26,23 +48,7 @@ def send_verification_otp_email(email, user_name, purpose="registration"):
     Returns:
         bool: True if email sent successfully
     """
-    otp_code = generate_otp()
-    expires_at = timezone.now() + timedelta(minutes=settings.OTP_EXPIRE_MINUTES)
-
-    # Invalidate any existing OTPs for this email and purpose
-    OTPVerification.objects.filter(
-        email=email,
-        purpose=purpose,
-        is_verified=False,
-    ).update(is_verified=True)
-
-    # Create new OTP
-    OTPVerification.objects.create(
-        email=email,
-        otp_code=otp_code,
-        purpose=purpose,
-        expires_at=expires_at,
-    )
+    otp_code = create_email_otp(email=email, purpose=purpose)
 
     # Determine subject based on purpose
     subjects = {
@@ -67,6 +73,41 @@ def send_verification_otp_email(email, user_name, purpose="registration"):
     # Send email
     send_mail(
         subject=subject,
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+    return True
+
+
+def send_staff_invitation_email(email, user_name):
+    """
+    Send a staff invitation email with a password setup link.
+
+    Args:
+        email: Staff member's email address
+        user_name: Staff member's display name
+    """
+    otp_code = create_email_otp(email=email, purpose="password_reset")
+    query = urlencode({"email": email, "otp": otp_code})
+    setup_url = f"{settings.ADMIN_URL.rstrip('/')}/set-password?{query}"
+
+    html_message = render_to_string(
+        "emails/staff_invitation.html",
+        {
+            "user_name": user_name,
+            "setup_url": setup_url,
+            "otp_code": otp_code,
+            "expiry_minutes": settings.OTP_EXPIRE_MINUTES,
+        },
+    )
+    plain_message = strip_tags(html_message)
+
+    send_mail(
+        subject="Set Up Your Staff Account - Dookan",
         message=plain_message,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[email],

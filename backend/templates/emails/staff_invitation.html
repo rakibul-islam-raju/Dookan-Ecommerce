@@ -1,0 +1,26 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Set Up Your Staff Account - Dookan{% endblock %}
+
+{% block content %}
+<h2>Set Up Your Staff Account</h2>
+<p>Hello {{ user_name }},</p>
+<p>An admin has created your Dookan staff account. Use the button below to set your password and activate your admin access.</p>
+
+<p class="text-center">
+    <a href="{{ setup_url }}" class="btn">Set Your Password</a>
+</p>
+
+<div class="highlight">
+    <p style="margin: 0 0 8px 0;"><strong>This invite expires in {{ expiry_minutes }} minutes.</strong></p>
+    <p style="margin: 0;">If the button does not work, you can paste this link into your browser:</p>
+    <p style="margin: 12px 0 0 0; word-break: break-all;">{{ setup_url }}</p>
+    <p style="margin: 16px 0 0 0;">Manual setup code: <strong>{{ otp_code }}</strong></p>
+</div>
+
+<p>If you were not expecting this invitation, you can safely ignore this email.</p>
+
+<div class="signature">
+    <p>Best regards,<br><strong>The Dookan Team</strong></p>
+</div>
+{% endblock %}

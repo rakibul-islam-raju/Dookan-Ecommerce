@@ -17,7 +17,6 @@ export interface StaffCreateData {
 	last_name: string;
 	email: string;
 	mobile_number: string;
-	password: string;
 	role?: string | null;
 }
 

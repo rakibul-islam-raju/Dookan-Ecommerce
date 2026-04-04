@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.conf import settings
 
 from rest_framework import serializers
@@ -9,6 +10,7 @@ from datetime import timedelta
 import random
 
 from users.models import User
+from utils.email import send_staff_invitation_email
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -254,8 +256,6 @@ class StaffCreateSerializer(serializers.ModelSerializer):
     Staff creation serializer
     """
 
-    password = serializers.CharField(write_only=True, required=True)
-
     class Meta:
         model = User
         fields = [
@@ -265,20 +265,21 @@ class StaffCreateSerializer(serializers.ModelSerializer):
             "email",
             "mobile_number",
             "role",
-            "password",
         ]
         read_only_fields = ["id"]
 
     def create(self, validated_data):
-        password = validated_data.pop("password")
-        user = User.objects.create_user(
-            is_staff=True,
-            is_active=True,
-            is_email_verified=True,
-            **validated_data,
-        )
-        user.set_password(password)
-        user.save()
+        with transaction.atomic():
+            user = User.objects.create_user(
+                is_staff=True,
+                is_active=True,
+                is_email_verified=True,
+                **validated_data,
+            )
+            send_staff_invitation_email(
+                email=user.email,
+                user_name=f"{user.first_name} {user.last_name}".strip() or "there",
+            )
         return user
 
 

@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import filters
 from rest_framework import generics
 from rest_framework import status
@@ -21,6 +22,7 @@ from products.models import (
 from products.serializers import (
     CategorySerializer,
     CategoryCreateUpdateSerializer,
+    CategoryReorderSerializer,
     ProductCreateSerializer,
     VendorProductListSerializer,
     ConsumerProductListSerializer,
@@ -84,6 +86,35 @@ class CategoryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView
         if self.request.method in ["PUT", "PATCH"]:
             return CategoryCreateUpdateSerializer
         return CategorySerializer
+
+
+class CategoryReorderAPIView(APIView):
+    permission_classes = [HasModulePermission("manage_categories")]
+
+    def post(self, request):
+        serializer = CategoryReorderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        items = serializer.validated_data["items"]
+        category_ids = [item["id"] for item in items]
+        categories = Category.objects.filter(id__in=category_ids)
+
+        if categories.count() != len(category_ids):
+            return Response(
+                {"detail": "One or more categories were not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        categories_by_id = {category.id: category for category in categories}
+
+        with transaction.atomic():
+            for item in items:
+                category = categories_by_id[item["id"]]
+                category.display_order = item["display_order"]
+
+            Category.objects.bulk_update(categories_by_id.values(), ["display_order"])
+
+        return Response({"message": "Category order updated successfully."})
 
 
 class ProductCreateListAPIView(generics.ListCreateAPIView):

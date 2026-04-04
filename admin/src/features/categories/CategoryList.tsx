@@ -16,12 +16,19 @@ import { useFilterParams } from "@/hooks/useFilterParams";
 import {
 	getCategories,
 	useDeleteCategory,
+	useReorderCategories,
 	type CategoryFilter,
 	type CategoryListItem,
 } from "@/lib/api/category";
 import { useQuery } from "@tanstack/react-query";
-import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import {
+	GripVertical,
+	MoreHorizontal,
+	Pencil,
+	Plus,
+	Trash2,
+} from "lucide-react";
+import { useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { CategoryFilterForm } from "./components/CategoryFilterForm";
 import { CategoryFormModal } from "./components/CategoryFormModal";
@@ -42,6 +49,12 @@ export function CategoryList() {
 	const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 	const [selectedCategory, setSelectedCategory] =
 		useState<CategoryListItem | null>(null);
+	const [orderOverride, setOrderOverride] = useState<{
+		sourceKey: string;
+		ids: string[];
+	} | null>(null);
+	const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+	const dragStartSnapshotRef = useRef<string[]>([]);
 
 	// Fetch categories using TanStack Query
 	const { data, isLoading, error } = useQuery(
@@ -54,6 +67,7 @@ export function CategoryList() {
 
 	// Delete mutation
 	const deleteMutation = useDeleteCategory();
+	const reorderMutation = useReorderCategories();
 
 	const handleEdit = (category: CategoryListItem) => {
 		setSelectedCategory(category);
@@ -79,7 +93,115 @@ export function CategoryList() {
 		return isActive ? "default" : "secondary";
 	};
 
+	const isFilteredView = Boolean(searchQuery || params.is_active !== undefined);
+	const canReorder =
+		!isFilteredView && !isLoading && !reorderMutation.isPending;
+	const pageOffset = (currentPage - 1) * pagination.limit;
+	const serverCategories = data?.results || [];
+	const sourceKey = serverCategories
+		.map((category) => `${category.id}:${category.display_order}`)
+		.join("|");
+
+	const syncDisplayOrder = (items: CategoryListItem[]) =>
+		items.map((category, index) => ({
+			...category,
+			display_order: pageOffset + index + 1,
+		}));
+
+	let categories = serverCategories;
+
+	if (orderOverride && orderOverride.sourceKey === sourceKey) {
+		const categoryMap = new Map(
+			serverCategories.map((category) => [category.id, category])
+		);
+		const reordered = orderOverride.ids
+			.map((id) => categoryMap.get(id))
+			.filter((category): category is CategoryListItem => Boolean(category));
+
+		if (reordered.length === serverCategories.length) {
+			categories = syncDisplayOrder(reordered);
+		}
+	}
+
+	const handleDragStart = (index: number) => {
+		if (!canReorder) return;
+		dragStartSnapshotRef.current = categories.map((category) => category.id);
+		setDraggedIndex(index);
+	};
+
+	const handleDragOver = (
+		event: React.DragEvent<HTMLTableRowElement>,
+		index: number
+	) => {
+		event.preventDefault();
+		if (!canReorder || draggedIndex === null || draggedIndex === index) return;
+
+		const currentIds =
+			orderOverride?.sourceKey === sourceKey
+				? [...orderOverride.ids]
+				: categories.map((category) => category.id);
+		const [draggedItem] = currentIds.splice(draggedIndex, 1);
+		currentIds.splice(index, 0, draggedItem);
+
+		setOrderOverride({
+			sourceKey,
+			ids: currentIds,
+		});
+		setDraggedIndex(index);
+	};
+
+	const handleDragEnd = () => {
+		if (!canReorder || draggedIndex === null) {
+			setDraggedIndex(null);
+			return;
+		}
+
+		const previous = dragStartSnapshotRef.current;
+		const nextIds =
+			orderOverride?.sourceKey === sourceKey
+				? orderOverride.ids
+				: categories.map((category) => category.id);
+		const didChange = previous.some((id, index) => id !== nextIds[index]);
+
+		setDraggedIndex(null);
+
+		if (!didChange) return;
+
+		const nextWithOrder = nextIds.map((id, index) => ({
+			id,
+			display_order: pageOffset + index + 1,
+		}));
+
+		reorderMutation.mutate(
+			nextWithOrder,
+			{
+				onSuccess: () => {
+					toast.success("Category order updated successfully");
+				},
+				onError: () => {
+					setOrderOverride(null);
+				},
+			}
+		);
+	};
+
 	const columns: Column<CategoryListItem>[] = [
+		{
+			key: "drag",
+			header: "",
+			render: () => (
+				<span
+					className={`inline-flex items-center justify-center ${
+						canReorder
+							? "cursor-grab text-muted-foreground"
+							: "cursor-not-allowed text-muted-foreground/40"
+					}`}
+				>
+					<GripVertical className="h-4 w-4" />
+				</span>
+			),
+			className: "w-[44px]",
+		},
 		{
 			key: "image",
 			header: "Image",
@@ -193,7 +315,6 @@ export function CategoryList() {
 
 	// Calculate pagination
 	const totalPages = data ? Math.ceil(data.count / pagination.limit) : 0;
-	const categories = data?.results || [];
 
 	return (
 		<div className="space-y-6">
@@ -234,10 +355,30 @@ export function CategoryList() {
 				</FilterDrawer>
 			</div>
 
+			{isFilteredView && (
+				<p className="text-sm text-muted-foreground">
+					Drag and drop is available on the default category list. Clear search
+					or filters to reorder categories.
+				</p>
+			)}
+
 			{/* Categories Table */}
 			<AppTable
 				data={categories}
 				columns={columns}
+				rowKey={(category) => category.id}
+				getRowProps={(_, index) =>
+					canReorder
+						? {
+								draggable: true,
+								onDragStart: () => handleDragStart(index),
+								onDragOver: (event) => handleDragOver(event, index),
+								onDragEnd: handleDragEnd,
+								className:
+									draggedIndex === index ? "opacity-50" : "cursor-move",
+							}
+						: {}
+				}
 				emptyMessage={
 					isLoading
 						? "Loading categories..."

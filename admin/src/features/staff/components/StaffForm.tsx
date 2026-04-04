@@ -17,19 +17,18 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
+/** Radix Select.Item cannot use value=""; map this to null on submit. */
+const NO_ROLE_VALUE = "__no_role__";
+
 const staffCreateSchema = z.object({
 	first_name: z.string().min(1, "First name is required"),
 	last_name: z.string().min(1, "Last name is required"),
 	email: z.string().email("Valid email is required"),
 	mobile_number: z.string().min(1, "Mobile number is required"),
-	password: z.string().min(8, "Password must be at least 8 characters"),
-	role: z.string().optional().or(z.literal("")),
+	role: z.string(),
 });
 
-const staffEditSchema = staffCreateSchema.omit({ password: true });
-
-type StaffCreateFormData = z.infer<typeof staffCreateSchema>;
-type StaffEditFormData = z.infer<typeof staffEditSchema>;
+type StaffFormData = z.infer<typeof staffCreateSchema>;
 
 interface StaffFormProps {
 	handleClose: () => void;
@@ -45,16 +44,13 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 	const isEditMode = mode === "edit";
 	const isPending = isCreating || isUpdating;
 
-	const schema = isEditMode ? staffEditSchema : staffCreateSchema;
-
-	const form = useZodForm(schema, {
+	const form = useZodForm(staffCreateSchema, {
 		defaultValues: {
 			first_name: "",
 			last_name: "",
 			email: "",
 			mobile_number: "",
-			...(!isEditMode && { password: "" }),
-			role: "",
+			role: NO_ROLE_VALUE,
 		},
 	});
 
@@ -63,14 +59,14 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 		form.reset();
 	};
 
-	const onSubmit = async (data: StaffCreateFormData | StaffEditFormData) => {
+	const onSubmit = async (data: StaffFormData) => {
 		if (isEditMode && staff) {
 			const updateData: StaffUpdateData = {
 				first_name: data.first_name,
 				last_name: data.last_name,
 				email: data.email,
 				mobile_number: data.mobile_number,
-				role: data.role || null,
+				role: data.role === NO_ROLE_VALUE ? null : data.role,
 			};
 			updateStaff(
 				{ id: staff.id, updateData },
@@ -87,13 +83,12 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 				last_name: data.last_name,
 				email: data.email,
 				mobile_number: data.mobile_number,
-				password: (data as StaffCreateFormData).password,
-				role: data.role || null,
+				role: data.role === NO_ROLE_VALUE ? null : data.role,
 			};
 			createStaff(createData, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Staff member created successfully");
+					toast.success("Staff member created and password setup email sent");
 				},
 			});
 		}
@@ -106,13 +101,13 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 				last_name: staff.last_name,
 				email: staff.email,
 				mobile_number: staff.mobile_number,
-				role: staff.role || "",
+				role: staff.role || NO_ROLE_VALUE,
 			});
 		}
 	}, [staff, isEditMode]);
 
 	const roleOptions = [
-		{ value: "", label: "No Role" },
+		{ value: NO_ROLE_VALUE, label: "No Role" },
 		...(roles?.map((r) => ({ value: r.id, label: r.name })) || []),
 	];
 
@@ -151,13 +146,10 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 				</div>
 
 				{!isEditMode && (
-					<TextField
-						name="password"
-						label="Password"
-						placeholder="Minimum 8 characters"
-						type="password"
-						required
-					/>
+					<p className="rounded-md border border-dashed bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+						The staff member will receive an email with a secure link to set
+						their password.
+					</p>
 				)}
 
 				<SelectField
@@ -178,7 +170,7 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 					Cancel
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Staff" : "Create Staff"}
+					{isEditMode ? "Update Staff" : "Create Staff & Send Invite"}
 				</LoadingButton>
 			</div>
 		</BaseForm>

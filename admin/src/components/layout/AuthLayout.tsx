@@ -1,10 +1,12 @@
 import { useAuthStore } from "@/store/useAuthStore";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 export function AuthLayout() {
 	const { user } = useAuthStore();
+	const location = useLocation();
+	const allowAuthenticatedAccess = location.pathname === "/set-password";
 
-	if (user) {
+	if (user && !allowAuthenticatedAccess) {
 		return <Navigate to="/" />;
 	}
 

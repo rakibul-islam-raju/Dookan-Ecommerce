@@ -8,7 +8,43 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { HTMLAttributes, Key } from "react";
+
+type PaginationItem = number | "ellipsis";
+
+function getPaginationItems(
+	currentPage: number,
+	totalPages: number,
+	siblingCount = 1,
+): PaginationItem[] {
+	const pages: number[] = [];
+	for (let i = 1; i <= totalPages; i++) {
+		if (
+			i === 1 ||
+			i === totalPages ||
+			(i >= currentPage - siblingCount && i <= currentPage + siblingCount)
+		) {
+			pages.push(i);
+		}
+	}
+
+	const items: PaginationItem[] = [];
+	let prev: number | undefined;
+	for (const page of pages) {
+		if (prev !== undefined) {
+			if (page - prev === 2) {
+				items.push(prev + 1);
+			} else if (page - prev > 2) {
+				items.push("ellipsis");
+			}
+		}
+		items.push(page);
+		prev = page;
+	}
+	return items;
+}
 
 export interface Column<T> {
 	key: string;
@@ -30,6 +66,11 @@ interface AppTableProps<T> {
 	};
 	onRowClick?: (item: T) => void;
 	rowClassName?: (item: T) => string;
+	rowKey?: (item: T, index: number) => Key;
+	getRowProps?: (
+		item: T,
+		index: number,
+	) => HTMLAttributes<HTMLTableRowElement>;
 }
 
 export function AppTable<T extends Record<string, any>>({
@@ -40,6 +81,8 @@ export function AppTable<T extends Record<string, any>>({
 	pagination,
 	onRowClick,
 	rowClassName,
+	rowKey,
+	getRowProps,
 }: AppTableProps<T>) {
 	const renderCellContent = (item: T, column: Column<T>) => {
 		if (column.render) {
@@ -120,50 +163,101 @@ export function AppTable<T extends Record<string, any>>({
 					</TableHeader>
 					<TableBody>
 						{data.map((item, index) => (
-							<TableRow
-								key={index}
-								onClick={() => onRowClick?.(item)}
-								className={`${
-									onRowClick ? "cursor-pointer hover:bg-muted/50" : ""
-								} ${rowClassName ? rowClassName(item) : ""}`}
-							>
+							(() => {
+								const extraRowProps = getRowProps?.(item, index) ?? {};
+								const {
+									className: extraClassName,
+									onClick: extraOnClick,
+									...restRowProps
+								} = extraRowProps;
+
+								return (
+									<TableRow
+										key={rowKey ? rowKey(item, index) : index}
+										onClick={(event) => {
+											extraOnClick?.(event);
+											onRowClick?.(item);
+										}}
+										className={cn(
+											onRowClick ? "cursor-pointer hover:bg-muted/50" : "",
+											rowClassName ? rowClassName(item) : "",
+											extraClassName,
+										)}
+										{...restRowProps}
+									>
 								{columns.map((column) => (
 									<TableCell key={column.key} className={column.className}>
 										{renderCellContent(item, column)}
 									</TableCell>
 								))}
-							</TableRow>
+									</TableRow>
+								);
+							})()
 						))}
 					</TableBody>
 				</Table>
 			</div>
 
 			{pagination && pagination.totalPages > 1 && (
-				<div className="flex items-center justify-between">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<p className="text-sm text-muted-foreground">
 						Page {pagination.currentPage} of {pagination.totalPages}
 					</p>
-					<div className="flex items-center gap-2">
+					<div className="flex flex-wrap items-center justify-end gap-1">
 						<Button
 							variant="outline"
-							size="sm"
+							size="icon-sm"
+							aria-label="Previous page"
 							onClick={() =>
 								pagination.onPageChange(pagination.currentPage - 1)
 							}
 							disabled={pagination.currentPage === 1}
 						>
 							<ChevronLeft className="h-4 w-4" />
-							Previous
 						</Button>
+						{getPaginationItems(
+							pagination.currentPage,
+							pagination.totalPages,
+						).map((item, index) =>
+							item === "ellipsis" ? (
+								<span
+									key={`e-${index}`}
+									className="flex h-8 min-w-8 items-center justify-center px-1 text-sm text-muted-foreground"
+									aria-hidden
+								>
+									…
+								</span>
+							) : item === pagination.currentPage ? (
+								<span
+									key={item}
+									className="inline-flex h-8 min-w-8 items-center justify-center rounded-md bg-primary px-2 text-sm font-medium text-primary-foreground"
+									aria-current="page"
+									aria-label={`Page ${item}`}
+								>
+									{item}
+								</span>
+							) : (
+								<Button
+									key={item}
+									variant="ghost"
+									size="sm"
+									className="min-w-8 px-2"
+									aria-label={`Page ${item}`}
+									onClick={() => pagination.onPageChange(item)}
+								>
+									{item}
+								</Button>
+							),
+						)}
 						<Button
 							variant="outline"
-							size="sm"
+							size="icon-sm"
+							aria-label="Next page"
 							onClick={() =>
 								pagination.onPageChange(pagination.currentPage + 1)
 							}
 							disabled={pagination.currentPage === pagination.totalPages}
 						>
-							Next
 							<ChevronRight className="h-4 w-4" />
 						</Button>
 					</div>

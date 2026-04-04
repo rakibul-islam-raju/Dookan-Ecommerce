@@ -33,7 +33,7 @@ export function StaffFormModal({
 					<DialogDescription>
 						{isEditMode
 							? "Update staff member details and role."
-							: "Create a new staff member with admin dashboard access."}
+							: "Create a new staff member and send them an email to set their password."}
 					</DialogDescription>
 				</DialogHeader>
 

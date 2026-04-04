@@ -38,6 +38,7 @@ export function ProductList() {
 		getProducts({
 			...params,
 			search: debouncedValue,
+			offset: (currentPage - 1) * pagination.limit,
 		})
 	);
 
