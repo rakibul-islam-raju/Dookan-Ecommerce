@@ -382,6 +382,9 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 class VendorProductListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
     category = ProductCategorySerializer(read_only=True)
+    sale_price = serializers.SerializerMethodField()
+    sale_discount_percentage = serializers.SerializerMethodField()
+    sale_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -393,6 +396,9 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             "category",
             "base_price",
             "cost_price",
+            "sale_price",
+            "sale_discount_percentage",
+            "sale_name",
             "stock_quantity",
             "unit",
             "unit_value",
@@ -400,6 +406,22 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             "is_active",
             "primary_image",
         ]
+
+    def _get_sale_data(self, obj):
+        sale_prices = self.context.get("sale_prices", {})
+        return sale_prices.get(str(obj.id))
+
+    def get_sale_price(self, obj):
+        data = self._get_sale_data(obj)
+        return str(data[1]) if data else None
+
+    def get_sale_discount_percentage(self, obj):
+        data = self._get_sale_data(obj)
+        return data[2] if data else 0
+
+    def get_sale_name(self, obj):
+        data = self._get_sale_data(obj)
+        return data[0].name if data else None
 
     def get_primary_image(self, obj):
         image = obj.images.filter(is_primary=True).order_by("display_order").first()
@@ -481,10 +503,30 @@ class VendorProductDetailsSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     category = ProductCategorySerializer(read_only=True)
     variants = ProductVariantSerializer(many=True, read_only=True)
+    sale_price = serializers.SerializerMethodField()
+    sale_discount_percentage = serializers.SerializerMethodField()
+    sale_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = "__all__"
+        # extra fields added by SerializerMethodField are included automatically
+
+    def _get_sale_data(self, obj):
+        sale_prices = self.context.get("sale_prices", {})
+        return sale_prices.get(str(obj.id))
+
+    def get_sale_price(self, obj):
+        data = self._get_sale_data(obj)
+        return str(data[1]) if data else None
+
+    def get_sale_discount_percentage(self, obj):
+        data = self._get_sale_data(obj)
+        return data[2] if data else 0
+
+    def get_sale_name(self, obj):
+        data = self._get_sale_data(obj)
+        return data[0].name if data else None
 
 
 class ConsumerProductDetailsSerializer(serializers.ModelSerializer):

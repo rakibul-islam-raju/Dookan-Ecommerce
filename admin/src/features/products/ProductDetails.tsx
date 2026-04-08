@@ -342,6 +342,37 @@ export const ProductDetails = () => {
 									</p>
 								</div>
 							</div>
+							{/* sale price */}
+							<div>
+								<p className="text-sm text-muted-foreground mb-1.5">
+									Sale Price
+								</p>
+								{product.sale_price ? (
+									<div className="px-3 py-2 bg-green-50 border border-green-200 rounded-md">
+										<div className="flex items-center justify-between">
+											<p className="font-semibold text-green-700">
+												BDT {Number(product.sale_price).toFixed(2)}
+											</p>
+											{product.sale_discount_percentage ? (
+												<span className="text-xs font-medium bg-red-500 text-white px-2 py-0.5 rounded">
+													-{product.sale_discount_percentage}%
+												</span>
+											) : null}
+										</div>
+										{product.sale_name && (
+											<p className="text-xs text-orange-600 font-medium mt-1">
+												{product.sale_name}
+											</p>
+										)}
+									</div>
+								) : (
+									<div className="px-3 py-2 bg-muted/50 rounded-md">
+										<p className="text-sm text-muted-foreground">
+											No active sale
+										</p>
+									</div>
+								)}
+							</div>
 						</CardContent>
 					</Card>
 				</div>

@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { WishlistButton } from "@/components/Product/WishlistButton";
 import { ProductReviews } from "./ProductReviews";
+import { SimilarProducts } from "./SimilarProducts";
 import { VariantSelector } from "./VariantSelector";
 
 interface ProductDetailsClientProps {
@@ -31,15 +32,16 @@ export const ProductDetailsClient = ({
 }: ProductDetailsClientProps) => {
 	const images = product.images ?? [];
 	const [selectedImage, setSelectedImage] = useState(
-		images.find((img) => img.is_primary) || images[0] || null
+		images.find((img) => img.is_primary) || images[0] || null,
 	);
 	const [quantity, setQuantity] = useState(1);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
-	const [selectedVariant, setSelectedVariant] = useState<IProductVariant | null>(
-		product.has_variants && product.variants.length > 0
-			? product.variants[0]
-			: null
-	);
+	const [selectedVariant, setSelectedVariant] =
+		useState<IProductVariant | null>(
+			product.has_variants && product.variants.length > 0
+				? product.variants[0]
+				: null,
+		);
 
 	const addToCartMutation = useAddToCart();
 
@@ -53,6 +55,7 @@ export const ProductDetailsClient = ({
 	const activeDiscount = selectedVariant
 		? selectedVariant.sale_discount_percentage
 		: product.sale_discount_percentage;
+	const activeSaleName = product.sale_name;
 	const activePrice = activeSalePrice ?? activeBasePrice;
 	const activeStock = selectedVariant
 		? selectedVariant.stock_quantity
@@ -93,7 +96,9 @@ export const ProductDetailsClient = ({
 							id: selectedVariant.id,
 							name: selectedVariant.name,
 							sku: selectedVariant.sku,
-							price: Number(selectedVariant.sale_price ?? selectedVariant.base_price),
+							price: Number(
+								selectedVariant.sale_price ?? selectedVariant.base_price,
+							),
 						}
 					: undefined,
 				quantity,
@@ -158,7 +163,7 @@ export const ProductDetailsClient = ({
 									"aspect-square rounded-lg overflow-hidden border-2 transition-all",
 									selectedImage?.id === img.id
 										? "border-primary ring-2 ring-primary/20"
-										: "border-transparent hover:border-muted-foreground/25"
+										: "border-transparent hover:border-muted-foreground/25",
 								)}
 							>
 								{/* eslint-disable-next-line @next/next/no-img-element */}
@@ -190,12 +195,17 @@ export const ProductDetailsClient = ({
 									Save {activeDiscount}%
 								</Badge>
 							)}
+							{activeSaleName && (
+								<Badge className="bg-orange-500 text-white border-none hover:bg-orange-600">
+									{activeSaleName}
+								</Badge>
+							)}
 							<div
 								className={cn(
 									"flex items-center gap-2 px-3 py-1 rounded-md font-medium text-sm",
 									activeInStock
 										? "bg-green-500/10 text-green-700"
-										: "bg-red-500/10 text-red-700"
+										: "bg-red-500/10 text-red-700",
 								)}
 							>
 								{activeInStock ? (
@@ -267,10 +277,7 @@ export const ProductDetailsClient = ({
 										</span>
 										<button
 											onClick={() => handleQuantityChange(1)}
-											disabled={
-												quantity >= activeStock ||
-												!activeInStock
-											}
+											disabled={quantity >= activeStock || !activeInStock}
 											className="p-2 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
 											aria-label="Increase quantity"
 										>
@@ -307,10 +314,7 @@ export const ProductDetailsClient = ({
 										</>
 									)}
 								</Button>
-								<WishlistButton
-									productId={product.id}
-									variant="icon-outline"
-								/>
+								<WishlistButton productId={product.id} variant="icon-outline" />
 								<Button
 									size="lg"
 									variant="ghost"
@@ -383,9 +387,7 @@ export const ProductDetailsClient = ({
 											<dd
 												className={cn(
 													"font-semibold",
-													activeInStock
-														? "text-green-600"
-														: "text-destructive"
+													activeInStock ? "text-green-600" : "text-destructive",
 												)}
 											>
 												{activeInStock ? "In Stock" : "Out of Stock"}
@@ -395,9 +397,7 @@ export const ProductDetailsClient = ({
 											<dt className="text-muted-foreground">
 												Available Quantity:
 											</dt>
-											<dd className="font-medium">
-												{activeStock} units
-											</dd>
+											<dd className="font-medium">{activeStock} units</dd>
 										</div>
 										<div className="flex justify-between">
 											<dt className="text-muted-foreground">Product Status:</dt>
@@ -406,7 +406,7 @@ export const ProductDetailsClient = ({
 													"font-semibold",
 													product.is_active
 														? "text-green-600"
-														: "text-muted-foreground"
+														: "text-muted-foreground",
 												)}
 											>
 												{product.is_active ? "Active" : "Inactive"}
@@ -424,6 +424,12 @@ export const ProductDetailsClient = ({
 			<ProductReviews
 				productId={product.id}
 				reviewSummary={product.review_summary}
+			/>
+
+			{/* Similar Products */}
+			<SimilarProducts
+				categoryId={product.category.id}
+				currentProductId={product.id}
 			/>
 		</div>
 	);

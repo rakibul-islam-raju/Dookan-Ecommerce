@@ -6,7 +6,19 @@
 
 import type { IPaginatedResponse } from "@/@types/Common";
 import type { IBanner, ISiteConfig } from "@/@types/Store";
+import { unstable_cache } from "next/cache";
 import { clientApi, serverApi } from "./axios";
+
+export const STORE_CACHE_TAGS = {
+	banners: "store:banners",
+} as const;
+
+const getBannersUncached = async (): Promise<IBanner[]> => {
+	const { data } = await serverApi.get<IPaginatedResponse<IBanner>>(
+		"/store/banners/"
+	);
+	return data.results;
+};
 
 /**
  * Store API for Server Components (SSR/ISR)
@@ -17,7 +29,7 @@ export const storeServerApi = {
 	 * Use in Server Components with ISR
 	 */
 	async getSiteConfig(): Promise<ISiteConfig> {
-		const { data } = await serverApi.get<ISiteConfig>("/store/config/");
+		const { data } = await serverApi.get<ISiteConfig>("/store/site-config/");
 		return data;
 	},
 
@@ -26,11 +38,21 @@ export const storeServerApi = {
 	 * Use in Server Components with ISR
 	 */
 	async getBanners(): Promise<IBanner[]> {
-		const { data } = await serverApi.get<IPaginatedResponse<IBanner>>(
-			"/store/banners/"
-		);
-		return data.results;
+		return getBannersUncached();
 	},
+
+	/**
+	 * Get banners with Next.js server-side caching.
+	 * Cache is invalidated via `revalidateTag(STORE_CACHE_TAGS.banners)`.
+	 */
+	getBannersCached: unstable_cache(
+		async () => getBannersUncached(),
+		["storeServerApi.getBannersCached"],
+		{
+			revalidate: 60 * 60 * 24 * 365, // 1 year; admin triggers explicit revalidation
+			tags: [STORE_CACHE_TAGS.banners],
+		}
+	),
 };
 
 /**

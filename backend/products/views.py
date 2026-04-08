@@ -150,9 +150,7 @@ class ProductCreateListAPIView(generics.ListCreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        if self.request.method == "GET" and not getattr(
-            self.request.user, "is_staff", False
-        ):
+        if self.request.method == "GET":
             from sales.utils import get_sale_prices_bulk
 
             context["sale_prices"] = get_sale_prices_bulk(self.get_queryset())
@@ -199,6 +197,17 @@ class ProductRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
         elif self.request.method in ["PUT", "PATCH"]:
             return ProductCreateSerializer
         return ProductCreateSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.request.method == "GET":
+            from sales.utils import get_sale_prices_bulk
+
+            product = self.get_object()
+            context["sale_prices"] = get_sale_prices_bulk(
+                Product.objects.filter(id=product.id)
+            )
+        return context
 
     def get_permissions(self):
         if self.request.method == "GET":

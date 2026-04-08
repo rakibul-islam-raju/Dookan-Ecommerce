@@ -38,9 +38,7 @@ const ReviewItem = ({ review }: { review: IProductReview }) => (
 			</div>
 		</div>
 		<StarRating rating={review.rating} size="sm" />
-		{review.title && (
-			<h4 className="font-medium mt-2">{review.title}</h4>
-		)}
+		{review.title && <h4 className="font-medium mt-2">{review.title}</h4>}
 		{review.comment && (
 			<p className="text-muted-foreground text-sm mt-1 leading-relaxed">
 				{review.comment}
@@ -60,24 +58,17 @@ export const ProductReviews = ({
 		<div className="mt-12 space-y-6">
 			<div className="bg-muted/30 rounded-xl p-6 space-y-6">
 				<div className="flex items-center justify-between">
-					<h3 className="font-semibold text-lg">
-						Customer Reviews
-					</h3>
+					<h3 className="font-semibold text-lg">Customer Reviews</h3>
 					{reviewSummary.review_count > 0 && (
 						<div className="flex items-center gap-2">
 							<StarRating
-								rating={Math.round(
-									reviewSummary.average_rating
-								)}
+								rating={Math.round(reviewSummary.average_rating)}
 								size="sm"
 							/>
 							<span className="text-sm text-muted-foreground">
 								{reviewSummary.average_rating} out of 5 (
 								{reviewSummary.review_count}{" "}
-								{reviewSummary.review_count === 1
-									? "review"
-									: "reviews"}
-								)
+								{reviewSummary.review_count === 1 ? "review" : "reviews"})
 							</span>
 						</div>
 					)}
@@ -98,17 +89,19 @@ export const ProductReviews = ({
 					</div>
 				) : (
 					<p className="text-center text-muted-foreground py-6">
-						No reviews yet. Be the first to review this product!
+						No reviews yet. Be the first to review this product! To review this
+						product, you must have purchased it. Once you have made a purchase,
+						you can leave a review.
 					</p>
 				)}
 
 				<Separator />
 
 				{/* Review Form */}
-				<div>
+				{/* <div>
 					<h4 className="font-semibold mb-4">Write a Review</h4>
 					<ReviewForm productId={productId} />
-				</div>
+				</div> */}
 			</div>
 		</div>
 	);

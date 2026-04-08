@@ -126,7 +126,7 @@ export const revalidate = 3600; // 1 hour
 
 export default async function ProductsPage() {
 	// Fetch on server
-	const products = await productServerApi.getProducts({ page_size: 12 });
+	const products = await productServerApi.getProducts({ limit: 12 });
 
 	return (
 		<div>
@@ -388,7 +388,7 @@ staleTime: 1 * 60 * 1000;
 
 ```tsx
 export async function generateStaticParams() {
-	const products = await productServerApi.getProducts({ page_size: 100 });
+	const products = await productServerApi.getProducts({ limit: 100 });
 	return products.results.map((p) => ({ slug: p.slug }));
 }
 ```

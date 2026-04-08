@@ -16,6 +16,25 @@ import type {
 } from "../../@types/Common.type";
 import { clientApi } from "./axios";
 
+const storefrontRevalidateUrl = import.meta.env.VITE_STOREFRONT_REVALIDATE_URL;
+const storefrontRevalidateSecret =
+	import.meta.env.VITE_STOREFRONT_REVALIDATE_SECRET;
+
+const revalidateStorefrontBanners = async () => {
+	if (!storefrontRevalidateUrl || !storefrontRevalidateSecret) return;
+
+	try {
+		await fetch(storefrontRevalidateUrl, {
+			method: "POST",
+			headers: {
+				"X-Revalidate-Secret": storefrontRevalidateSecret,
+			},
+		});
+	} catch (error) {
+		console.warn("[Storefront revalidate] Failed:", error);
+	}
+};
+
 // ============ Banner Types ============
 export interface BannerListItem extends BaseModel {
 	title: string;
@@ -26,8 +45,7 @@ export interface BannerListItem extends BaseModel {
 	display_order: number;
 }
 
-export interface BannerListResponse
-	extends IPaginatedResponse<BannerListItem> {}
+export type BannerListResponse = IPaginatedResponse<BannerListItem>;
 
 export interface BannerCreateData {
 	title: string;
@@ -64,8 +82,7 @@ export interface AnnouncementListItem {
 	is_active: boolean;
 }
 
-export interface AnnouncementListResponse
-	extends IPaginatedResponse<AnnouncementListItem> {}
+export type AnnouncementListResponse = IPaginatedResponse<AnnouncementListItem>;
 
 export interface AnnouncementCreateData {
 	title: string;
@@ -75,7 +92,7 @@ export interface AnnouncementCreateData {
 	is_active?: boolean;
 }
 
-export interface AnnouncementUpdateData extends Partial<AnnouncementCreateData> {}
+export type AnnouncementUpdateData = Partial<AnnouncementCreateData>;
 
 export interface AnnouncementFilter extends ICommonFilter {
 	search?: string;
@@ -288,10 +305,11 @@ export const useCreateBanner = () => {
 
 	return useMutation({
 		mutationFn: (bannerData: BannerCreateData) => bannerApi.create(bannerData),
-		onSuccess: () => {
+		onSuccess: async () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.banners],
 			});
+			await revalidateStorefrontBanners();
 		},
 	});
 };
@@ -306,10 +324,11 @@ export const useUpdateBanner = () => {
 			id: string;
 			updateData: BannerUpdateData;
 		}) => bannerApi.update(id, updateData),
-		onSuccess: () => {
+		onSuccess: async () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.banners],
 			});
+			await revalidateStorefrontBanners();
 		},
 	});
 };
@@ -318,10 +337,11 @@ export const useDeleteBanner = () => {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (id: string) => bannerApi.delete(id),
-		onSuccess: () => {
+		onSuccess: async () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.banners],
 			});
+			await revalidateStorefrontBanners();
 		},
 	});
 };

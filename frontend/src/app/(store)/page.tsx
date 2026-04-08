@@ -7,9 +7,6 @@ import { Featured } from "./_components/Featured";
 import { Hero } from "./_components/Hero";
 import { NewArrivals } from "./_components/NewArrivals";
 
-// SSR: Fetch fresh data on every request
-export const revalidate = 0;
-
 // Rich SEO Metadata
 export const metadata: Metadata = {
 	title: {
@@ -83,9 +80,9 @@ export const metadata: Metadata = {
 
 export default async function Home() {
 	// Fetch banners server-side with SSR
-	let banners: Awaited<ReturnType<typeof storeServerApi.getBanners>> = [];
+	let banners: Awaited<ReturnType<typeof storeServerApi.getBannersCached>> = [];
 	try {
-		banners = await storeServerApi.getBanners();
+		banners = await storeServerApi.getBannersCached();
 	} catch (error) {
 		console.error("Failed to fetch banners:", error);
 	}

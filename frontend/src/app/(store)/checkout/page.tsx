@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
@@ -53,6 +53,14 @@ const checkoutSchema = z.object({
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
+	return (
+		<Suspense fallback={<div className="container py-10" />}>
+			<CheckoutPageInner />
+		</Suspense>
+	);
+}
+
+function CheckoutPageInner() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 

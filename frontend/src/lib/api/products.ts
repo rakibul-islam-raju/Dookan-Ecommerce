@@ -30,7 +30,7 @@ export const productServerApi = {
 	 * Use in Server Components with ISR
 	 */
 	async getProducts(
-		params: IProductFilter = {}
+		params: IProductFilter = {},
 	): Promise<IPaginatedResponse<IConsumerProductListItem>> {
 		const { data } = await serverApi.get<
 			IPaginatedResponse<IConsumerProductListItem>
@@ -44,7 +44,7 @@ export const productServerApi = {
 	 */
 	async getProductBySlug(slug: string): Promise<IConsumerProductDetail> {
 		const { data } = await serverApi.get<IConsumerProductDetail>(
-			`/products/slug/${slug}/`
+			`/products/slug/${slug}/`,
 		);
 		return data;
 	},
@@ -56,7 +56,7 @@ export const productServerApi = {
 		const { data } = await serverApi.get<
 			IPaginatedResponse<IConsumerProductListItem>
 		>("/products/", {
-			params: { is_featured: true, page_size: 8 },
+			params: { is_featured: true, limit: 8 },
 		});
 		return data.results;
 	},
@@ -68,7 +68,7 @@ export const productServerApi = {
 		const { data } = await serverApi.get<
 			IPaginatedResponse<IConsumerProductListItem>
 		>("/products/", {
-			params: { ordering: "-created_at", page_size: 8 },
+			params: { ordering: "-created_at", limit: 8 },
 		});
 		return data.results;
 	},
@@ -78,7 +78,7 @@ export const productServerApi = {
 	 */
 	async getProductsByCategory(
 		categorySlug: string,
-		params?: { page?: number; page_size?: number }
+		params?: { page?: number; limit?: number },
 	): Promise<IPaginatedResponse<IConsumerProductListItem>> {
 		const { data } = await serverApi.get<
 			IPaginatedResponse<IConsumerProductListItem>
@@ -91,7 +91,8 @@ export const productServerApi = {
 
 export interface IProductClientFilter {
 	page?: number;
-	page_size?: number;
+	limit?: number;
+	offset?: number;
 	category?: string;
 	search?: string;
 	is_featured?: boolean;
@@ -110,7 +111,7 @@ export const productClientApi = {
 	 * Use in Client Components with TanStack Query
 	 */
 	async getProducts(
-		params?: IProductClientFilter
+		params?: IProductClientFilter,
 	): Promise<IPaginatedResponse<IConsumerProductListItem>> {
 		const { data } = await clientApi.get<
 			IPaginatedResponse<IConsumerProductListItem>
@@ -123,7 +124,7 @@ export const productClientApi = {
 	 */
 	async getProductBySlug(slug: string): Promise<IConsumerProductDetail> {
 		const { data } = await clientApi.get<IConsumerProductDetail>(
-			`/products/${slug}/`
+			`/products/${slug}/`,
 		);
 		return data;
 	},
@@ -133,7 +134,7 @@ export const productClientApi = {
 	 */
 	async searchProducts(
 		query: string,
-		params?: { page?: number; page_size?: number }
+		params?: { page?: number; limit?: number },
 	): Promise<IPaginatedResponse<IConsumerProductListItem>> {
 		const { data } = await clientApi.get<
 			IPaginatedResponse<IConsumerProductListItem>

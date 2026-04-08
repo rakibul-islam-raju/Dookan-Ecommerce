@@ -45,6 +45,9 @@ export interface ProductListItem extends BaseModel {
 	category: ProductCategory;
 	base_price: string;
 	cost_price?: string;
+	sale_price?: string | null;
+	sale_discount_percentage?: number;
+	sale_name?: string | null;
 	stock_quantity?: number;
 	low_stock_threshold?: number;
 	track_inventory?: boolean;
@@ -95,6 +98,9 @@ export interface ProductDetailsResponse {
 	category: ProductCategory;
 	base_price: string;
 	cost_price: string;
+	sale_price?: string | null;
+	sale_discount_percentage?: number;
+	sale_name?: string | null;
 	stock_quantity: number;
 	is_low_stock: boolean;
 	is_in_stock: boolean;

@@ -95,7 +95,7 @@ export function ShopContent() {
 	// Build API params from URL state
 	const apiParams = {
 		page,
-		page_size: pageSize,
+		limit: pageSize,
 		...(searchQuery && { search: searchQuery }),
 		...(categoryFilter && { category: categoryFilter }),
 		...(sortBy && { ordering: sortBy }),
@@ -135,7 +135,7 @@ export function ShopContent() {
 
 			router.push(`/shop?${params.toString()}`, { scroll: false });
 		},
-		[router, searchParams]
+		[router, searchParams],
 	);
 
 	const clearFilters = useCallback(() => {
@@ -198,7 +198,7 @@ export function ShopContent() {
 								"w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
 								!categoryFilter
 									? "bg-primary text-primary-foreground"
-									: "hover:bg-muted"
+									: "hover:bg-muted",
 							)}
 						>
 							All Categories
@@ -214,7 +214,7 @@ export function ShopContent() {
 										"w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors",
 										categoryFilter === cat.id
 											? "bg-primary text-primary-foreground"
-											: "hover:bg-muted"
+											: "hover:bg-muted",
 									)}
 								>
 									{cat.name}
@@ -232,7 +232,7 @@ export function ShopContent() {
 													"w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
 													categoryFilter === child.id
 														? "bg-primary text-primary-foreground"
-														: "text-muted-foreground hover:bg-muted hover:text-foreground"
+														: "text-muted-foreground hover:bg-muted hover:text-foreground",
 												)}
 											>
 												{child.name}

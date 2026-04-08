@@ -54,7 +54,7 @@ export function useProduct(slug: string) {
  */
 export function useProductSearch(
 	query: string,
-	params?: { page?: number; page_size?: number }
+	params?: { page?: number; limit?: number },
 ) {
 	return useQuery<IPaginatedResponse<IConsumerProductListItem>>({
 		queryKey: productKeys.list({ ...params, search: query }),

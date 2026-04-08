@@ -27,6 +27,7 @@ export const ProductItem = ({
 		base_price,
 		sale_price,
 		sale_discount_percentage,
+		sale_name,
 		primary_image,
 		is_in_stock,
 		is_low_stock,
@@ -65,6 +66,11 @@ export const ProductItem = ({
 					{sale_discount_percentage > 0 && (
 						<Badge variant="destructive" className="font-bold shadow-sm">
 							-{sale_discount_percentage}%
+						</Badge>
+					)}
+					{sale_name && (
+						<Badge className="font-bold shadow-sm bg-orange-500 hover:bg-orange-600 text-white border-none">
+							{sale_name}
 						</Badge>
 					)}
 					{!is_in_stock ? (

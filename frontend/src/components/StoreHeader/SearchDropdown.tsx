@@ -23,7 +23,7 @@ export function SearchDropdown({
 
 	// Fetch search results with max 10 items and fresh data
 	const { data, isLoading } = useProductSearch(searchQuery, {
-		page_size: 10,
+		limit: 10,
 	});
 
 	const products = data?.results || [];

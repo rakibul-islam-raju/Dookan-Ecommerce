@@ -4,6 +4,12 @@ import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { pagination } from "@/config";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilterParams } from "@/hooks/useFilterParams";
@@ -14,7 +20,7 @@ import {
 	type ProductListItem,
 } from "@/lib/api/product";
 import { useQuery } from "@tanstack/react-query";
-import { Minus, Plus } from "lucide-react";
+import { ChevronDown, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -43,13 +49,13 @@ export function ProductList() {
 			...params,
 			search: debouncedValue,
 			offset: (currentPage - 1) * pagination.limit,
-		})
+		}),
 	);
 	const bulkStatusMutation = useBulkUpdateProductStatus();
 	const products = data?.results || [];
 	const pageProductIds = products.map((product) => product.id);
 	const selectedOnPageCount = pageProductIds.filter((id) =>
-		selectedProductIds.includes(id)
+		selectedProductIds.includes(id),
 	).length;
 	const allOnPageSelected =
 		pageProductIds.length > 0 && selectedOnPageCount === pageProductIds.length;
@@ -58,7 +64,9 @@ export function ProductList() {
 
 	const toggleProductSelection = (productId: string, checked: boolean) => {
 		setSelectedProductIds((prev) =>
-			checked ? [...new Set([...prev, productId])] : prev.filter((id) => id !== productId)
+			checked
+				? [...new Set([...prev, productId])]
+				: prev.filter((id) => id !== productId),
 		);
 	};
 
@@ -85,7 +93,7 @@ export function ProductList() {
 					toast.success(response.message);
 					clearSelection();
 				},
-			}
+			},
 		);
 	};
 
@@ -137,11 +145,35 @@ export function ProductList() {
 		},
 		{
 			key: "base_price",
-			header: "Base Price",
+			header: "Price",
 			render: (product) => (
-				<span className="font-medium">৳ {product.base_price}</span>
+				<div className="flex flex-col gap-0.5">
+					{product.sale_price ? (
+						<>
+							<div className="flex items-center gap-2">
+								<span className="font-semibold text-green-600">
+									৳ {product.sale_price}
+								</span>
+								{product.sale_discount_percentage ? (
+									<span className="text-xs font-medium text-white bg-red-500 px-1.5 py-0.5 rounded">
+										-{product.sale_discount_percentage}%
+									</span>
+								) : null}
+							</div>
+							<span className="text-xs text-muted-foreground line-through">
+								৳ {product.base_price}
+							</span>
+							{product.sale_name && (
+								<span className="text-xs text-orange-600 font-medium">
+									{product.sale_name}
+								</span>
+							)}
+						</>
+					) : (
+						<span className="font-medium">৳ {product.base_price}</span>
+					)}
+				</div>
 			),
-			className: "text-right",
 		},
 
 		{
@@ -214,13 +246,19 @@ export function ProductList() {
 				</FilterDrawer>
 			</div>
 
-			<div className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-col gap-3 rounded-lg border bg-muted/20 py-2 px-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-center gap-3">
 					<Checkbox
 						checked={
-							allOnPageSelected ? true : someOnPageSelected ? "indeterminate" : false
+							allOnPageSelected
+								? true
+								: someOnPageSelected
+									? "indeterminate"
+									: false
 						}
-						onCheckedChange={(checked) => toggleSelectAllOnPage(checked === true)}
+						onCheckedChange={(checked) =>
+							toggleSelectAllOnPage(checked === true)
+						}
 						aria-label="Select all products on this page"
 					/>
 					<p className="text-sm text-muted-foreground">
@@ -230,33 +268,42 @@ export function ProductList() {
 					</p>
 				</div>
 				<div className="flex flex-wrap items-center gap-2">
-					<Button
-						variant="default"
-						disabled={
-							selectedProductIds.length === 0 || bulkStatusMutation.isPending
-						}
-						onClick={() => handleBulkStatusUpdate(true)}
-					>
-						<Plus className="mr-2 h-4 w-4" />
-						Mark Active
-					</Button>
-					<Button
-						variant="outline"
-						disabled={
-							selectedProductIds.length === 0 || bulkStatusMutation.isPending
-						}
-						onClick={() => handleBulkStatusUpdate(false)}
-					>
-						<Minus className="mr-2 h-4 w-4" />
-						Mark Inactive
-					</Button>
-					<Button
-						variant="ghost"
-						disabled={selectedProductIds.length === 0}
-						onClick={clearSelection}
-					>
-						Clear Selection
-					</Button>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="outline"
+								disabled={
+									selectedProductIds.length === 0 ||
+									bulkStatusMutation.isPending
+								}
+							>
+								Bulk actions
+								<ChevronDown className="ml-2 h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem
+								disabled={
+									selectedProductIds.length === 0 ||
+									bulkStatusMutation.isPending
+								}
+								onSelect={() => handleBulkStatusUpdate(true)}
+							>
+								<Plus className="h-4 w-4" />
+								Mark Active
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								disabled={
+									selectedProductIds.length === 0 ||
+									bulkStatusMutation.isPending
+								}
+								onSelect={() => handleBulkStatusUpdate(false)}
+							>
+								<Minus className="h-4 w-4" />
+								Mark Inactive
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</div>
 
