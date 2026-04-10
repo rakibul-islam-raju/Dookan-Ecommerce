@@ -23,6 +23,7 @@ import type { CustomerListItem } from "@/@types/User.type";
 import { useQuery } from "@tanstack/react-query";
 import { MoreHorizontal, ShieldCheck, ShieldOff } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CustomerFilterForm } from "./components/CustomerFilterForm";
 
@@ -89,9 +90,12 @@ export function CustomerList() {
 			key: "name",
 			header: "Name",
 			render: (customer) => (
-				<div className="font-medium">
+				<Link
+					to={`/customers/${customer.id}`}
+					className="font-medium hover:underline"
+				>
 					{customer.first_name} {customer.last_name}
-				</div>
+				</Link>
 			),
 		},
 		{

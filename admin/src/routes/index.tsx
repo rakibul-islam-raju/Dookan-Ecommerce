@@ -9,6 +9,7 @@ import { CouponList } from "@/features/coupons/CouponList";
 import { SaleList } from "@/features/sales/SaleList";
 import { VariantTypeList } from "@/features/variants/VariantTypeList";
 import { CustomerList } from "@/features/customers/CustomerList";
+import { CustomerDetails } from "@/features/customers/CustomerDetails";
 import { ReviewList } from "@/features/reviews/ReviewList";
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { OrderDetails } from "@/features/orders/OrderDetails";
@@ -90,6 +91,14 @@ export const router = createBrowserRouter([
 				element: (
 					<PermissionGuard permission="manage_customers">
 						<CustomerList />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "customers/:id",
+				element: (
+					<PermissionGuard permission="manage_customers">
+						<CustomerDetails />
 					</PermissionGuard>
 				),
 			},

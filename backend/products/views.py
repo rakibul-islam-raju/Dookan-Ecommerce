@@ -319,7 +319,7 @@ class AdminReviewListAPIView(generics.ListAPIView):
     serializer_class = ProductReviewSerializer
     permission_classes = [HasModulePermission("manage_reviews")]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    filterset_fields = ["is_approved", "is_active", "rating"]
+    filterset_fields = ["is_approved", "is_active", "rating", "user"]
     search_fields = ["product__name", "user__email", "title", "comment"]
 
     def get_queryset(self):

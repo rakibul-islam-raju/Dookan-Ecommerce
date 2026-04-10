@@ -7,7 +7,7 @@
 
 "use client";
 
-import type { IBanner, ISiteConfig } from "@/@types/Store";
+import type { IAnnouncement, IBanner, ISiteConfig } from "@/@types/Store";
 import { storeClientApi } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 
@@ -18,6 +18,7 @@ export const storeKeys = {
 	all: ["store"] as const,
 	banners: () => [...storeKeys.all, "banners"] as const,
 	siteConfig: () => [...storeKeys.all, "siteConfig"] as const,
+	announcements: () => [...storeKeys.all, "announcements"] as const,
 };
 
 /**
@@ -29,6 +30,17 @@ export function useSiteConfig() {
 		queryKey: storeKeys.siteConfig(),
 		queryFn: () => storeClientApi.getSiteConfig(),
 		staleTime: 5 * 60 * 1000, // 5 minutes
+	});
+}
+
+/**
+ * Hook to fetch active announcements for the announcement bar
+ */
+export function useAnnouncements() {
+	return useQuery<IAnnouncement[]>({
+		queryKey: storeKeys.announcements(),
+		queryFn: () => storeClientApi.getAnnouncements(),
+		staleTime: 2 * 60 * 1000, // 2 minutes
 	});
 }
 

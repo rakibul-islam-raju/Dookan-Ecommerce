@@ -369,7 +369,7 @@ class OrderListSerializer(serializers.ModelSerializer):
     """
 
     items_count = serializers.SerializerMethodField()
-    is_guest_order = serializers.BooleanField(source="is_guest_order", read_only=True)
+    is_guest_order = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Order

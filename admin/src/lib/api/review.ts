@@ -12,6 +12,7 @@ export interface ReviewFilter extends ICommonFilter {
 	search?: string;
 	is_approved?: boolean;
 	rating?: number;
+	user?: string;
 }
 
 export const reviewApi = {

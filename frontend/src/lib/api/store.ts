@@ -5,7 +5,7 @@
  */
 
 import type { IPaginatedResponse } from "@/@types/Common";
-import type { IBanner, ISiteConfig } from "@/@types/Store";
+import type { IAnnouncement, IBanner, ISiteConfig } from "@/@types/Store";
 import { unstable_cache } from "next/cache";
 import { clientApi, serverApi } from "./axios";
 
@@ -59,6 +59,16 @@ export const storeServerApi = {
  * Store API for Client Components (CSR)
  */
 export const storeClientApi = {
+	/**
+	 * Get active announcements for the announcement bar
+	 */
+	async getAnnouncements(): Promise<IAnnouncement[]> {
+		const { data } = await clientApi.get<IPaginatedResponse<IAnnouncement>>(
+			"/store/announcements/",
+			{ params: { limit: 20 } }
+		);
+		return data.results;
+	},
 	/**
 	 * Get site configuration
 	 * Use in Client Components with TanStack Query

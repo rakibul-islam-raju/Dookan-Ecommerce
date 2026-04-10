@@ -1,4 +1,4 @@
-import type { CustomerListItem } from "@/@types/User.type";
+import type { CustomerDetails, CustomerListItem } from "@/@types/User.type";
 import type { ICommonFilter, IPaginatedResponse } from "@/@types/Common.type";
 import { queryKeys } from "@/constants/queryKeys";
 import {
@@ -24,6 +24,11 @@ export const customerApi = {
 		return data;
 	},
 
+	async getById(id: string): Promise<CustomerDetails> {
+		const { data } = await clientApi.get<CustomerDetails>(`/users/${id}/`);
+		return data;
+	},
+
 	async updateStatus(
 		id: string,
 		is_active: boolean
@@ -40,6 +45,12 @@ export const getCustomers = (params: CustomerFilter) =>
 	queryOptions({
 		queryKey: [queryKeys.customers, { params }],
 		queryFn: async () => customerApi.list(params),
+	});
+
+export const getCustomerById = (id: string) =>
+	queryOptions({
+		queryKey: [queryKeys.customers, id],
+		queryFn: async () => customerApi.getById(id),
 	});
 
 export const useUpdateCustomerStatus = () => {

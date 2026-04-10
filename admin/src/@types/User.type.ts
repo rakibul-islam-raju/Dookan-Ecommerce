@@ -59,3 +59,36 @@ export interface CustomerListItem {
 	created_at: string;
 	updated_at: string;
 }
+
+export interface CustomerDefaultAddress {
+	id: string;
+	user: string;
+	full_name: string;
+	mobile_number: string;
+	address_line1: string;
+	address_line2?: string;
+	city: string;
+	state: string;
+	postal_code: string;
+	country: string;
+	is_default: boolean;
+	is_active: boolean;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CustomerDetails {
+	id: string;
+	email: string;
+	first_name: string;
+	last_name: string;
+	mobile_number: string;
+	is_active: boolean;
+	is_staff: boolean;
+	is_superuser: boolean;
+	is_email_verified: boolean;
+	is_mobile_verified: boolean;
+	created_at: string;
+	updated_at: string;
+	default_address: CustomerDefaultAddress | null;
+}

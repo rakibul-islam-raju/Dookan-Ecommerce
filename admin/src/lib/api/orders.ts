@@ -16,6 +16,7 @@ export interface OrderFilter extends ICommonFilter {
 	search?: string;
 	status?: IOrderStatus;
 	payment_status?: IOrderPaymentStatus;
+	user?: string;
 }
 import { clientApi } from "./axios";
 import { queryOptions, useMutation } from "@tanstack/react-query";

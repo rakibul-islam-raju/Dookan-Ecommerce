@@ -21,6 +21,15 @@ export interface ISiteConfig {
 	tax_rate?: string;
 }
 
+export interface IAnnouncement {
+	id: number;
+	title: string;
+	description: string;
+	start_date: string;
+	end_date: string;
+	is_active: boolean;
+}
+
 export interface IBanner {
 	id: string;
 	title: string;
