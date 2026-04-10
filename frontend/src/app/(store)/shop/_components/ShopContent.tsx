@@ -1,8 +1,10 @@
 /* eslint-disable react-hooks/static-components */
 "use client";
 
+import type { ICategory, ICategoryChild } from "@/@types/Category";
 import { IConsumerProductListItem } from "@/@types/Product";
 import { ProductItem } from "@/components/Product/ProductItem";
+import Image from "next/image";
 import { QuickViewModal } from "@/components/Product/QuickViewModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,7 @@ import { useCategories } from "@/lib/hooks/useCategories";
 import { useProducts } from "@/lib/hooks/useProducts";
 import { cn } from "@/lib/utils";
 import {
+	ChevronDown,
 	ChevronLeft,
 	ChevronRight,
 	Filter,
@@ -68,6 +71,46 @@ function CategorySkeleton() {
 	);
 }
 
+function CategoryFilterImage({ category }: { category: ICategory }) {
+	return (
+		<div className="size-6 rounded bg-muted flex items-center justify-center text-muted-foreground overflow-hidden shrink-0">
+			{category.image ? (
+				<Image
+					src={category.image}
+					alt={category.name}
+					width={24}
+					height={24}
+					className="object-cover size-full"
+				/>
+			) : (
+				<span className="text-[10px] font-semibold uppercase">
+					{category.name.charAt(0)}
+				</span>
+			)}
+		</div>
+	);
+}
+
+function ChildCategoryFilterImage({ child }: { child: ICategoryChild }) {
+	return (
+		<div className="size-5 rounded bg-muted flex items-center justify-center text-muted-foreground overflow-hidden shrink-0">
+			{child.image ? (
+				<Image
+					src={child.image}
+					alt={child.name}
+					width={20}
+					height={20}
+					className="object-cover size-full"
+				/>
+			) : (
+				<span className="text-[9px] font-semibold uppercase">
+					{child.name.charAt(0)}
+				</span>
+			)}
+		</div>
+	);
+}
+
 export function ShopContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -76,6 +119,21 @@ export function ShopContent() {
 		useState<IConsumerProductListItem | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [showFilters, setShowFilters] = useState(false);
+	const [expandedCategoryIds, setExpandedCategoryIds] = useState<Set<string>>(
+		new Set(),
+	);
+
+	const toggleCategoryExpanded = (id: string) => {
+		setExpandedCategoryIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) {
+				next.delete(id);
+			} else {
+				next.add(id);
+			}
+			return next;
+		});
+	};
 
 	// Get filters from URL
 	const searchQuery = searchParams.get("search") || "";
@@ -183,12 +241,12 @@ export function ShopContent() {
 	}) => (
 		<>
 			{/* Category Filter */}
-			<div className="space-y-3">
+			<div className="space-y-2">
 				<h3 className="font-medium text-sm">Category</h3>
 				{isCategoriesLoading ? (
 					<CategorySkeleton />
 				) : (
-					<div className="space-y-1">
+					<div className="space-y-0.5">
 						<button
 							onClick={() => {
 								updateFilters({ category: "" });
@@ -203,45 +261,80 @@ export function ShopContent() {
 						>
 							All Categories
 						</button>
-						{topLevelCategories.map((cat) => (
-							<div key={cat.id}>
-								<button
-									onClick={() => {
-										updateFilters({ category: cat.id });
-										onCategorySelect?.();
-									}}
-									className={cn(
-										"w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors",
-										categoryFilter === cat.id
-											? "bg-primary text-primary-foreground"
-											: "hover:bg-muted",
-									)}
-								>
-									{cat.name}
-								</button>
-								{cat.children && cat.children.length > 0 && (
-									<div className="ml-3 border-l pl-2 space-y-0.5">
-										{cat.children.map((child) => (
+						{topLevelCategories.map((cat) => {
+							const children = cat.children || [];
+							const hasChildren = children.length > 0;
+							const isExpanded = expandedCategoryIds.has(cat.id);
+							const isChildActive = children.some(
+								(c) => c.id === categoryFilter,
+							);
+
+							return (
+								<div key={cat.id}>
+									<div className="flex items-center rounded-md overflow-hidden">
+										<button
+											onClick={() => {
+												updateFilters({ category: cat.id });
+												onCategorySelect?.();
+											}}
+											className={cn(
+												"flex-1 flex items-center gap-2.5 px-2 py-2 text-sm font-medium transition-colors text-left rounded-md",
+												categoryFilter === cat.id
+													? "bg-primary text-primary-foreground"
+													: isChildActive
+														? "text-primary"
+														: "hover:bg-muted",
+											)}
+										>
+											<CategoryFilterImage category={cat} />
+											<span className="truncate">{cat.name}</span>
+										</button>
+										{hasChildren && (
 											<button
-												key={child.id}
-												onClick={() => {
-													updateFilters({ category: child.id });
-													onCategorySelect?.();
-												}}
+												onClick={() => toggleCategoryExpanded(cat.id)}
 												className={cn(
-													"w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
-													categoryFilter === child.id
-														? "bg-primary text-primary-foreground"
-														: "text-muted-foreground hover:bg-muted hover:text-foreground",
+													"px-2 py-2 transition-colors rounded-md ml-0.5",
+													categoryFilter === cat.id
+														? "text-primary-foreground/70 hover:text-primary-foreground"
+														: "text-muted-foreground hover:bg-muted",
 												)}
+												aria-label={isExpanded ? "Collapse" : "Expand"}
 											>
-												{child.name}
+												<ChevronDown
+													className={cn(
+														"size-3.5 transition-transform duration-200",
+														isExpanded || isChildActive ? "rotate-180" : "",
+													)}
+												/>
 											</button>
-										))}
+										)}
 									</div>
-								)}
-							</div>
-						))}
+
+									{hasChildren && (isExpanded || isChildActive) && (
+										<div className="ml-4 mt-0.5 border-l-2 border-primary/20 pl-2 space-y-0.5 pb-1">
+											{children.map((child) => (
+												<button
+													key={child.id}
+													onClick={() => {
+														updateFilters({ category: child.id });
+														onCategorySelect?.();
+													}}
+													className={cn(
+														"w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors text-left",
+														categoryFilter === child.id
+															? "bg-primary text-primary-foreground"
+															: "text-muted-foreground hover:bg-muted hover:text-foreground",
+													)}
+												>
+													<ChildCategoryFilterImage child={child} />
+													<span className="truncate">{child.name}</span>
+												</button>
+											))}
+										</div>
+									)}
+								</div>
+							);
+						})}
 					</div>
 				)}
 			</div>

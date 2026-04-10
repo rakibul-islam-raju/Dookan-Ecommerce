@@ -1,6 +1,6 @@
 "use client";
 
-import type { ICategory } from "@/@types/Category";
+import type { ICategory, ICategoryChild } from "@/@types/Category";
 import { useCategories } from "@/lib/hooks/useCategories";
 import { ChevronDown, LayoutGrid, Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -20,7 +20,7 @@ import {
 } from "../ui/dropdown-menu";
 
 const CategoryImage = ({ category }: { category: ICategory }) => (
-	<div className="size-8 rounded-md bg-muted flex items-center justify-center text-muted-foreground overflow-hidden">
+	<div className="size-8 rounded-md bg-muted flex items-center justify-center text-muted-foreground overflow-hidden shrink-0">
 		{category.image ? (
 			<Image
 				src={category.image}
@@ -30,19 +30,37 @@ const CategoryImage = ({ category }: { category: ICategory }) => (
 				className="object-cover size-full"
 			/>
 		) : (
-			category.name.charAt(0)
+			<span className="text-xs font-semibold uppercase">
+				{category.name.charAt(0)}
+			</span>
+		)}
+	</div>
+);
+
+const ChildCategoryImage = ({ child }: { child: ICategoryChild }) => (
+	<div className="size-6 rounded bg-muted flex items-center justify-center text-muted-foreground overflow-hidden shrink-0">
+		{child.image ? (
+			<Image
+				src={child.image}
+				alt={child.name}
+				width={24}
+				height={24}
+				className="object-cover size-full"
+			/>
+		) : (
+			<span className="text-[10px] font-semibold uppercase">
+				{child.name.charAt(0)}
+			</span>
 		)}
 	</div>
 );
 
 export const CategoryDropdownMenu = () => {
 	const { data: categoriesData, isLoading } = useCategories();
-	const categories = categoriesData?.results || [];
 
-	// Get only top-level categories (no parent)
 	const topLevelCategories = useMemo(
-		() => categories.filter((c) => !c.parent),
-		[categories],
+		() => (categoriesData?.results || []).filter((c) => !c.parent),
+		[categoriesData],
 	);
 
 	return (
@@ -57,7 +75,7 @@ export const CategoryDropdownMenu = () => {
 					<ChevronDown className="size-4 opacity-50" />
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className="w-56 p-2" align="start">
+			<DropdownMenuContent className="w-60 p-2" align="start">
 				<DropdownMenuLabel className="text-xs font-normal text-muted-foreground uppercase tracking-wider mb-2">
 					Browse by Category
 				</DropdownMenuLabel>
@@ -74,27 +92,38 @@ export const CategoryDropdownMenu = () => {
 									<DropdownMenuSub key={category.id}>
 										<DropdownMenuSubTrigger className="flex items-center gap-3 p-2 cursor-pointer rounded-md">
 											<CategoryImage category={category} />
-											<span className="font-medium leading-none">
-												{category.name}
-											</span>
+											<div className="flex flex-col min-w-0">
+												<span className="font-medium leading-none truncate">
+													{category.name}
+												</span>
+												<span className="text-[11px] text-muted-foreground mt-0.5">
+													{children.length} subcategories
+												</span>
+											</div>
 										</DropdownMenuSubTrigger>
-										<DropdownMenuSubContent className="w-48 p-1">
+										<DropdownMenuSubContent className="w-56 p-2">
 											<DropdownMenuItem asChild>
 												<Link
 													href={`/shop?category=${category.id}`}
-													className="flex items-center gap-2 p-2 cursor-pointer"
+													className="flex items-center gap-2.5 px-2 py-2 cursor-pointer rounded-md"
 												>
-													All {category.name}
+													<div className="size-6 rounded bg-primary/10 flex items-center justify-center shrink-0">
+														<LayoutGrid className="size-3 text-primary" />
+													</div>
+													<span className="text-sm font-medium">
+														All {category.name}
+													</span>
 												</Link>
 											</DropdownMenuItem>
-											<DropdownMenuSeparator />
+											<DropdownMenuSeparator className="my-1" />
 											{children.map((child) => (
 												<DropdownMenuItem key={child.id} asChild>
 													<Link
 														href={`/shop?category=${child.id}`}
-														className="flex items-center gap-2 p-2 cursor-pointer"
+														className="flex items-center gap-2.5 px-2 py-2 cursor-pointer rounded-md"
 													>
-														{child.name}
+														<ChildCategoryImage child={child} />
+														<span className="text-sm">{child.name}</span>
 													</Link>
 												</DropdownMenuItem>
 											))}
@@ -110,8 +139,8 @@ export const CategoryDropdownMenu = () => {
 										className="flex items-center gap-3 p-2 cursor-pointer rounded-md focus:bg-accent focus:text-accent-foreground"
 									>
 										<CategoryImage category={category} />
-										<div className="flex flex-col">
-											<span className="font-medium leading-none">
+										<div className="flex flex-col min-w-0">
+											<span className="font-medium leading-none truncate">
 												{category.name}
 											</span>
 										</div>
