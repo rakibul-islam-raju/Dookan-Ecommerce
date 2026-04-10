@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useCart } from "@/lib/hooks/useCart";
 import { useCreateOrder } from "@/lib/hooks/useOrders";
+import { useSiteConfig } from "@/lib/hooks/useStore";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import type { CouponValidateResponse } from "@/lib/api/coupons";
 import { couponClientApi } from "@/lib/api/coupons";
@@ -43,6 +44,7 @@ function CheckoutPageInner() {
 
 	const { data: cart, isLoading: cartLoading } = useCart();
 	const createOrder = useCreateOrder();
+	const { data: siteConfig } = useSiteConfig();
 
 	const [couponCode, setCouponCode] = useState(
 		searchParams.get("coupon") || ""
@@ -80,9 +82,25 @@ function CheckoutPageInner() {
 	const discount = appliedCoupon
 		? parseFloat(appliedCoupon.discount_amount)
 		: 0;
-	const baseShipping = selectedDeliveryType === "inside_dhaka" ? 60 : 120;
-	const shipping = subtotal >= 1000 ? 0 : baseShipping;
-	const tax = 0;
+
+	const insideDhakaCharge = parseFloat(
+		siteConfig?.inside_dhaka_delivery_charge ?? "60"
+	);
+	const outsideDhakaCharge = parseFloat(
+		siteConfig?.outside_dhaka_delivery_charge ?? "120"
+	);
+	const freeShippingThreshold = parseFloat(
+		siteConfig?.free_shipping_threshold ?? "1000"
+	);
+	const taxRate = parseFloat(siteConfig?.tax_rate ?? "0");
+
+	const baseShipping =
+		selectedDeliveryType === "inside_dhaka" ? insideDhakaCharge : outsideDhakaCharge;
+	const shipping =
+		freeShippingThreshold > 0 && subtotal >= freeShippingThreshold
+			? 0
+			: baseShipping;
+	const tax = (subtotal - discount) * (taxRate / 100);
 	const total = subtotal - discount + shipping + tax;
 
 	const handleDeliveryTypeChange = (type: "inside_dhaka" | "outside_dhaka") => {
@@ -257,6 +275,8 @@ function CheckoutPageInner() {
 							selectedDeliveryType={selectedDeliveryType}
 							onDeliveryTypeChange={handleDeliveryTypeChange}
 							error={form.formState.errors.delivery_type}
+							insideDhakaCharge={insideDhakaCharge}
+							outsideDhakaCharge={outsideDhakaCharge}
 						/>
 						<Separator />
 						<CheckoutPaymentMethod />
@@ -292,6 +312,7 @@ function CheckoutPageInner() {
 							tax={tax}
 							total={total}
 							appliedCoupon={appliedCoupon}
+							freeShippingThreshold={freeShippingThreshold}
 						/>
 					</div>
 				</div>

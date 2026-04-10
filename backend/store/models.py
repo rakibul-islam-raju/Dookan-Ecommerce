@@ -26,6 +26,32 @@ class SiteConfig(BaseModel):
     youtube_url = models.URLField(blank=True, null=True)
     logo = models.ImageField(upload_to="site/", blank=True, null=True)
 
+    # Shipping & Tax Configuration
+    inside_dhaka_delivery_charge = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=60,
+        help_text="Delivery charge for orders within Dhaka city (BDT)",
+    )
+    outside_dhaka_delivery_charge = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=120,
+        help_text="Delivery charge for orders outside Dhaka city (BDT)",
+    )
+    free_shipping_threshold = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=1000,
+        help_text="Orders at or above this amount qualify for free shipping. Set to 0 to disable free shipping.",
+    )
+    tax_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        help_text="Tax percentage applied to the order total (e.g. 5 means 5%). Set to 0 for no tax.",
+    )
+
     class Meta:
         verbose_name = "Site Configuration"
         verbose_name_plural = "Site Configuration"

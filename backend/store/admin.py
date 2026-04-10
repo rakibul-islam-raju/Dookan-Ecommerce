@@ -34,6 +34,17 @@ class SiteConfigAdmin(admin.ModelAdmin):
             "Social Links",
             {"fields": ("facebook_url", "instagram_url", "youtube_url")},
         ),
+        (
+            "Shipping & Tax",
+            {
+                "fields": (
+                    "inside_dhaka_delivery_charge",
+                    "outside_dhaka_delivery_charge",
+                    "free_shipping_threshold",
+                    "tax_rate",
+                )
+            },
+        ),
     )
 
     def has_add_permission(self, request):

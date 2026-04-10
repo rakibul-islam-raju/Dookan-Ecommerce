@@ -125,6 +125,17 @@ export function OrderList() {
 			),
 		},
 		{
+			key: "is_guest_order",
+			header: "Guest",
+			render: (order) =>
+				order.is_guest_order ? (
+					<Badge variant="secondary">Guest</Badge>
+				) : (
+					<span className="text-muted-foreground">—</span>
+				),
+			className: "text-center",
+		},
+		{
 			key: "items_count",
 			header: "Items",
 			render: (order) => <span>{order.items_count}</span>,

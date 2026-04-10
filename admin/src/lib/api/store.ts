@@ -110,6 +110,10 @@ export interface SiteConfigData {
 	instagram_url: string | null;
 	youtube_url: string | null;
 	logo: string | null;
+	inside_dhaka_delivery_charge: string;
+	outside_dhaka_delivery_charge: string;
+	free_shipping_threshold: string;
+	tax_rate: string;
 }
 
 export interface SiteConfigUpdateData {
@@ -121,6 +125,10 @@ export interface SiteConfigUpdateData {
 	instagram_url?: string | null;
 	youtube_url?: string | null;
 	logo?: File | null;
+	inside_dhaka_delivery_charge?: number;
+	outside_dhaka_delivery_charge?: number;
+	free_shipping_threshold?: number;
+	tax_rate?: number;
 }
 
 // ============ Banner API ============
@@ -269,6 +277,27 @@ export const siteConfigApi = {
 		}
 		if (updateData.logo) {
 			formData.append("logo", updateData.logo);
+		}
+		if (updateData.inside_dhaka_delivery_charge !== undefined) {
+			formData.append(
+				"inside_dhaka_delivery_charge",
+				String(updateData.inside_dhaka_delivery_charge)
+			);
+		}
+		if (updateData.outside_dhaka_delivery_charge !== undefined) {
+			formData.append(
+				"outside_dhaka_delivery_charge",
+				String(updateData.outside_dhaka_delivery_charge)
+			);
+		}
+		if (updateData.free_shipping_threshold !== undefined) {
+			formData.append(
+				"free_shipping_threshold",
+				String(updateData.free_shipping_threshold)
+			);
+		}
+		if (updateData.tax_rate !== undefined) {
+			formData.append("tax_rate", String(updateData.tax_rate));
 		}
 
 		const { data } = await clientApi.patch<SiteConfigData>(

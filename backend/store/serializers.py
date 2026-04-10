@@ -30,6 +30,10 @@ class SiteConfigSerializer(serializers.ModelSerializer):
             "instagram_url",
             "youtube_url",
             "logo",
+            "inside_dhaka_delivery_charge",
+            "outside_dhaka_delivery_charge",
+            "free_shipping_threshold",
+            "tax_rate",
         ]
         read_only_fields = ["id"]
 

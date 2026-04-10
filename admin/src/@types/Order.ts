@@ -21,6 +21,7 @@ export interface OrderListItem {
 	id: string;
 	order_number: string;
 	customer_name: string;
+	is_guest_order: boolean;
 	status: IOrderStatus;
 	payment_status: "pending" | "paid" | "failed" | "refunded";
 	total_amount: string; // Decimal as string

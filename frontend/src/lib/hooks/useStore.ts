@@ -7,7 +7,7 @@
 
 "use client";
 
-import type { IBanner } from "@/@types/Store";
+import type { IBanner, ISiteConfig } from "@/@types/Store";
 import { storeClientApi } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,7 +17,20 @@ import { useQuery } from "@tanstack/react-query";
 export const storeKeys = {
 	all: ["store"] as const,
 	banners: () => [...storeKeys.all, "banners"] as const,
+	siteConfig: () => [...storeKeys.all, "siteConfig"] as const,
 };
+
+/**
+ * Hook to fetch site configuration (client-side)
+ * Provides shipping charges, tax rate, and free shipping threshold for checkout.
+ */
+export function useSiteConfig() {
+	return useQuery<ISiteConfig>({
+		queryKey: storeKeys.siteConfig(),
+		queryFn: () => storeClientApi.getSiteConfig(),
+		staleTime: 5 * 60 * 1000, // 5 minutes
+	});
+}
 
 /**
  * Hook to fetch active banners

@@ -13,6 +13,7 @@ interface CheckoutOrderSummaryProps {
 	tax: number;
 	total: number;
 	appliedCoupon: CouponValidateResponse | null;
+	freeShippingThreshold: number;
 }
 
 function getImageUrl(image?: string) {
@@ -29,6 +30,7 @@ export function CheckoutOrderSummary({
 	tax,
 	total,
 	appliedCoupon,
+	freeShippingThreshold,
 }: CheckoutOrderSummaryProps) {
 	const items = cart.items;
 
@@ -94,9 +96,10 @@ export function CheckoutOrderSummary({
 						<span>৳{tax.toFixed(2)}</span>
 					</div>
 				)}
-				{subtotal < 1000 && (
+				{freeShippingThreshold > 0 && subtotal < freeShippingThreshold && (
 					<div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-						Add ৳{(1000 - subtotal).toFixed(2)} more for free shipping!
+						Add ৳{(freeShippingThreshold - subtotal).toFixed(2)} more for free
+						shipping!
 					</div>
 				)}
 			</div>

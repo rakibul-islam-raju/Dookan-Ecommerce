@@ -61,10 +61,12 @@ class OrderListView(generics.ListAPIView):
 
         if user.is_staff:
             # Admin sees all orders
-            queryset = Order.objects.all()
+            queryset = Order.objects.all().prefetch_related("items")
         else:
             # Regular users see only their orders
             return Order.objects.filter(user=user).prefetch_related("items")
+
+        return queryset
 
 
 class OrderDetailView(generics.RetrieveAPIView):

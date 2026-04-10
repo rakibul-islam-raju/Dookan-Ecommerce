@@ -14,6 +14,11 @@ export interface ISiteConfig {
 	twitter?: string;
 	youtube?: string;
 	linkedin?: string;
+	// Shipping & Tax
+	inside_dhaka_delivery_charge?: string;
+	outside_dhaka_delivery_charge?: string;
+	free_shipping_threshold?: string;
+	tax_rate?: string;
 }
 
 export interface IBanner {

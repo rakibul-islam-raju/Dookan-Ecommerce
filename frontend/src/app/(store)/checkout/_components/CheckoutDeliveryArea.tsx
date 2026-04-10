@@ -8,33 +8,37 @@ interface CheckoutDeliveryAreaProps {
 	selectedDeliveryType: "inside_dhaka" | "outside_dhaka";
 	onDeliveryTypeChange: (type: "inside_dhaka" | "outside_dhaka") => void;
 	error?: FieldError;
+	insideDhakaCharge: number;
+	outsideDhakaCharge: number;
 }
 
 export function CheckoutDeliveryArea({
 	selectedDeliveryType,
 	onDeliveryTypeChange,
 	error,
+	insideDhakaCharge,
+	outsideDhakaCharge,
 }: CheckoutDeliveryAreaProps) {
+	const options = [
+		{
+			value: "inside_dhaka" as const,
+			label: "Inside Dhaka",
+			description: "Delivery within Dhaka city limits",
+			price: `৳${insideDhakaCharge}`,
+		},
+		{
+			value: "outside_dhaka" as const,
+			label: "Outside Dhaka",
+			description: "Delivery outside Dhaka city limits",
+			price: `৳${outsideDhakaCharge}`,
+		},
+	];
+
 	return (
 		<section className="space-y-4">
 			<h2 className="text-xl font-semibold">Delivery Area</h2>
 			<div className="space-y-3">
-				{(
-					[
-						{
-							value: "inside_dhaka",
-							label: "Inside Dhaka",
-							description: "Delivery within Dhaka city limits",
-							price: "৳60",
-						},
-						{
-							value: "outside_dhaka",
-							label: "Outside Dhaka",
-							description: "Delivery outside Dhaka city limits",
-							price: "৳120",
-						},
-					] as const
-				).map((option) => (
+				{options.map((option) => (
 					<div
 						key={option.value}
 						className={cn(
