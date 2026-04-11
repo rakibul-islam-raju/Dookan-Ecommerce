@@ -1,3 +1,4 @@
+import logging
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
@@ -15,6 +16,7 @@ from utils.permissions import IsOwnerOrAdmin
 from utils.email import send_guest_order_tracking_otp, send_order_status_update_email
 from orders.models import Order, OrderStatusHistory
 from orders.filters import OrderFilter
+from store.meta import send_purchase_event
 from orders.serializers import (
     OrderCreateSerializer,
     OrderListSerializer,
@@ -24,6 +26,8 @@ from orders.serializers import (
     OrderPaymentUpdateSerializer,
     OrderStatusUpdateSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class OrderCreateView(generics.CreateAPIView):
@@ -39,6 +43,15 @@ class OrderCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
+        meta_event_id = serializer.validated_data.get("meta_event_id") or None
+
+        try:
+            send_purchase_event(order, request, event_id=meta_event_id)
+        except Exception:
+            logger.exception(
+                "Meta purchase tracking failed",
+                extra={"order_id": str(order.id), "event_id": meta_event_id},
+            )
 
         # Return detailed order info
         response_serializer = OrderDetailSerializer(order)

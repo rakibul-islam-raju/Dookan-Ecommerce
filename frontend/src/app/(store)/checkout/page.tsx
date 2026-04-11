@@ -8,6 +8,12 @@ import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Separator } from "@/components/ui/separator";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useCart } from "@/lib/hooks/useCart";
+import {
+	generateMetaEventId,
+	initMetaPixel,
+	trackMetaInitiateCheckout,
+	trackMetaPurchase,
+} from "@/lib/meta";
 import { useCreateOrder } from "@/lib/hooks/useOrders";
 import { useSiteConfig } from "@/lib/hooks/useStore";
 import { useAuthStore } from "@/lib/store/useAuthStore";
@@ -17,6 +23,7 @@ import { ArrowLeft, Loader2, Truck } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { useRef } from "react";
 import { checkoutSchema } from "./_types";
 import type { CheckoutFormValues } from "./_types";
 import { CheckoutContactInfo } from "./_components/CheckoutContactInfo";
@@ -93,6 +100,8 @@ function CheckoutPageInner() {
 		siteConfig?.free_shipping_threshold ?? "1000"
 	);
 	const taxRate = parseFloat(siteConfig?.tax_rate ?? "0");
+	const metaCurrency = siteConfig?.meta_default_currency || "BDT";
+	const hasTrackedCheckoutRef = useRef(false);
 
 	const baseShipping =
 		selectedDeliveryType === "inside_dhaka" ? insideDhakaCharge : outsideDhakaCharge;
@@ -144,6 +153,7 @@ function CheckoutPageInner() {
 			guest_mobile_number: data.guest_mobile_number,
 			payment_method: "cod",
 			delivery_type: data.delivery_type,
+			meta_event_id: generateMetaEventId(),
 			customer_note: data.customer_note || undefined,
 			coupon_code: appliedCoupon?.code || undefined,
 			items: items.map((item) => ({
@@ -164,6 +174,12 @@ function CheckoutPageInner() {
 
 		try {
 			const result = await createOrder.mutateAsync(orderData);
+			if (orderData.meta_event_id) {
+				if (siteConfig?.meta_pixel_enabled && siteConfig.meta_pixel_id) {
+					initMetaPixel(siteConfig.meta_pixel_id);
+				}
+				trackMetaPurchase(result, metaCurrency, orderData.meta_event_id);
+			}
 			if (!isAuthenticated) {
 				setGuestOrderNumber(result.order_number);
 				setShowGuestSuccessModal(true);
@@ -194,6 +210,19 @@ function CheckoutPageInner() {
 				.catch(() => {});
 		}
 	}, [searchParams, subtotal]);
+
+	useEffect(() => {
+		if (hasTrackedCheckoutRef.current || items.length === 0) return;
+		if (siteConfig?.meta_pixel_enabled && siteConfig.meta_pixel_id) {
+			initMetaPixel(siteConfig.meta_pixel_id);
+		}
+		trackMetaInitiateCheckout({
+			items,
+			value: total,
+			currency: metaCurrency,
+		});
+		hasTrackedCheckoutRef.current = true;
+	}, [items, total, metaCurrency, siteConfig?.meta_pixel_enabled, siteConfig?.meta_pixel_id]);
 
 	useEffect(() => {
 		if (user) {

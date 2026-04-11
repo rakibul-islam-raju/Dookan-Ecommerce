@@ -7,6 +7,8 @@
 "use client";
 
 import { type Cart, type CartItem } from "@/lib/api";
+import { initMetaPixel, trackMetaAddToCart } from "@/lib/meta";
+import { useSiteConfigContext } from "@/lib/providers/site-config-provider";
 import { toast } from "react-toastify";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -249,10 +251,29 @@ export function useCart() {
  */
 export function useAddToCart() {
 	const addToCart = useCartStore((state) => state.addToCart);
+	const { config } = useSiteConfigContext();
 
 	return {
 		mutate: (data: LocalAddToCartData) => {
+			const price = data.variant
+				? data.variant.price
+				: Number(
+						data.product.sale_price ??
+							data.product.base_price ??
+							data.product.price
+				  );
+			const quantity = data.quantity ?? 1;
+
 			addToCart(data);
+			if (config?.meta_pixel_enabled && config.meta_pixel_id) {
+				initMetaPixel(config.meta_pixel_id);
+			}
+			trackMetaAddToCart({
+				productId: data.product.id,
+				price,
+				quantity,
+				currency: config?.meta_default_currency || "BDT",
+			});
 		},
 		isPending: false, // No async operation, so always false
 		isError: false,

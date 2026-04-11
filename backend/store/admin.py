@@ -35,6 +35,19 @@ class SiteConfigAdmin(admin.ModelAdmin):
             {"fields": ("facebook_url", "instagram_url", "youtube_url")},
         ),
         (
+            "Meta Tracking",
+            {
+                "fields": (
+                    "meta_pixel_enabled",
+                    "meta_pixel_id",
+                    "meta_capi_enabled",
+                    "meta_access_token",
+                    "meta_test_event_code",
+                    "meta_default_currency",
+                )
+            },
+        ),
+        (
             "Shipping & Tax",
             {
                 "fields": (

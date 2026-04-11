@@ -18,8 +18,12 @@ export async function POST(req: NextRequest) {
 	}
 
 	revalidateTag(STORE_CACHE_TAGS.banners, "default");
+	revalidatePath("/", "layout");
 	revalidatePath("/", "page");
 
-	return Response.json({ ok: true, revalidated: ["tag:store:banners", "path:/"] });
+	return Response.json({
+		ok: true,
+		revalidated: ["tag:store:banners", "layout:/", "page:/"],
+	});
 }
 

@@ -97,6 +97,9 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     coupon_code = serializers.CharField(
         max_length=50, required=False, allow_blank=True, write_only=True
     )
+    meta_event_id = serializers.CharField(
+        required=False, allow_blank=True, write_only=True
+    )
 
     class Meta:
         model = Order
@@ -110,6 +113,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             "shipping_address",
             "delivery_type",
             "coupon_code",
+            "meta_event_id",
         ]
 
     def validate_items(self, value):
@@ -175,6 +179,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop("items")
         shipping_data = validated_data.pop("shipping_address")
         coupon_code = validated_data.pop("coupon_code", "").strip().upper()
+        validated_data.pop("meta_event_id", None)
 
         # Generate unique order number
         order_number = self._generate_order_number()

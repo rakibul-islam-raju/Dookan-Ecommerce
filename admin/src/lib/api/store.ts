@@ -20,7 +20,7 @@ const storefrontRevalidateUrl = import.meta.env.VITE_STOREFRONT_REVALIDATE_URL;
 const storefrontRevalidateSecret =
 	import.meta.env.VITE_STOREFRONT_REVALIDATE_SECRET;
 
-const revalidateStorefrontBanners = async () => {
+const revalidateStorefront = async () => {
 	if (!storefrontRevalidateUrl || !storefrontRevalidateSecret) return;
 
 	try {
@@ -110,6 +110,12 @@ export interface SiteConfigData {
 	instagram_url: string | null;
 	youtube_url: string | null;
 	logo: string | null;
+	meta_pixel_enabled: boolean;
+	meta_pixel_id: string;
+	meta_capi_enabled: boolean;
+	meta_test_event_code: string;
+	meta_default_currency: string;
+	has_meta_access_token?: boolean;
 	inside_dhaka_delivery_charge: string;
 	outside_dhaka_delivery_charge: string;
 	free_shipping_threshold: string;
@@ -125,6 +131,12 @@ export interface SiteConfigUpdateData {
 	instagram_url?: string | null;
 	youtube_url?: string | null;
 	logo?: File | null;
+	meta_pixel_enabled?: boolean;
+	meta_pixel_id?: string;
+	meta_capi_enabled?: boolean;
+	meta_access_token?: string;
+	meta_test_event_code?: string;
+	meta_default_currency?: string;
 	inside_dhaka_delivery_charge?: number;
 	outside_dhaka_delivery_charge?: number;
 	free_shipping_threshold?: number;
@@ -278,6 +290,24 @@ export const siteConfigApi = {
 		if (updateData.logo) {
 			formData.append("logo", updateData.logo);
 		}
+		if (updateData.meta_pixel_enabled !== undefined) {
+			formData.append("meta_pixel_enabled", String(updateData.meta_pixel_enabled));
+		}
+		if (updateData.meta_pixel_id !== undefined) {
+			formData.append("meta_pixel_id", updateData.meta_pixel_id);
+		}
+		if (updateData.meta_capi_enabled !== undefined) {
+			formData.append("meta_capi_enabled", String(updateData.meta_capi_enabled));
+		}
+		if (updateData.meta_access_token !== undefined) {
+			formData.append("meta_access_token", updateData.meta_access_token);
+		}
+		if (updateData.meta_test_event_code !== undefined) {
+			formData.append("meta_test_event_code", updateData.meta_test_event_code);
+		}
+		if (updateData.meta_default_currency !== undefined) {
+			formData.append("meta_default_currency", updateData.meta_default_currency);
+		}
 		if (updateData.inside_dhaka_delivery_charge !== undefined) {
 			formData.append(
 				"inside_dhaka_delivery_charge",
@@ -338,7 +368,7 @@ export const useCreateBanner = () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.banners],
 			});
-			await revalidateStorefrontBanners();
+			await revalidateStorefront();
 		},
 	});
 };
@@ -357,7 +387,7 @@ export const useUpdateBanner = () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.banners],
 			});
-			await revalidateStorefrontBanners();
+			await revalidateStorefront();
 		},
 	});
 };
@@ -370,7 +400,7 @@ export const useDeleteBanner = () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.banners],
 			});
-			await revalidateStorefrontBanners();
+			await revalidateStorefront();
 		},
 	});
 };
@@ -426,10 +456,11 @@ export const useUpdateSiteConfig = () => {
 	return useMutation({
 		mutationFn: (updateData: SiteConfigUpdateData) =>
 			siteConfigApi.update(updateData),
-		onSuccess: () => {
+		onSuccess: async () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.siteConfig],
 			});
+			await revalidateStorefront();
 		},
 	});
 };

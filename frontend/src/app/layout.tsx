@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { store } from "@/config/store";
+import { MetaPixelTracker } from "@/components/integrations/MetaPixelTracker";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { SiteConfigProvider } from "@/lib/providers/site-config-provider";
 import { storeServerApi } from "@/lib/api";
@@ -55,6 +57,9 @@ export default async function RootLayout({
 			>
 				<QueryProvider>
 					<SiteConfigProvider initialConfig={siteConfig}>
+						<Suspense fallback={null}>
+							<MetaPixelTracker />
+						</Suspense>
 						<ToastProvider>{children}</ToastProvider>
 					</SiteConfigProvider>
 				</QueryProvider>

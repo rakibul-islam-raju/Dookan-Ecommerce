@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAddToCart } from "@/lib/hooks/useCart";
+import { initMetaPixel, trackMetaViewContent } from "@/lib/meta";
+import { useSiteConfigContext } from "@/lib/providers/site-config-provider";
 import { cn } from "@/lib/utils";
 import {
 	AlertTriangle,
@@ -17,7 +19,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WishlistButton } from "@/components/Product/WishlistButton";
 import { ProductReviews } from "./ProductReviews";
 import { SimilarProducts } from "./SimilarProducts";
@@ -30,6 +32,7 @@ interface ProductDetailsClientProps {
 export const ProductDetailsClient = ({
 	product,
 }: ProductDetailsClientProps) => {
+	const { config } = useSiteConfigContext();
 	const images = product.images ?? [];
 	const [selectedImage, setSelectedImage] = useState(
 		images.find((img) => img.is_primary) || images[0] || null,
@@ -63,6 +66,7 @@ export const ProductDetailsClient = ({
 	const activeInStock = selectedVariant
 		? selectedVariant.is_in_stock
 		: product.is_in_stock;
+	const metaCurrency = config?.meta_default_currency || "BDT";
 
 	const handleQuantityChange = (delta: number) => {
 		const newQuantity = quantity + delta;
@@ -110,6 +114,18 @@ export const ProductDetailsClient = ({
 			setIsAddingToCart(false);
 		}
 	};
+
+	useEffect(() => {
+		if (config?.meta_pixel_enabled && config.meta_pixel_id) {
+			initMetaPixel(config.meta_pixel_id);
+		}
+		trackMetaViewContent({
+			product,
+			variantId: selectedVariant?.id || null,
+			price: Number(activePrice),
+			currency: metaCurrency,
+		});
+	}, [product, selectedVariant, activePrice, metaCurrency]);
 
 	return (
 		<div className="container py-8 md:py-12">

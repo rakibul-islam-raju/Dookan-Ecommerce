@@ -25,6 +25,12 @@ class SiteConfig(BaseModel):
     instagram_url = models.URLField(blank=True, null=True)
     youtube_url = models.URLField(blank=True, null=True)
     logo = models.ImageField(upload_to="site/", blank=True, null=True)
+    meta_pixel_enabled = models.BooleanField(default=False)
+    meta_pixel_id = models.CharField(max_length=32, blank=True)
+    meta_capi_enabled = models.BooleanField(default=False)
+    meta_access_token = models.TextField(blank=True)
+    meta_test_event_code = models.CharField(max_length=100, blank=True)
+    meta_default_currency = models.CharField(max_length=10, default="BDT")
 
     # Shipping & Tax Configuration
     inside_dhaka_delivery_charge = models.DecimalField(

@@ -46,6 +46,7 @@ export interface ICreateOrderRequest {
 	shipping_address: IOrderShippingAddressRequest;
 
 	delivery_type: "inside_dhaka" | "outside_dhaka";
+	meta_event_id?: string;
 }
 
 // Individual order item for creation

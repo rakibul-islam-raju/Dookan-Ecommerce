@@ -14,6 +14,9 @@ export interface ISiteConfig {
 	twitter?: string;
 	youtube?: string;
 	linkedin?: string;
+	meta_pixel_enabled?: boolean;
+	meta_pixel_id?: string;
+	meta_default_currency?: string;
 	// Shipping & Tax
 	inside_dhaka_delivery_charge?: string;
 	outside_dhaka_delivery_charge?: string;
