@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import type { Permission } from "@/@types/User.type";
 import {
 	Grid2X2Check,
+	Heart,
 	Image,
 	KeyRound,
 	LayoutDashboard,
@@ -38,6 +39,7 @@ const sidebarItems: SidebarItem[] = [
 	{ icon: Grid2X2Check, label: "Categories", href: "/categories", permission: "manage_categories" },
 	{ icon: SwatchBook, label: "Variant Types", href: "/variant-types", permission: "manage_products" },
 	{ icon: MessageSquareText, label: "Reviews", href: "/reviews", permission: "manage_reviews" },
+	{ icon: Heart, label: "Wishlists", href: "/wishlists", permission: "manage_wishlists" },
 	{ icon: Tag, label: "Coupons", href: "/coupons", permission: "manage_coupons" },
 	{ icon: Percent, label: "Sales", href: "/sales", permission: "manage_sales" },
 ];

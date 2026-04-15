@@ -16,4 +16,5 @@ export const queryKeys = {
 	staff: "staff",
 	roles: "roles",
 	sales: "sales",
+	wishlists: "wishlists",
 } as const;

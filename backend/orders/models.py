@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from coupons.models import Coupon
-from products.models import Product
+from products.models import Product, ProductVariant
 from users.models import User
 from utils.models import BaseModel
 
@@ -138,10 +138,19 @@ class OrderItem(BaseModel):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="order_items"
     )
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="order_items",
+    )
 
     # Product snapshot at time of order
     product_name = models.CharField(max_length=200)
     product_sku = models.CharField(max_length=50)
+    variant_name = models.CharField(max_length=200, blank=True)
+    variant_sku = models.CharField(max_length=50, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
     total_price = models.DecimalField(max_digits=10, decimal_places=2)

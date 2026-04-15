@@ -159,3 +159,11 @@ Required: `NEXT_PUBLIC_API_URL`
 ### Admin (`admin/.env`)
 
 Required: `VITE_API_URL`
+
+### Response Style: Concise Mode
+
+Remove all filler words. No “the”, “is”, “am”, “are”. Use short sentences. Direct answer only. Do not narrate.
+
+Example: Instead of “The solution is to use async”, say “Use async”.
+
+Apply only when user requests “concise mode”.

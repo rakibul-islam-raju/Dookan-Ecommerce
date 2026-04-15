@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from utils.permissions import HasModulePermission
 
 from orders.models import Order
-from products.models import Product
+from products.models import Product, ProductVariant
 from users.models import User
 
 
@@ -79,16 +79,31 @@ class DashboardMetricsView(APIView):
 
         # -- Product metrics --
         total_products = Product.objects.filter(is_active=True).count()
-        low_stock_products = list(
-            Product.objects.filter(
+        low_stock_variants = list(
+            ProductVariant.objects.filter(
                 is_active=True,
-                track_inventory=True,
+                product__is_active=True,
+                product__is_digital=False,
                 stock_quantity__gt=0,
                 stock_quantity__lte=F("low_stock_threshold"),
-            ).values("id", "name", "slug", "stock_quantity", "low_stock_threshold")[:10]
+            )
+            .select_related("product")
+            .values(
+                "id",
+                "sku",
+                "name",
+                "stock_quantity",
+                "low_stock_threshold",
+                "product__id",
+                "product__name",
+                "product__slug",
+            )[:10]
         )
-        out_of_stock_count = Product.objects.filter(
-            is_active=True, track_inventory=True, stock_quantity=0
+        out_of_stock_count = ProductVariant.objects.filter(
+            is_active=True,
+            product__is_active=True,
+            product__is_digital=False,
+            stock_quantity=0,
         ).count()
 
         # -- Recent orders --
@@ -132,7 +147,7 @@ class DashboardMetricsView(APIView):
                 "products": {
                     "total": total_products,
                     "out_of_stock": out_of_stock_count,
-                    "low_stock": low_stock_products,
+                    "low_stock": low_stock_variants,
                 },
                 "recent_orders": recent_orders,
             }

@@ -12,6 +12,7 @@ import { CustomerList } from "@/features/customers/CustomerList";
 import { CustomerDetails } from "@/features/customers/CustomerDetails";
 import { ReviewList } from "@/features/reviews/ReviewList";
 import { Dashboard } from "@/features/dashboard/Dashboard";
+import { CreateOrder } from "@/features/orders/CreateOrder";
 import { OrderDetails } from "@/features/orders/OrderDetails";
 import { OrderList } from "@/features/orders/OrderList";
 import { CreateProduct } from "@/features/products/CreateProduct";
@@ -23,6 +24,7 @@ import { BannerList } from "@/features/store/BannerList";
 import { SiteConfig } from "@/features/store/SiteConfig";
 import { StaffList } from "@/features/staff/StaffList";
 import { RoleList } from "@/features/roles/RoleList";
+import { WishlistList } from "@/features/wishlists/WishlistList";
 import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter([
@@ -75,6 +77,14 @@ export const router = createBrowserRouter([
 				element: (
 					<PermissionGuard permission="manage_orders">
 						<OrderList />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "orders/create",
+				element: (
+					<PermissionGuard permission="manage_orders">
+						<CreateOrder />
 					</PermissionGuard>
 				),
 			},
@@ -179,6 +189,14 @@ export const router = createBrowserRouter([
 				element: (
 					<PermissionGuard permission="manage_staff">
 						<RoleList />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "wishlists",
+				element: (
+					<PermissionGuard permission="manage_wishlists">
+						<WishlistList />
 					</PermissionGuard>
 				),
 			},

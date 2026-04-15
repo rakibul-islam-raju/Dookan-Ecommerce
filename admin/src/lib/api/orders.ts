@@ -191,3 +191,13 @@ export const useCancelOrder = () => {
 		},
 	});
 };
+
+export const useCreateOrder = () => {
+	return useMutation({
+		mutationFn: (orderData: ICreateOrderRequest) =>
+			orderApi.createOrder(orderData),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [queryKeys.orders] });
+		},
+	});
+};

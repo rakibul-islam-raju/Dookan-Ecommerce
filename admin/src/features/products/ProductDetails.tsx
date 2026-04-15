@@ -240,12 +240,8 @@ export const ProductDetails = () => {
 								<Badge variant={product.is_featured ? "info" : "secondary"}>
 									{product.is_featured ? "Featured" : "Not Featured"}
 								</Badge>
-								<Badge
-									variant={product.track_inventory ? "default" : "secondary"}
-								>
-									{product.track_inventory
-										? "Track Inventory"
-										: "Not Track Inventory"}
+								<Badge variant={product.is_digital ? "purple" : "secondary"}>
+									{product.is_digital ? "Digital" : "Physical"}
 								</Badge>
 								<Badge
 									variant={product.is_in_stock ? "success" : "destructive"}
@@ -289,25 +285,14 @@ export const ProductDetails = () => {
 								</div>
 							</div>
 
-							{/* stock quantity */}
+							{/* total stock */}
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Stock Quantity
+									Total Stock
 								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
 									<p className="font-medium text-sm">
-										{product.stock_quantity}
-									</p>
-								</div>
-							</div>
-							{/* low stock threshold */}
-							<div>
-								<p className="text-sm text-muted-foreground mb-1.5">
-									Low Stock Threshold
-								</p>
-								<div className="px-3 py-2 bg-muted/50 rounded-md">
-									<p className="font-medium text-sm">
-										{product.low_stock_threshold}
+										{product.is_digital ? "N/A (Digital)" : (product.total_stock ?? 0)}
 									</p>
 								</div>
 							</div>

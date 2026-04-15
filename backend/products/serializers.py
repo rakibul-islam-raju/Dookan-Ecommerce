@@ -127,10 +127,17 @@ class ProductImageSerializer(serializers.ModelSerializer):
         return obj.image.url if obj.image else None
 
 
+class ProductImageUploadItemSerializer(serializers.Serializer):
+    image = serializers.ImageField()
+    alt_text = serializers.CharField(required=False, allow_blank=True, default="")
+    is_primary = serializers.BooleanField(required=False, default=False)
+    display_order = serializers.IntegerField(required=False, default=0)
+
+
 class ProductImageUploadSerializer(serializers.Serializer):
     """Serializer for uploading multiple product images"""
 
-    images = ProductImageSerializer(many=True)
+    images = ProductImageUploadItemSerializer(many=True)
 
     def create(self, validated_data):
         product_id = self.context.get("product_id")
@@ -279,6 +286,61 @@ class ProductVariantCreateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id"]
 
+    def validate_option_ids(self, value):
+        if not value:
+            return value
+
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError("Variant options must be unique.")
+
+        options = list(
+            VariantOption.objects.filter(id__in=value).select_related("variant_type")
+        )
+        if len(options) != len(value):
+            raise serializers.ValidationError(
+                "One or more selected variant options do not exist."
+            )
+
+        seen_type_ids = set()
+        for option in options:
+            if option.variant_type_id in seen_type_ids:
+                raise serializers.ValidationError(
+                    "Select at most one option from each variant type."
+                )
+            seen_type_ids.add(option.variant_type_id)
+
+        return value
+
+    def validate(self, attrs):
+        name = attrs.get("name", getattr(self.instance, "name", ""))
+        option_ids = attrs.get("option_ids", None)
+
+        if option_ids is None:
+            has_options = self.instance.options.exists() if self.instance else False
+        else:
+            has_options = len(option_ids) > 0
+
+        if not (name or "").strip() and not has_options:
+            raise serializers.ValidationError(
+                {"name": "Select variant options or enter a variant name."}
+            )
+
+        return attrs
+
+    @staticmethod
+    def _populate_generated_name(variant):
+        option_values = list(
+            variant.options.order_by(
+                "variant_type__display_order",
+                "variant_type__name",
+                "display_order",
+                "value",
+            ).values_list("value", flat=True)
+        )
+        if option_values:
+            variant.name = " / ".join(option_values)
+            variant.save(update_fields=["name"])
+
     def create(self, validated_data):
         option_ids = validated_data.pop("option_ids", [])
         product_id = self.context.get("product_id")
@@ -287,10 +349,7 @@ class ProductVariantCreateSerializer(serializers.ModelSerializer):
             variant.options.set(VariantOption.objects.filter(id__in=option_ids))
         # Auto-generate name if not provided
         if not variant.name:
-            option_values = list(variant.options.values_list("value", flat=True))
-            if option_values:
-                variant.name = " / ".join(option_values)
-                variant.save(update_fields=["name"])
+            self._populate_generated_name(variant)
         return variant
 
     def update(self, instance, validated_data):
@@ -302,10 +361,7 @@ class ProductVariantCreateSerializer(serializers.ModelSerializer):
             instance.options.set(VariantOption.objects.filter(id__in=option_ids))
             # Regenerate name if it was auto-generated
             if not validated_data.get("name"):
-                option_values = list(instance.options.values_list("value", flat=True))
-                if option_values:
-                    instance.name = " / ".join(option_values)
-                    instance.save(update_fields=["name"])
+                self._populate_generated_name(instance)
         return instance
 
 
@@ -353,6 +409,8 @@ class ConsumerProductVariantSerializer(serializers.ModelSerializer):
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
+    variants = ProductVariantCreateSerializer(many=True, write_only=True)
+
     class Meta:
         model = Product
         fields = [
@@ -365,9 +423,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             "category",
             "base_price",
             "cost_price",
-            "stock_quantity",
-            "low_stock_threshold",
-            "track_inventory",
+            "is_digital",
             "weight",
             "unit",
             "unit_value",
@@ -375,8 +431,49 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             "meta_description",
             "is_featured",
             "is_active",
+            "variants",
         ]
         read_only_fields = ["id"]
+
+    def validate_variants(self, value):
+        if not value:
+            raise serializers.ValidationError("At least one variant is required.")
+
+        seen_skus = set()
+        seen_option_sets = {}
+
+        for index, variant in enumerate(value, start=1):
+            sku = variant.get("sku")
+            if sku in seen_skus:
+                raise serializers.ValidationError(
+                    f"Duplicate variant SKU '{sku}' in row {index}."
+                )
+            seen_skus.add(sku)
+
+            option_ids = tuple(sorted(str(option_id) for option_id in variant.get("option_ids", [])))
+            if option_ids:
+                existing_index = seen_option_sets.get(option_ids)
+                if existing_index is not None:
+                    raise serializers.ValidationError(
+                        f"Rows {existing_index} and {index} use the same variant option combination."
+                    )
+                seen_option_sets[option_ids] = index
+
+        return value
+
+    def create(self, validated_data):
+        from django.db import transaction
+        variants_data = validated_data.pop("variants")
+        with transaction.atomic():
+            product = Product.objects.create(**validated_data)
+            for variant_data in variants_data:
+                option_ids = variant_data.pop("option_ids", [])
+                variant = ProductVariant.objects.create(product=product, **variant_data)
+                if option_ids:
+                    variant.options.set(VariantOption.objects.filter(id__in=option_ids))
+                if not variant.name:
+                    ProductVariantCreateSerializer._populate_generated_name(variant)
+        return product
 
 
 class VendorProductListSerializer(serializers.ModelSerializer):
@@ -385,6 +482,7 @@ class VendorProductListSerializer(serializers.ModelSerializer):
     sale_price = serializers.SerializerMethodField()
     sale_discount_percentage = serializers.SerializerMethodField()
     sale_name = serializers.SerializerMethodField()
+    total_stock = serializers.ReadOnlyField()
 
     class Meta:
         model = Product
@@ -399,7 +497,9 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             "sale_price",
             "sale_discount_percentage",
             "sale_name",
-            "stock_quantity",
+            "total_stock",
+            "is_digital",
+            "is_in_stock",
             "unit",
             "unit_value",
             "is_featured",
@@ -436,11 +536,11 @@ class VendorProductListSerializer(serializers.ModelSerializer):
 class ConsumerProductListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
     category = ProductCategorySerializer(read_only=True)
-    has_variants = serializers.SerializerMethodField()
     min_variant_base_price = serializers.SerializerMethodField()
     sale_price = serializers.SerializerMethodField()
     sale_discount_percentage = serializers.SerializerMethodField()
     sale_name = serializers.SerializerMethodField()
+    total_stock = serializers.ReadOnlyField()
 
     class Meta:
         model = Product
@@ -454,15 +554,15 @@ class ConsumerProductListSerializer(serializers.ModelSerializer):
             "sale_price",
             "sale_discount_percentage",
             "sale_name",
-            "stock_quantity",
+            "total_stock",
             "is_low_stock",
             "is_in_stock",
+            "is_digital",
             "unit",
             "unit_value",
             "is_featured",
             "is_active",
             "primary_image",
-            "has_variants",
             "min_variant_base_price",
         ]
 
@@ -481,9 +581,6 @@ class ConsumerProductListSerializer(serializers.ModelSerializer):
     def get_sale_name(self, obj):
         data = self._get_sale_data(obj)
         return data[0].name if data else None
-
-    def get_has_variants(self, obj):
-        return obj.variants.filter(is_active=True).exists()
 
     def get_min_variant_base_price(self, obj):
         variant = obj.variants.filter(is_active=True).order_by("base_price").first()
@@ -506,6 +603,9 @@ class VendorProductDetailsSerializer(serializers.ModelSerializer):
     sale_price = serializers.SerializerMethodField()
     sale_discount_percentage = serializers.SerializerMethodField()
     sale_name = serializers.SerializerMethodField()
+    total_stock = serializers.ReadOnlyField()
+    is_in_stock = serializers.ReadOnlyField()
+    is_low_stock = serializers.ReadOnlyField()
 
     class Meta:
         model = Product
@@ -535,7 +635,9 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
     review_summary = serializers.SerializerMethodField()
     variants = serializers.SerializerMethodField()
     variant_types = serializers.SerializerMethodField()
-    has_variants = serializers.SerializerMethodField()
+    total_stock = serializers.ReadOnlyField()
+    is_in_stock = serializers.ReadOnlyField()
+    is_low_stock = serializers.ReadOnlyField()
 
     sale_price = serializers.SerializerMethodField()
     sale_discount_percentage = serializers.SerializerMethodField()
@@ -555,9 +657,10 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
             "sale_price",
             "sale_discount_percentage",
             "sale_name",
-            "stock_quantity",
+            "total_stock",
             "is_low_stock",
             "is_in_stock",
+            "is_digital",
             "weight",
             "unit",
             "unit_value",
@@ -567,7 +670,6 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
             "meta_description",
             "images",
             "review_summary",
-            "has_variants",
             "variants",
             "variant_types",
         ]
@@ -587,9 +689,6 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
     def get_sale_name(self, obj):
         data = self._get_sale_data(obj)
         return data[0].name if data else None
-
-    def get_has_variants(self, obj):
-        return obj.variants.filter(is_active=True).exists()
 
     def get_variants(self, obj):
         active_variants = obj.variants.filter(is_active=True).prefetch_related(

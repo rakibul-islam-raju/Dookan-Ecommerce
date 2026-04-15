@@ -26,6 +26,7 @@ class Role(BaseModel):
         ("manage_settings", "Manage Settings"),
         ("manage_staff", "Manage Staff"),
         ("manage_sales", "Manage Sales"),
+        ("manage_wishlists", "Manage Wishlists"),
     ]
 
     ALL_PERMISSIONS = [code for code, _ in PERMISSION_CHOICES]

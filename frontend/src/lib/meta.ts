@@ -85,7 +85,7 @@ export function buildMetaContentsFromCart(items: CartItem[]) {
 	return items.map((item) => ({
 		id: item.product.id,
 		quantity: item.quantity,
-		item_price: item.variant?.price ?? item.product.price,
+		item_price: item.variant.price,
 	}));
 }
 

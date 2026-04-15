@@ -11,6 +11,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { UNIT_OPTIONS } from "@/constants/selectOptions";
 import { useZodForm } from "@/hooks/useZodForm";
@@ -21,8 +23,11 @@ import {
 	type CreateProductRequest,
 	type ProductDetailsResponse,
 } from "@/lib/api/product";
+import { getVariantTypes, type VariantType } from "@/lib/api/variant";
 import { useQuery } from "@tanstack/react-query";
+import { Plus, Trash2 } from "lucide-react";
 import { useEffect } from "react";
+import { useFieldArray, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import slugify from "slugify";
 import { toast } from "sonner";
@@ -34,6 +39,31 @@ const initialCategoryParams: CategoryFilter = {
 	search: "",
 	is_active: true,
 };
+
+const variantRowSchema = z
+	.object({
+		name: z.string().optional(),
+		sku: z.string().min(1, "SKU is required"),
+		base_price: z.coerce.number().min(0.01, "Price required"),
+		cost_price: z.coerce.number().optional(),
+		stock_quantity: z.coerce.number().min(0).optional(),
+		low_stock_threshold: z.coerce.number().min(0).optional(),
+		weight: z.coerce.number().optional(),
+		display_order: z.coerce.number().optional(),
+		option_ids: z.array(z.string()).optional().default([]),
+	})
+	.superRefine((data, ctx) => {
+		const hasName = !!data.name?.trim();
+		const hasOptions = (data.option_ids?.length ?? 0) > 0;
+
+		if (!hasName && !hasOptions) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				path: ["name"],
+				message: "Select variant options or enter a variant name",
+			});
+		}
+	});
 
 const productSchema = z
 	.object({
@@ -49,11 +79,7 @@ const productSchema = z
 		category: z.string().min(1, "Category is required"),
 		base_price: z.coerce.number().min(0.01, "Base price is required"),
 		cost_price: z.coerce.number().optional(),
-		stock_quantity: z.coerce.number().min(0, "Stock quantity is required"),
-		low_stock_threshold: z.coerce
-			.number()
-			.min(0, "Low stock threshold is required"),
-		track_inventory: z.boolean().default(false),
+		is_digital: z.boolean().default(false),
 		weight: z.coerce.number().optional(),
 		unit: z.enum(["kg", "g", "l", "ml", "piece", "pack"]),
 		unit_value: z.string().optional(),
@@ -61,6 +87,7 @@ const productSchema = z
 		meta_description: z.string().optional().nullable(),
 		is_featured: z.boolean().default(false),
 		is_active: z.boolean().default(true),
+		variants: z.array(variantRowSchema).min(1, "At least one variant is required"),
 	})
 	.refine(
 		(data) => {
@@ -75,6 +102,18 @@ const productSchema = z
 
 type ProductFormData = z.infer<typeof productSchema>;
 
+const defaultVariant = {
+	name: "",
+	sku: "",
+	base_price: 0,
+	cost_price: 0,
+	stock_quantity: 0,
+	low_stock_threshold: 5,
+	weight: 0,
+	display_order: 0,
+	option_ids: [],
+};
+
 const productDefaultValues: ProductFormData = {
 	name: "",
 	slug: "",
@@ -84,9 +123,7 @@ const productDefaultValues: ProductFormData = {
 	category: "",
 	base_price: 0,
 	cost_price: 0,
-	stock_quantity: 0,
-	low_stock_threshold: 0,
-	track_inventory: false,
+	is_digital: false,
 	weight: 0,
 	unit: "kg",
 	unit_value: "",
@@ -94,6 +131,7 @@ const productDefaultValues: ProductFormData = {
 	meta_description: "",
 	is_featured: false,
 	is_active: true,
+	variants: [{ ...defaultVariant }],
 };
 
 export interface ProductFormProps {
@@ -101,6 +139,27 @@ export interface ProductFormProps {
 	mode: "create" | "edit";
 	handleClose: () => void;
 }
+
+const getNextOptionIds = (
+	currentOptionIds: string[],
+	variantTypeId: string,
+	optionId: string,
+	variantTypes: VariantType[],
+) => {
+	const optionIdsForType =
+		variantTypes.find((variantType) => variantType.id === variantTypeId)?.options.map(
+			(option) => option.id,
+		) ?? [];
+
+	if (currentOptionIds.includes(optionId)) {
+		return currentOptionIds.filter((id) => id !== optionId);
+	}
+
+	return [
+		...currentOptionIds.filter((id) => !optionIdsForType.includes(id)),
+		optionId,
+	];
+};
 
 export const ProductForm: React.FC<ProductFormProps> = ({
 	product,
@@ -112,16 +171,31 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
 	const form = useZodForm(productSchema, {
 		defaultValues: isEditMode
-			? { ...product, category: product?.category.id }
+			? {
+				...product,
+				category: product?.category.id,
+				cost_price: product?.cost_price ? parseFloat(product.cost_price) : 0,
+				base_price: parseFloat(product?.base_price ?? "0"),
+				variants: [{ ...defaultVariant }],
+			}
 			: productDefaultValues,
 		mode: "onChange",
 	});
 
 	const { data: categories } = useQuery(getCategories(initialCategoryParams));
+	const { data: variantTypes = [] } = useQuery(getVariantTypes());
 
 	const { mutate: createProduct, isPending: isCreating } = useCreateProduct();
 	const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
 	const isPending = isCreating || isUpdating;
+
+	const { fields: variantFields, append, remove } = useFieldArray({
+		control: form.control,
+		name: "variants",
+	});
+
+	const isDigital = useWatch({ control: form.control, name: "is_digital" });
+	const variantValues = useWatch({ control: form.control, name: "variants" });
 
 	const handleCancel = () => {
 		handleClose();
@@ -137,12 +211,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 			base_price: data.base_price.toString(),
 			cost_price: data.cost_price?.toString() ?? null,
 			weight: data.weight?.toString() ?? null,
+			variants: data.variants.map((v) => ({
+				name: v.name,
+				sku: v.sku,
+				base_price: v.base_price.toString(),
+				cost_price: v.cost_price?.toString() ?? null,
+				stock_quantity: v.stock_quantity ?? 0,
+				low_stock_threshold: v.low_stock_threshold ?? 5,
+				weight: v.weight?.toString() ?? null,
+				display_order: v.display_order ?? 0,
+				option_ids: v.option_ids ?? [],
+			})),
 		};
 		if (isEditMode && product) {
+			// In edit mode we only update product-level fields (variants managed separately)
+			const editData = { ...requestData };
+			delete editData.variants;
 			updateProduct(
 				{
 					id: product.id,
-					updateData: requestData,
+					updateData: editData,
 				},
 				{
 					onSuccess: () => {
@@ -172,6 +260,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 						navigate("/products");
 					}
 				},
+				onError: () => {
+					toast.error("Failed to create product");
+				},
 			});
 		}
 	};
@@ -191,6 +282,22 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 			form.setValue("slug", slugify(nameValue, { lower: true }));
 		}
 	}, [nameValue, isEditMode, form]);
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const variantErrors = (form.formState.errors.variants as any) ?? [];
+
+	const handleVariantOptionToggle = (
+		index: number,
+		variantTypeId: string,
+		optionId: string,
+	) => {
+		const currentOptionIds = form.getValues(`variants.${index}.option_ids`) ?? [];
+		form.setValue(
+			`variants.${index}.option_ids`,
+			getNextOptionIds(currentOptionIds, variantTypeId, optionId, variantTypes),
+			{ shouldDirty: true, shouldValidate: true },
+		);
+	};
 
 	return (
 		<BaseForm
@@ -249,7 +356,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 							label="Base Price (MRP)"
 							type="number"
 							placeholder="e.g., 250"
-							helpText="The original/MRP price. Sale discounts are applied via the Sales module."
+							helpText="The original/MRP price. Variant prices override this per-variant."
 							required
 						/>
 					</div>
@@ -260,36 +367,211 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 				</CardContent>
 			</Card>
 
+			{/* ── Variants ─────────────────────────────────────────── */}
+			{!isEditMode && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Variants</CardTitle>
+						<CardDescription>
+							Every product requires at least one sellable variant. Select reusable
+							variant options where applicable, then set SKU, price, and stock for each row.
+							{isDigital && " Stock fields are hidden for digital products."}
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						{/* Column headers */}
+						<div className={`hidden md:grid gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide px-1 ${isDigital ? "grid-cols-[1fr_1fr_1fr_32px]" : "grid-cols-[1fr_1fr_1fr_80px_80px_32px]"}`}>
+							<span>Variant Name</span>
+							<span>SKU <span className="text-red-500">*</span></span>
+							<span>Price <span className="text-red-500">*</span></span>
+							{!isDigital && <span>Stock</span>}
+							{!isDigital && <span>Low Stock</span>}
+							<span />
+						</div>
+
+						{variantTypes.length === 0 && (
+							<p className="text-sm text-muted-foreground">
+								No reusable variant types are configured yet. You can still create
+								variants manually by entering a variant name.
+							</p>
+						)}
+
+						{variantFields.map((field, index) => (
+							<div
+								key={field.id}
+								className="space-y-3 rounded-lg border p-4"
+							>
+								<div className={`grid gap-2 items-start ${isDigital ? "grid-cols-1 md:grid-cols-[1fr_1fr_1fr_32px]" : "grid-cols-1 md:grid-cols-[1fr_1fr_1fr_80px_80px_32px]"}`}>
+									{/* Name */}
+									<div>
+										<Label className="md:hidden text-xs mb-1 block">Name</Label>
+										<Input
+											placeholder="Auto from options, or enter custom name"
+											{...form.register(`variants.${index}.name`)}
+											className={variantErrors?.[index]?.name ? "border-red-500" : ""}
+										/>
+										{variantErrors?.[index]?.name && (
+											<p className="text-xs text-red-500 mt-0.5">{variantErrors[index].name.message}</p>
+										)}
+									</div>
+
+									{/* SKU */}
+									<div>
+										<Label className="md:hidden text-xs mb-1 block">SKU *</Label>
+										<Input
+											placeholder="e.g., PRD-001-500"
+											{...form.register(`variants.${index}.sku`)}
+											className={variantErrors?.[index]?.sku ? "border-red-500" : ""}
+										/>
+										{variantErrors?.[index]?.sku && (
+											<p className="text-xs text-red-500 mt-0.5">{variantErrors[index].sku.message}</p>
+										)}
+									</div>
+
+									{/* Price */}
+									<div>
+										<Label className="md:hidden text-xs mb-1 block">Price *</Label>
+										<Input
+											type="number"
+											min={0.01}
+											step={0.01}
+											placeholder="0.00"
+											{...form.register(`variants.${index}.base_price`)}
+											className={variantErrors?.[index]?.base_price ? "border-red-500" : ""}
+										/>
+										{variantErrors?.[index]?.base_price && (
+											<p className="text-xs text-red-500 mt-0.5">{variantErrors[index].base_price.message}</p>
+										)}
+									</div>
+
+									{/* Stock — hidden for digital */}
+									{!isDigital && (
+										<div>
+											<Label className="md:hidden text-xs mb-1 block">Stock</Label>
+											<Input
+												type="number"
+												min={0}
+												placeholder="0"
+												{...form.register(`variants.${index}.stock_quantity`)}
+											/>
+										</div>
+									)}
+
+									{/* Low Stock — hidden for digital */}
+									{!isDigital && (
+										<div>
+											<Label className="md:hidden text-xs mb-1 block">Low Stock</Label>
+											<Input
+												type="number"
+												min={0}
+												placeholder="5"
+												{...form.register(`variants.${index}.low_stock_threshold`)}
+											/>
+										</div>
+									)}
+
+									{/* Remove */}
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon"
+										className="h-9 w-9 text-muted-foreground hover:text-destructive mt-0 md:mt-0"
+										onClick={() => remove(index)}
+										disabled={variantFields.length === 1}
+										title="Remove variant"
+									>
+										<Trash2 className="h-4 w-4" />
+									</Button>
+								</div>
+
+								{variantTypes.length > 0 && (
+									<div className="space-y-3 rounded-md border bg-muted/20 p-3">
+										<div className="flex items-center justify-between gap-3">
+											<div>
+												<p className="text-sm font-medium">Variant Options</p>
+												<p className="text-xs text-muted-foreground">
+													Choose up to one option from each variant type for this
+													variant.
+												</p>
+											</div>
+										</div>
+										{variantTypes.map((variantType) => {
+											const selectedOptionIds =
+												variantValues?.[index]?.option_ids ?? [];
+											return (
+												<div key={variantType.id} className="space-y-1.5">
+													<p className="text-sm text-muted-foreground font-medium">
+														{variantType.name}
+													</p>
+													<div className="flex flex-wrap gap-2">
+														{variantType.options.map((option) => {
+															const isSelected = selectedOptionIds.includes(option.id);
+															return (
+																<button
+																	key={option.id}
+																	type="button"
+																	onClick={() =>
+																		handleVariantOptionToggle(
+																			index,
+																			variantType.id,
+																			option.id,
+																		)
+																	}
+																	className={`px-3 py-1.5 rounded-md text-sm border transition-colors ${
+																		isSelected
+																			? "bg-primary text-primary-foreground border-primary"
+																			: "bg-background text-muted-foreground border-border hover:bg-muted"
+																	}`}
+																>
+																	{option.value}
+																</button>
+															);
+														})}
+													</div>
+												</div>
+											);
+										})}
+									</div>
+								)}
+							</div>
+						))}
+
+						{typeof variantErrors?.message === "string" && (
+							<p className="text-sm text-red-500">{variantErrors.message}</p>
+						)}
+						{typeof variantErrors?.root?.message === "string" && (
+							<p className="text-sm text-red-500">{variantErrors.root.message}</p>
+						)}
+
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => append({ ...defaultVariant })}
+							className="w-full mt-1"
+						>
+							<Plus className="h-4 w-4 mr-2" />
+							Add Variant
+						</Button>
+					</CardContent>
+				</Card>
+			)}
+
 			<Card>
 				<CardHeader>
-					<CardTitle>Inventory & Specifications</CardTitle>
+					<CardTitle>Specifications</CardTitle>
 					<CardDescription>
-						Track stock and product specifications.
+						Unit and packaging information.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						<TextField
 							name="sku"
-							label="SKU"
+							label="Product SKU"
 							required
 							placeholder="e.g., SKU123"
-							helpText="Stock Keeping Unit - a unique code for inventory tracking."
-						/>
-						<TextField
-							name="stock_quantity"
-							label="Stock Quantity"
-							type="number"
-							placeholder="e.g., 100"
-							helpText="Total number of units currently in stock."
-							required
-						/>
-						<TextField
-							name="low_stock_threshold"
-							label="Low Stock Threshold"
-							type="number"
-							helpText="Notify me when inventory reaches this level."
-							required
+							helpText="Unique identifier for the product (not a variant)."
 						/>
 						<SelectField
 							name="unit"
@@ -303,20 +585,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 							label="Unit Value"
 							type="number"
 							required
-							helpText="The numeric value for the selected unit (e.g., if Unit is 'g', enter '500' for 500g)."
+							helpText="The numeric value for the selected unit (e.g., '500' for 500g)."
 						/>
 						<TextField
 							name="weight"
 							label="Weight (in grams)"
-							required
 							helpText="Product weight in grams. Used for shipping cost calculations."
 						/>
-						<div className="flex items-end pb-2 col-span-full">
-							<CheckboxField
-								name="track_inventory"
-								label="Track Inventory (helps manage stock levels and low stock alerts.)"
-							/>
-						</div>
 					</div>
 				</CardContent>
 			</Card>
@@ -324,7 +599,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 			<Card>
 				<CardHeader>
 					<CardTitle>Organization</CardTitle>
-					<CardDescription>Category and status.</CardDescription>
+					<CardDescription>Category, type, and status.</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 gap-4">
@@ -340,6 +615,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 							}
 						/>
 						<div className="space-y-2 pt-2">
+							<CheckboxField
+								name="is_digital"
+								label="Digital Product (no stock tracking — e.g., ebook, gift card)"
+							/>
 							{isEditMode && (
 								<CheckboxField name="is_active" label="Active Product" />
 							)}
@@ -373,14 +652,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 					Cancel
 				</Button>
 				<div className="flex justify-end gap-2">
-					<LoadingButton
-						variant="outline"
-						type="button"
-						onClick={handleSaveAndCreateAnother}
-						isLoading={isPending}
-					>
-						Save & Create Another
-					</LoadingButton>
+					{!isEditMode && (
+						<LoadingButton
+							variant="outline"
+							type="button"
+							onClick={handleSaveAndCreateAnother}
+							isLoading={isPending}
+						>
+							Save & Create Another
+						</LoadingButton>
+					)}
 					<LoadingButton type="submit" isLoading={isPending}>
 						{isEditMode ? "Update Product" : "Create Product"}
 					</LoadingButton>

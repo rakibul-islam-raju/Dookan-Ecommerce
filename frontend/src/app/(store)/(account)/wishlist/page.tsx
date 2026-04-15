@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { useRemoveFromWishlist, useWishlist } from "@/lib/hooks/useWishlist";
-import { useAddToCart } from "@/lib/hooks/useCart";
 import { Heart, Loader2, ShoppingCart, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,7 +9,6 @@ import Link from "next/link";
 export default function WishlistPage() {
 	const { data: items, isLoading } = useWishlist();
 	const removeFromWishlist = useRemoveFromWishlist();
-	const addToCart = useAddToCart();
 
 	if (isLoading) {
 		return (
@@ -97,20 +95,11 @@ export default function WishlistPage() {
 
 							{/* Actions */}
 							<div className="flex flex-col gap-2 shrink-0">
-								<Button
-									size="sm"
-									disabled={!product.is_in_stock}
-									onClick={() =>
-										addToCart.mutate({
-											product,
-											quantity: 1,
-										})
-									}
-								>
-									<ShoppingCart className="size-4 mr-1" />
-									<span className="hidden sm:inline">
-										{product.is_in_stock ? "Add to Cart" : "Out of Stock"}
-									</span>
+								<Button size="sm" asChild>
+									<Link href={`/products/${product.slug}`}>
+										<ShoppingCart className="size-4 mr-1" />
+										<span className="hidden sm:inline">View Product</span>
+									</Link>
 								</Button>
 								<Button
 									size="sm"

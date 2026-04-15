@@ -15,9 +15,13 @@ import { pagination } from "@/config";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilterParams } from "@/hooks/useFilterParams";
 import { getOrders, type OrderFilter } from "@/lib/api/orders";
-import type { IOrderStatus, IOrderPaymentStatus, OrderListItem } from "@/@types/Order";
+import type {
+	IOrderStatus,
+	IOrderPaymentStatus,
+	OrderListItem,
+} from "@/@types/Order";
 import { useQuery } from "@tanstack/react-query";
-import { Eye, MoreHorizontal } from "lucide-react";
+import { Eye, MoreHorizontal, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { OrderFilterForm } from "./components/OrderFilterForm";
@@ -44,12 +48,20 @@ export function OrderList() {
 			...params,
 			search: debouncedSearchQuery || undefined,
 			offset: (currentPage - 1) * pagination.limit,
-		})
+		}),
 	);
 
 	const getStatusBadgeVariant = (
-		status: IOrderStatus
-	): "default" | "secondary" | "destructive" | "success" | "warning" | "info" | "purple" | "cyan" => {
+		status: IOrderStatus,
+	):
+		| "default"
+		| "secondary"
+		| "destructive"
+		| "success"
+		| "warning"
+		| "info"
+		| "purple"
+		| "cyan" => {
 		switch (status) {
 			case "pending":
 				return "warning";
@@ -71,8 +83,14 @@ export function OrderList() {
 	};
 
 	const getPaymentStatusBadgeVariant = (
-		status: IOrderPaymentStatus
-	): "default" | "secondary" | "destructive" | "success" | "warning" | "info" => {
+		status: IOrderPaymentStatus,
+	):
+		| "default"
+		| "secondary"
+		| "destructive"
+		| "success"
+		| "warning"
+		| "info" => {
 		switch (status) {
 			case "pending":
 				return "warning";
@@ -234,6 +252,10 @@ export function OrderList() {
 						Manage customer orders and track deliveries
 					</p>
 				</div>
+				<Button onClick={() => navigate("/orders/create")}>
+					<Plus className="h-4 w-4 mr-2" />
+					Create Order
+				</Button>
 			</div>
 
 			{/* Search and Filter Bar */}

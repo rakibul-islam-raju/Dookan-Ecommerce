@@ -217,12 +217,11 @@ class OrderCancelView(APIView):
             order.coupon.used_count -= 1
             order.coupon.save()
 
-        # Restore stock
-        for item in order.items.all():
-            product = item.product
-            if product.track_inventory:
-                product.stock_quantity += item.quantity
-                product.save()
+        # Restore variant stock (skip for digital products)
+        for item in order.items.select_related("product", "variant").all():
+            if item.variant and not item.product.is_digital:
+                item.variant.stock_quantity += item.quantity
+                item.variant.save(update_fields=["stock_quantity"])
 
         # Create status history
         cancel_note = f'Order cancelled by {"admin" if request.user.is_staff else "customer"}'

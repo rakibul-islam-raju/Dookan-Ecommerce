@@ -82,10 +82,8 @@ class Product(BaseModel):
         help_text="Cost price for profit calculation",
     )
 
-    # Inventory
-    stock_quantity = models.IntegerField(default=0)
-    low_stock_threshold = models.IntegerField(default=10)
-    track_inventory = models.BooleanField(default=True)
+    # Digital product flag (skips stock tracking entirely)
+    is_digital = models.BooleanField(default=False)
 
     # Product attributes
     weight = models.DecimalField(
@@ -131,16 +129,27 @@ class Product(BaseModel):
         super().save(*args, **kwargs)
 
     @property
+    def total_stock(self):
+        if self.is_digital:
+            return None
+        return self.variants.filter(is_active=True).aggregate(
+            total=models.Sum("stock_quantity")
+        )["total"] or 0
+
+    @property
     def is_in_stock(self):
-        if not self.track_inventory:
+        if self.is_digital:
             return True
-        return self.stock_quantity > 0
+        return self.variants.filter(is_active=True, stock_quantity__gt=0).exists()
 
     @property
     def is_low_stock(self):
-        if not self.track_inventory:
+        if self.is_digital:
             return False
-        return 0 < self.stock_quantity <= self.low_stock_threshold
+        active_variants = self.variants.filter(is_active=True)
+        return active_variants.exists() and not active_variants.filter(
+            stock_quantity__gt=models.F("low_stock_threshold")
+        ).exists() and active_variants.filter(stock_quantity__gt=0).exists()
 
 
 
@@ -288,7 +297,12 @@ class ProductVariant(BaseModel):
     def save(self, *args, **kwargs):
         # Auto-generate name from options if not provided
         if not self.name and self.pk:
-            option_values = self.options.values_list("value", flat=True)
+            option_values = self.options.order_by(
+                "variant_type__display_order",
+                "variant_type__name",
+                "display_order",
+                "value",
+            ).values_list("value", flat=True)
             if option_values:
                 self.name = " / ".join(option_values)
         super().save(*args, **kwargs)

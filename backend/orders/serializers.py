@@ -10,6 +10,7 @@ from rest_framework import serializers
 from users.models import OTPVerification
 from utils.email import send_order_confirmation_email
 from coupons.models import Coupon
+from products.models import ProductVariant
 from .models import (
     Order,
     OrderItem,
@@ -45,6 +46,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     """
 
     product_id = serializers.UUIDField(write_only=True)
+    variant_id = serializers.UUIDField(write_only=True)
     product_details = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -52,8 +54,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "product_id",
+            "variant_id",
             "product_name",
             "product_sku",
+            "variant_name",
+            "variant_sku",
             "unit_price",
             "quantity",
             "total_price",
@@ -65,6 +70,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "id",
             "product_name",
             "product_sku",
+            "variant_name",
+            "variant_sku",
             "unit_price",
             "total_price",
             "sale_discount_amount",
@@ -126,26 +133,44 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         for item in value:
             try:
                 product = Product.objects.get(id=item["product_id"])
-
-                # Check if product is active
-                if not product.is_active:
-                    raise serializers.ValidationError(
-                        f"Product '{product.name}' is not available."
-                    )
-
-                # Check stock
-                if (
-                    product.track_inventory
-                    and product.stock_quantity < item["quantity"]
-                ):
-                    raise serializers.ValidationError(
-                        f"Insufficient stock for '{product.name}'. "
-                        f"Available: {product.stock_quantity}"
-                    )
-
             except Product.DoesNotExist:
                 raise serializers.ValidationError(
                     f"Product with id {item['product_id']} does not exist."
+                )
+
+            if not product.is_active:
+                raise serializers.ValidationError(
+                    f"Product '{product.name}' is not available."
+                )
+
+            variant_id = item.get("variant_id")
+            if not variant_id:
+                raise serializers.ValidationError(
+                    f"variant_id is required for '{product.name}'."
+                )
+
+            try:
+                variant = ProductVariant.objects.get(id=variant_id)
+            except ProductVariant.DoesNotExist:
+                raise serializers.ValidationError(
+                    f"Variant with id {variant_id} does not exist."
+                )
+
+            if variant.product_id != product.id:
+                raise serializers.ValidationError(
+                    f"Variant {variant_id} does not belong to product '{product.name}'."
+                )
+
+            if not variant.is_active:
+                raise serializers.ValidationError(
+                    f"Variant '{variant.name}' is not available."
+                )
+
+            # Check stock (skip for digital products)
+            if not product.is_digital and variant.stock_quantity < item["quantity"]:
+                raise serializers.ValidationError(
+                    f"Insufficient stock for '{product.name} - {variant.name}'. "
+                    f"Available: {variant.stock_quantity}"
                 )
 
         return value
@@ -196,11 +221,19 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             product = Product.objects.select_related("category__parent").get(
                 id=item_data["product_id"]
             )
+            variant = ProductVariant.objects.get(id=item_data["variant_id"])
             quantity = item_data["quantity"]
 
             sale, sale_price = get_best_sale_for_product(product, active_sales)
-            sale_discount_per_unit = product.base_price - sale_price
-            unit_price = sale_price
+            # Use variant's base_price as the reference price, apply same sale %
+            if sale:
+                discount_pct = (product.base_price - sale_price) / product.base_price
+                variant_sale_price = variant.base_price * (1 - discount_pct)
+                variant_sale_price = variant_sale_price.quantize(Decimal("0.01"))
+            else:
+                variant_sale_price = variant.base_price
+            sale_discount_per_unit = variant.base_price - variant_sale_price
+            unit_price = variant_sale_price
             total_price = unit_price * quantity
 
             subtotal += total_price
@@ -211,8 +244,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             order_items.append(
                 {
                     "product": product,
+                    "variant": variant,
                     "product_name": product.name,
                     "product_sku": product.sku,
+                    "variant_name": variant.name,
+                    "variant_sku": variant.sku,
                     "unit_price": unit_price,
                     "quantity": quantity,
                     "total_price": total_price,
@@ -280,15 +316,16 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             **validated_data,
         )
 
-        # Create order items
+        # Create order items and deduct variant stock
         for item_data in order_items:
             OrderItem.objects.create(order=order, **item_data)
 
-            # Update product stock
+            # Deduct variant stock (skip for digital products)
             product = item_data["product"]
-            if product.track_inventory:
-                product.stock_quantity -= item_data["quantity"]
-                product.save()
+            variant = item_data["variant"]
+            if not product.is_digital:
+                variant.stock_quantity -= item_data["quantity"]
+                variant.save(update_fields=["stock_quantity"])
 
         # Create shipping address
         ShippingAddress.objects.create(order=order, **shipping_data)

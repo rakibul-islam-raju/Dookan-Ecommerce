@@ -42,6 +42,30 @@ interface ProductVariantsProps {
 	productId: string;
 }
 
+const getNextOptionIds = (
+	currentOptionIds: string[],
+	variantTypeId: string,
+	optionId: string,
+	variantTypes: {
+		id: string;
+		options: { id: string; value: string }[];
+	}[],
+) => {
+	const optionIdsForType =
+		variantTypes.find((variantType) => variantType.id === variantTypeId)?.options.map(
+			(option) => option.id,
+		) ?? [];
+
+	if (currentOptionIds.includes(optionId)) {
+		return currentOptionIds.filter((id) => id !== optionId);
+	}
+
+	return [
+		...currentOptionIds.filter((id) => !optionIdsForType.includes(id)),
+		optionId,
+	];
+};
+
 export const ProductVariants = ({ productId }: ProductVariantsProps) => {
 	const { data: variants = [], isLoading } = useQuery(
 		getProductVariants(productId),
@@ -262,17 +286,25 @@ function VariantFormDialog({
 	const [formData, setFormData] =
 		useState<CreateProductVariantRequest>(initialFormData);
 
-	const handleOptionToggle = (optionId: string) => {
+	const handleOptionToggle = (variantTypeId: string, optionId: string) => {
 		setFormData((prev) => ({
 			...prev,
-			option_ids: prev.option_ids?.includes(optionId)
-				? prev.option_ids.filter((id) => id !== optionId)
-				: [...(prev.option_ids || []), optionId],
+			option_ids: getNextOptionIds(
+				prev.option_ids || [],
+				variantTypeId,
+				optionId,
+				variantTypes,
+			),
 		}));
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
+		if (!(formData.name || "").trim() && !(formData.option_ids?.length ?? 0)) {
+			toast.error("Select variant options or enter a variant name.");
+			return;
+		}
+
 		if (isEdit && variant) {
 			updateVariant(
 				{ variantId: variant.id, data: formData },
@@ -395,8 +427,14 @@ function VariantFormDialog({
 					{/* Variant Options Selection */}
 					{variantTypes.length > 0 && (
 						<div className="space-y-3">
-							<Label>Variant Options</Label>
-							{variantTypes?.map((vt) => (
+							<div>
+								<Label>Variant Options</Label>
+								<p className="text-xs text-muted-foreground mt-1">
+									Choose up to one option from each variant type. Leave name blank
+									to auto-generate it from the selected options.
+								</p>
+							</div>
+							{variantTypes.map((vt) => (
 								<div key={vt.id} className="space-y-1.5">
 									<p className="text-sm text-muted-foreground font-medium">
 										{vt.name}
@@ -405,11 +443,12 @@ function VariantFormDialog({
 										{vt.options.map((option) => {
 											const isSelected =
 												formData.option_ids?.includes(option.id) ?? false;
+
 											return (
 												<button
 													key={option.id}
 													type="button"
-													onClick={() => handleOptionToggle(option.id)}
+													onClick={() => handleOptionToggle(vt.id, option.id)}
 													className={`px-3 py-1.5 rounded-md text-sm border transition-colors ${
 														isSelected
 															? "bg-primary text-primary-foreground border-primary"

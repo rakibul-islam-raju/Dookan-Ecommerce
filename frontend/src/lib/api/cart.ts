@@ -14,12 +14,12 @@ export interface CartItem {
 		base_price?: number; // original MRP — present only when item is on sale
 		primary_image?: string;
 	};
-	variant?: {
+	variant: {
 		id: string;
 		name: string;
 		sku: string;
 		price: number;
-	} | null;
+	};
 	quantity: number;
 	subtotal: number;
 }
@@ -34,6 +34,7 @@ export interface Cart {
 
 export interface AddToCartData {
 	product_id: string;
+	variant_id: string;
 	quantity: number;
 }
 

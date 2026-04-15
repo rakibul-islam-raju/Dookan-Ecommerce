@@ -41,36 +41,25 @@ export const ProductDetailsClient = ({
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [selectedVariant, setSelectedVariant] =
 		useState<IProductVariant | null>(
-			product.has_variants && product.variants.length > 0
-				? product.variants[0]
-				: null,
+			product.variants.find((v) => v.is_in_stock) ?? product.variants[0] ?? null,
 		);
 
 	const addToCartMutation = useAddToCart();
 
-	// Derive active pricing and stock from variant or base product
-	const activeBasePrice = selectedVariant
-		? selectedVariant.base_price
-		: product.base_price;
-	const activeSalePrice = selectedVariant
-		? selectedVariant.sale_price
-		: product.sale_price;
-	const activeDiscount = selectedVariant
-		? selectedVariant.sale_discount_percentage
-		: product.sale_discount_percentage;
+	// Derive active pricing and stock from selected variant
+	const activeBasePrice = selectedVariant?.base_price ?? product.base_price;
+	const activeSalePrice = selectedVariant?.sale_price ?? product.sale_price;
+	const activeDiscount = selectedVariant?.sale_discount_percentage ?? product.sale_discount_percentage;
 	const activeSaleName = product.sale_name;
 	const activePrice = activeSalePrice ?? activeBasePrice;
-	const activeStock = selectedVariant
-		? selectedVariant.stock_quantity
-		: product.stock_quantity;
-	const activeInStock = selectedVariant
-		? selectedVariant.is_in_stock
-		: product.is_in_stock;
+	const activeStock = selectedVariant?.stock_quantity ?? 0;
+	const activeInStock = product.is_digital || (selectedVariant?.is_in_stock ?? false);
 	const metaCurrency = config?.meta_default_currency || "BDT";
 
 	const handleQuantityChange = (delta: number) => {
 		const newQuantity = quantity + delta;
-		if (newQuantity >= 1 && newQuantity <= activeStock) {
+		const maxQty = product.is_digital ? Infinity : activeStock;
+		if (newQuantity >= 1 && newQuantity <= maxQty) {
 			setQuantity(newQuantity);
 		}
 	};
@@ -81,8 +70,7 @@ export const ProductDetailsClient = ({
 	};
 
 	const handleAddToCart = async () => {
-		// If product has variants, a variant must be selected
-		if (product.has_variants && !selectedVariant) return;
+		if (!selectedVariant) return;
 
 		setIsAddingToCart(true);
 		try {
@@ -95,16 +83,14 @@ export const ProductDetailsClient = ({
 					base_price: Number(activeBasePrice),
 					primary_image: images[0]?.image,
 				},
-				variant: selectedVariant
-					? {
-							id: selectedVariant.id,
-							name: selectedVariant.name,
-							sku: selectedVariant.sku,
-							price: Number(
-								selectedVariant.sale_price ?? selectedVariant.base_price,
-							),
-						}
-					: undefined,
+				variant: {
+					id: selectedVariant.id,
+					name: selectedVariant.name,
+					sku: selectedVariant.sku,
+					price: Number(
+						selectedVariant.sale_price ?? selectedVariant.base_price,
+					),
+				},
 				quantity,
 			});
 			setQuantity(1);
@@ -256,7 +242,7 @@ export const ProductDetailsClient = ({
 						<Separator className="mb-8" />
 
 						{/* Variant Selector */}
-						{product.has_variants && product.variant_types.length > 0 && (
+						{product.variant_types.length > 0 && (
 							<div className="mb-6">
 								<VariantSelector
 									variantTypes={product.variant_types}
@@ -264,7 +250,7 @@ export const ProductDetailsClient = ({
 									selectedVariant={selectedVariant}
 									onSelectVariant={handleVariantChange}
 								/>
-								{product.has_variants && !selectedVariant && (
+								{!selectedVariant && (
 									<p className="text-sm text-amber-600 mt-2">
 										Please select a variant to continue
 									</p>
@@ -310,11 +296,7 @@ export const ProductDetailsClient = ({
 								<Button
 									size="lg"
 									className="flex-1 text-base h-12 font-semibold"
-									disabled={
-										!activeInStock ||
-										isAddingToCart ||
-										(product.has_variants && !selectedVariant)
-									}
+									disabled={!activeInStock || isAddingToCart || !selectedVariant}
 									onClick={handleAddToCart}
 									aria-busy={isAddingToCart}
 								>
@@ -345,9 +327,7 @@ export const ProductDetailsClient = ({
 								<div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 flex items-center gap-2">
 									<AlertTriangle className="size-4 text-destructive" />
 									<span className="text-sm text-destructive font-medium">
-										{product.has_variants && selectedVariant
-											? "This variant is currently out of stock"
-											: "This product is currently out of stock"}
+										This variant is currently out of stock
 									</span>
 								</div>
 							)}
@@ -413,7 +393,9 @@ export const ProductDetailsClient = ({
 											<dt className="text-muted-foreground">
 												Available Quantity:
 											</dt>
-											<dd className="font-medium">{activeStock} units</dd>
+											<dd className="font-medium">
+												{product.is_digital ? "Unlimited" : `${activeStock} units`}
+											</dd>
 										</div>
 										<div className="flex justify-between">
 											<dt className="text-muted-foreground">Product Status:</dt>

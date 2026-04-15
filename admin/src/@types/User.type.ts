@@ -10,7 +10,8 @@ export type Permission =
 	| "manage_announcements"
 	| "manage_settings"
 	| "manage_staff"
-	| "manage_sales";
+	| "manage_sales"
+	| "manage_wishlists";
 
 export interface User {
 	id: string;

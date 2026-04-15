@@ -28,10 +28,13 @@ export interface DashboardMetrics {
 		out_of_stock: number;
 		low_stock: Array<{
 			id: string;
+			sku: string;
 			name: string;
-			slug: string;
 			stock_quantity: number;
 			low_stock_threshold: number;
+			"product__id": string;
+			"product__name": string;
+			"product__slug": string;
 		}>;
 	};
 	recent_orders: Array<{

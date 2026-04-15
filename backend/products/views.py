@@ -263,12 +263,16 @@ class ProductImageListCreateAPIView(generics.ListCreateAPIView):
 
         # Pass product_id in serializer context
         serializer = self.get_serializer(
-            data=request.data, context={"product_id": product_id}
+            data=request.data,
+            context={"product_id": product_id, "request": request},
         )
         serializer.is_valid(raise_exception=True)
         result = serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        response_serializer = ProductImageSerializer(
+            result["images"], many=True, context={"request": request}
+        )
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def get_permissions(self):
         if self.request.method == "GET":

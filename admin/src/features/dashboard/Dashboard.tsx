@@ -307,21 +307,26 @@ export function Dashboard() {
 							</div>
 						) : metrics?.products.low_stock.length ? (
 							<div className="space-y-3">
-								{metrics.products.low_stock.map((product) => (
+								{metrics.products.low_stock.map((variant) => (
 									<Link
-										key={product.id}
-										to={`/products/${product.id}`}
+										key={variant.id}
+										to={`/products/${variant["product__id"]}`}
 										className="flex items-center justify-between hover:bg-muted/50 -mx-2 px-2 py-1.5 rounded-md transition-colors"
 									>
-										<span className="text-sm font-medium truncate mr-2">
-											{product.name}
-										</span>
+										<div className="min-w-0 mr-2">
+											<p className="text-sm font-medium truncate">
+												{variant["product__name"]}
+											</p>
+											<p className="text-xs text-muted-foreground truncate">
+												{variant.name} &middot; SKU: {variant.sku}
+											</p>
+										</div>
 										<Badge
 											variant={
-												product.stock_quantity <= 3 ? "destructive" : "warning"
+												variant.stock_quantity <= 3 ? "destructive" : "warning"
 											}
 										>
-											{product.stock_quantity} left
+											{variant.stock_quantity} left
 										</Badge>
 									</Link>
 								))}

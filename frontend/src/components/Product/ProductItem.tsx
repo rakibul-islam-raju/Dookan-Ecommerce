@@ -1,9 +1,8 @@
 import { IConsumerProductListItem } from "@/@types/Product";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAddToCart } from "@/lib/hooks/useCart";
 import { cn } from "@/lib/utils";
-import { Eye, Loader2, ShoppingCart } from "lucide-react";
+import { Eye } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { WishlistButton } from "./WishlistButton";
@@ -19,8 +18,6 @@ export const ProductItem = ({
 	onQuickView,
 	className,
 }: ProductItemProps) => {
-	const addToCart = useAddToCart();
-
 	const {
 		name,
 		category,
@@ -30,7 +27,6 @@ export const ProductItem = ({
 		sale_name,
 		primary_image,
 		is_in_stock,
-		is_low_stock,
 	} = product;
 
 	const displayPrice = sale_price ?? base_price;
@@ -73,21 +69,14 @@ export const ProductItem = ({
 							{sale_name}
 						</Badge>
 					)}
-					{!is_in_stock ? (
+					{!is_in_stock && (
 						<Badge
 							variant="secondary"
 							className="font-bold shadow-sm bg-zinc-800 text-white hover:bg-zinc-700"
 						>
 							Out of Stock
 						</Badge>
-					) : is_low_stock ? (
-						<Badge
-							variant="secondary"
-							className="font-bold shadow-sm bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200"
-						>
-							Low Stock
-						</Badge>
-					) : null}
+					)}
 				</div>
 
 				{/* Quick Actions Overlay - Desktop */}
@@ -103,25 +92,6 @@ export const ProductItem = ({
 						title="Quick View"
 					>
 						<Eye className="h-5 w-5" />
-					</Button>
-					<Button
-						size="icon"
-						className="rounded-full h-10 w-10 hover:scale-110 transition-all shadow-md"
-						disabled={!is_in_stock || addToCart.isPending}
-						onClick={(e) => {
-							e.preventDefault();
-							addToCart.mutate({
-								product,
-								quantity: 1,
-							});
-						}}
-						title="Add to Cart"
-					>
-						{addToCart.isPending ? (
-							<Loader2 className="h-5 w-5 animate-spin" />
-						) : (
-							<ShoppingCart className="h-5 w-5" />
-						)}
 					</Button>
 					<WishlistButton productId={product.id} />
 				</div>
@@ -152,26 +122,10 @@ export const ProductItem = ({
 						)}
 					</div>
 
-					{/* Mobile Add to Cart (Visible only on touch/small screens) */}
-					<Button
-						size="icon"
-						variant="ghost"
-						className="lg:hidden rounded-full hover:bg-primary/10 hover:text-primary"
-						disabled={!is_in_stock || addToCart.isPending}
-						onClick={(e) => {
-							e.preventDefault();
-							addToCart.mutate({
-								product,
-								quantity: 1,
-							});
-						}}
-					>
-						{addToCart.isPending ? (
-							<Loader2 className="h-5 w-5 animate-spin" />
-						) : (
-							<ShoppingCart className="h-5 w-5" />
-						)}
-					</Button>
+					{/* Mobile: View options button */}
+					<span className="lg:hidden text-xs font-medium text-primary">
+						View options
+					</span>
 				</div>
 			</div>
 		</Link>

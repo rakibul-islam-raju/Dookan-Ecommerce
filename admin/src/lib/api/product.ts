@@ -3,7 +3,7 @@ import type {
 	ICommonFilter,
 	IPaginatedResponse,
 } from "@/@types/Common.type";
-import type { ProductVariant } from "./variant";
+import type { CreateProductVariantRequest, ProductVariant } from "./variant";
 import { queryKeys } from "@/constants/queryKeys";
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryClient } from "../react-query";
@@ -24,9 +24,7 @@ export interface CreateProductRequest {
 	category: string;
 	base_price: string;
 	cost_price?: string | null;
-	stock_quantity?: number;
-	low_stock_threshold?: number;
-	track_inventory?: boolean;
+	is_digital?: boolean;
 	weight?: string | null;
 	unit?: "kg" | "g" | "l" | "ml" | "piece" | "pack";
 	unit_value?: string;
@@ -34,6 +32,7 @@ export interface CreateProductRequest {
 	meta_description?: string | null;
 	is_featured?: boolean;
 	is_active?: boolean;
+	variants?: CreateProductVariantRequest[];
 }
 
 export interface ProductListItem extends BaseModel {
@@ -48,9 +47,9 @@ export interface ProductListItem extends BaseModel {
 	sale_price?: string | null;
 	sale_discount_percentage?: number;
 	sale_name?: string | null;
-	stock_quantity?: number;
-	low_stock_threshold?: number;
-	track_inventory?: boolean;
+	total_stock: number | null;
+	is_digital: boolean;
+	is_in_stock: boolean;
 	weight?: string;
 	unit?: "kg" | "g" | "l" | "ml" | "piece" | "pack";
 	unit_value?: string;
@@ -101,16 +100,15 @@ export interface ProductDetailsResponse {
 	sale_price?: string | null;
 	sale_discount_percentage?: number;
 	sale_name?: string | null;
-	stock_quantity: number;
+	total_stock: number | null;
 	is_low_stock: boolean;
 	is_in_stock: boolean;
-	low_stock_threshold: number;
+	is_digital: boolean;
 	weight: string;
 	unit: "kg" | "g" | "l" | "ml" | "piece" | "pack";
 	unit_value: string;
 	is_featured: boolean;
 	is_active: boolean;
-	track_inventory: boolean;
 	meta_title: string;
 	meta_description: string;
 	images: ProductImage[];

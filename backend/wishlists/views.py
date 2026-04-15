@@ -3,8 +3,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from django_filters.rest_framework import DjangoFilterBackend
+
+from utils.permissions import HasModulePermission
+from wishlists.filters import AdminWishlistFilter
 from wishlists.models import WishlistItem
-from wishlists.serializers import WishlistItemSerializer, WishlistItemCreateSerializer
+from wishlists.serializers import (
+    WishlistItemSerializer,
+    WishlistItemCreateSerializer,
+    AdminWishlistItemSerializer,
+)
 
 
 class WishlistListView(generics.ListAPIView):
@@ -94,6 +102,23 @@ class WishlistToggleView(APIView):
 
         WishlistItem.objects.create(user=request.user, product_id=product_id)
         return Response({"status": "added"}, status=status.HTTP_201_CREATED)
+
+
+class AdminWishlistListView(generics.ListAPIView):
+    """
+    Admin: List all wishlist items across all users with search and filter.
+    GET /api/v1/wishlists/admin/
+    """
+
+    serializer_class = AdminWishlistItemSerializer
+    permission_classes = [HasModulePermission("manage_wishlists")]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AdminWishlistFilter
+
+    def get_queryset(self):
+        return WishlistItem.objects.select_related(
+            "user", "product", "product__category"
+        ).order_by("-created_at")
 
 
 class WishlistProductIdsView(APIView):

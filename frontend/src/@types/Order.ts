@@ -52,6 +52,7 @@ export interface ICreateOrderRequest {
 // Individual order item for creation
 export interface IOrderItemRequest {
 	product_id: string; // UUID
+	variant_id: string; // UUID
 	quantity: number;
 }
 
@@ -102,6 +103,8 @@ export interface IOrderItemResponse {
 	id: string;
 	product_name: string;
 	product_sku: string;
+	variant_name: string;
+	variant_sku: string;
 	unit_price: string;
 	quantity: number;
 	total_price: string;

@@ -4,6 +4,23 @@ from products.serializers import ConsumerProductListSerializer
 from wishlists.models import WishlistItem
 
 
+class AdminWishlistUserSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    email = serializers.EmailField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+
+
+class AdminWishlistItemSerializer(serializers.ModelSerializer):
+    product = ConsumerProductListSerializer(read_only=True)
+    user = AdminWishlistUserSerializer(read_only=True)
+
+    class Meta:
+        model = WishlistItem
+        fields = ["id", "user", "product", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
 class WishlistItemSerializer(serializers.ModelSerializer):
     product = ConsumerProductListSerializer(read_only=True)
 

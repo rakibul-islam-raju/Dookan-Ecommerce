@@ -17,10 +17,11 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug", "base_price", "stock_quantity", "is_active"]
-    list_filter = ["name", "slug", "base_price", "stock_quantity", "is_active"]
-    search_fields = ["name", "slug", "stock_quantity"]
+    list_display = ["name", "slug", "base_price", "total_stock", "is_digital", "is_active"]
+    list_filter = ["is_digital", "is_featured", "is_active"]
+    search_fields = ["name", "slug", "sku"]
     prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ["total_stock"]
 
     inlines = [ProductImageInline]
 

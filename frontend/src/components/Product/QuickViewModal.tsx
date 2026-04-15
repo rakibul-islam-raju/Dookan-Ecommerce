@@ -1,11 +1,11 @@
 import { IConsumerProductListItem } from "@/@types/Product";
 import { Button } from "@/components/ui/button";
 import { env } from "@/config/env";
-import { useAddToCart } from "@/lib/hooks/useCart";
 import { cn } from "@/lib/utils";
-import { Check, Loader2, ShoppingCart, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { WishlistButton } from "./WishlistButton";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -21,7 +21,6 @@ export const QuickViewModal = ({
 	product,
 }: QuickViewModalProps) => {
 	const canUseDOM = typeof document !== "undefined";
-	const addToCart = useAddToCart();
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -49,7 +48,6 @@ export const QuickViewModal = ({
 		is_in_stock,
 		unit,
 		unit_value,
-		is_low_stock,
 	} = product;
 
 	const displayPrice = sale_price ?? base_price;
@@ -155,14 +153,6 @@ export const QuickViewModal = ({
 								<span>
 									{unit_value} {unit}
 								</span>
-								{is_low_stock && (
-									<>
-										<span>•</span>
-										<span className="text-sm font-medium text-yellow-500">
-											Low Stock
-										</span>
-									</>
-								)}
 							</div>
 						</div>
 
@@ -171,22 +161,11 @@ export const QuickViewModal = ({
 								<Button
 									className="flex-1 gap-2"
 									size="lg"
-									disabled={!is_in_stock || addToCart.isPending}
-									onClick={() => {
-										if (product) {
-											addToCart.mutate({
-												product,
-												quantity: 1,
-											});
-										}
-									}}
+									asChild
 								>
-									{addToCart.isPending ? (
-										<Loader2 className="h-5 w-5 animate-spin" />
-									) : (
-										<ShoppingCart className="h-5 w-5" />
-									)}
-									{addToCart.isPending ? "Adding..." : "Add to Cart"}
+									<Link href={`/products/${product.slug}`} onClick={onClose}>
+										View Product
+									</Link>
 								</Button>
 								<WishlistButton
 									productId={product.id}

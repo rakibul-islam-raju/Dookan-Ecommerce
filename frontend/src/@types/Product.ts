@@ -51,15 +51,14 @@ export interface IConsumerProductListItem {
 	sale_price: number | null;
 	sale_discount_percentage: number;
 	sale_name?: string;
-	stock_quantity: number;
-	is_low_stock: boolean;
+	total_stock: number | null;
 	is_in_stock: boolean;
+	is_digital: boolean;
 	unit: string;
 	unit_value: number;
 	is_featured: boolean;
 	is_active: boolean;
 	primary_image?: string;
-	has_variants: boolean;
 	min_variant_base_price?: string | null;
 }
 
@@ -75,9 +74,9 @@ export interface IConsumerProductDetail {
 	sale_price: string | null;
 	sale_discount_percentage: number;
 	sale_name?: string;
-	stock_quantity: number;
-	is_low_stock: boolean;
+	total_stock: number | null;
 	is_in_stock: boolean;
+	is_digital: boolean;
 	weight: string;
 	unit: string;
 	unit_value: string;
@@ -87,7 +86,6 @@ export interface IConsumerProductDetail {
 	meta_description?: string;
 	images: IProductImage[];
 	review_summary: IReviewSummary;
-	has_variants: boolean;
 	variants: IProductVariant[];
 	variant_types: IProductVariantType[];
 }
