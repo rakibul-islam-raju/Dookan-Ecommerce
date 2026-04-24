@@ -2,12 +2,15 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
-from users.serializers import UserSerializer
-from utils.email import send_verification_otp_email, send_welcome_email, send_password_reset_success_email
+from utils.email import (
+    send_password_reset_success_email,
+    send_verification_otp_email,
+    send_welcome_email,
+)
 
 from .serializers import (
     CustomTokenObtainPairSerializer,
@@ -27,6 +30,12 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
     permission_classes = [AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
+    throttle_scope = "auth_login"
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    permission_classes = [AllowAny]
+    throttle_scope = "auth_refresh"
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -39,6 +48,7 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     serializer_class = UserRegistrationSerializer
+    throttle_scope = "auth_register"
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
@@ -55,6 +65,7 @@ class EmailVerificationView(APIView):
     """
 
     permission_classes = [AllowAny]
+    throttle_scope = "auth_verify_email"
 
     def post(self, request):
         serializer = EmailVerificationSerializer(data=request.data)
@@ -99,6 +110,7 @@ class ResendVerificationView(APIView):
     """
 
     permission_classes = [AllowAny]
+    throttle_scope = "auth_resend_verification"
 
     def post(self, request):
         serializer = ResendVerificationSerializer(data=request.data)
@@ -127,6 +139,7 @@ class PasswordResetRequestView(APIView):
     """
 
     permission_classes = [AllowAny]
+    throttle_scope = "auth_password_reset"
 
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -157,6 +170,7 @@ class PasswordResetConfirmView(APIView):
     """
 
     permission_classes = [AllowAny]
+    throttle_scope = "auth_password_reset_confirm"
 
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
@@ -193,6 +207,7 @@ class LogoutView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    throttle_scope = "auth_logout"
 
     def post(self, request):
         try:

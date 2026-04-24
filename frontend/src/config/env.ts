@@ -3,6 +3,8 @@
  * Centralized access to environment variables with type safety
  */
 
+import { COOKIES_KEYS } from "@/config";
+
 export const env = {
 	// API URLs
 	api: {
@@ -17,9 +19,9 @@ export const env = {
 	// Authentication
 	auth: {
 		accessTokenCookie:
-			process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME || "access_token",
+			process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME || COOKIES_KEYS.ACCESS_TOKEN,
 		refreshTokenCookie:
-			process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || "refresh_token",
+			process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || COOKIES_KEYS.REFRESH_TOKEN,
 	},
 
 	// ISR Revalidation times (in seconds)
@@ -29,9 +31,9 @@ export const env = {
 		orders: 0, // No cache for user-specific data
 	},
 
-	environment:{
-		on_https: process.env.ON_HTTPS || false,
-	}
+	environment: {
+		on_https: process.env.ON_HTTPS === "true",
+	},
 } as const;
 
 /**

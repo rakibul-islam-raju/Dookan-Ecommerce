@@ -97,7 +97,7 @@ export const authApi = {
 	 * Refresh access token
 	 */
 	async refreshToken(): Promise<AuthTokens> {
-		const { data } = await clientApi.post<AuthTokens>("/auth/token/refresh/");
+		const { data } = await clientApi.post<AuthTokens>("/auth/refresh/");
 		return data;
 	},
 

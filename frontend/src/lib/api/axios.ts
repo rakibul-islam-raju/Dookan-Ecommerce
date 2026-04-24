@@ -97,7 +97,7 @@ export const createClientAxios = (): AxiosInstance => {
 			) {
 				try {
 					// Attempt to refresh token
-					await instance.post("/auth/token/refresh/");
+					await instance.post("/auth/refresh/");
 
 					// Retry original request
 					return instance(originalRequest);

@@ -1,6 +1,8 @@
 .env
 .ssh
 .idea
+.cache/
+deploy/certs/
 # Media files
 media/
 

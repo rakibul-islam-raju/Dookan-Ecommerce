@@ -22,7 +22,10 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
+CACHE_DIR = Path(env("CACHE_DIR", default=str(BASE_DIR / ".cache" / "django")))
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 # Application definition
 
@@ -161,6 +164,31 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": env("DRF_THROTTLE_ANON", default="120/hour"),
+        "user": env("DRF_THROTTLE_USER", default="1000/hour"),
+        "auth_login": env("DRF_THROTTLE_AUTH_LOGIN", default="5/minute"),
+        "auth_register": env("DRF_THROTTLE_AUTH_REGISTER", default="5/hour"),
+        "auth_refresh": env("DRF_THROTTLE_AUTH_REFRESH", default="30/minute"),
+        "auth_logout": env("DRF_THROTTLE_AUTH_LOGOUT", default="60/hour"),
+        "auth_verify_email": env(
+            "DRF_THROTTLE_AUTH_VERIFY_EMAIL", default="10/hour"
+        ),
+        "auth_resend_verification": env(
+            "DRF_THROTTLE_AUTH_RESEND_VERIFICATION", default="5/hour"
+        ),
+        "auth_password_reset": env(
+            "DRF_THROTTLE_AUTH_PASSWORD_RESET", default="5/hour"
+        ),
+        "auth_password_reset_confirm": env(
+            "DRF_THROTTLE_AUTH_PASSWORD_RESET_CONFIRM", default="10/hour"
+        ),
+    },
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "PAGE_SIZE": 20,
@@ -198,16 +226,47 @@ SIMPLE_JWT = {
 }
 
 # OTP Settings
-OTP_EXPIRE_MINUTES = 5
-OTP_MAX_ATTEMPTS = 3
-OTP_LENGTH = 6
+OTP_MAX_ATTEMPTS = env.int("OTP_MAX_ATTEMPTS", default=3)
+OTP_LENGTH = env.int("OTP_LENGTH", default=6)
+OTP_EXPIRE_MINUTES = env.int("OTP_EXPIRE_MINUTES", default=5)
 
 # Email Configuration (Gmail SMTP)
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
+)
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Dookan <noreply@dookan.com>")
 ADMIN_URL = env("ADMIN_URL", default="http://localhost:5173")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": str(CACHE_DIR),
+        "TIMEOUT": env.int("CACHE_TIMEOUT", default=300),
+        "OPTIONS": {
+            "MAX_ENTRIES": env.int("CACHE_MAX_ENTRIES", default=1000),
+        },
+    }
+}
+
+USE_X_FORWARDED_HOST = env.bool("USE_X_FORWARDED_HOST", default=True)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=not DEBUG)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=not DEBUG)
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=not DEBUG)
+SECURE_HSTS_SECONDS = env.int(
+    "SECURE_HSTS_SECONDS", default=31536000 if not DEBUG else 0
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=not DEBUG
+)
+SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
+SECURE_CONTENT_TYPE_NOSNIFF = env.bool("SECURE_CONTENT_TYPE_NOSNIFF", default=True)
+SECURE_REFERRER_POLICY = env(
+    "SECURE_REFERRER_POLICY", default="strict-origin-when-cross-origin"
+)
+X_FRAME_OPTIONS = env("X_FRAME_OPTIONS", default="DENY")

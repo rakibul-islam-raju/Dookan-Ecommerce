@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
 
 from django.contrib import admin
 from django.urls import path, include
@@ -15,6 +16,10 @@ admin.site.site_header = "Dookan"
 admin.site.site_title = "Admin Dashboard"
 admin.site.index_title = "Dookan"
 
+
+def health_check(_request):
+    return JsonResponse({"status": "ok"})
+
 # schema_view = get_schema_view(
 #     openapi.Info(
 #         title="Dookan API",
@@ -26,6 +31,7 @@ admin.site.index_title = "Dookan"
 # )
 
 urlpatterns = [
+    path("healthz/", health_check, name="healthz"),
     path(
         "",
         SpectacularSwaggerView.as_view(url_name="schema"),

@@ -1,23 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { COOKIES_KEYS } from "@/config";
 
-// Define route patterns
-const authRoutes = ["/login", "/register", "/forgot-password"];
-const protectedRoutes = [
-	"/account",
-	"/orders",
-	"/profile",
-	// "/checkout",
-	"/wishlist",
-];
+const authRoutes = ["/login", "/register", "/forgot-password", "/verify-email"];
+const protectedRoutes = ["/profile", "/orders", "/wishlist", "/addresses"];
+const publicRoutes = ["/", "/shop", "/products", "/cart", "/checkout", "/track-order"];
 
-// Check if user is authenticated by looking for access token
 function isAuthenticated(request: NextRequest): boolean {
-	const accessToken = request.cookies.get("vinMart_access_token")?.value;
-	console.log("accessToken------------>", accessToken);
+	const accessToken = request.cookies.get(COOKIES_KEYS.ACCESS_TOKEN)?.value;
 	return !!accessToken;
 }
 
-// Check if path matches any of the patterns
 function matchesRoute(pathname: string, routes: string[]): boolean {
 	return routes.some((route) => pathname.startsWith(route));
 }
@@ -31,23 +23,24 @@ export function proxy(request: NextRequest) {
 		pathname.startsWith("/api") ||
 		pathname.startsWith("/_next") ||
 		pathname.startsWith("/favicon") ||
-		pathname.includes(".") ||
-		pathname === "/"
+		pathname.includes(".")
 	) {
 		return NextResponse.next();
 	}
 
-	// If user is authenticated and trying to access auth routes, redirect to home
 	if (isAuth && matchesRoute(pathname, authRoutes)) {
 		return NextResponse.redirect(new URL("/", request.url));
 	}
 
-	// If user is not authenticated and trying to access protected routes, redirect to login
 	if (!isAuth && matchesRoute(pathname, protectedRoutes)) {
 		const loginUrl = new URL("/login", request.url);
-		// Add the current path as a redirect parameter
-		loginUrl.searchParams.set("redirect", pathname);
+		const redirectPath = `${pathname}${request.nextUrl.search}`;
+		loginUrl.searchParams.set("redirect", redirectPath);
 		return NextResponse.redirect(loginUrl);
+	}
+
+	if (matchesRoute(pathname, authRoutes) || matchesRoute(pathname, publicRoutes)) {
+		return NextResponse.next();
 	}
 
 	return NextResponse.next();

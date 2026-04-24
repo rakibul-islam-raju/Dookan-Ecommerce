@@ -21,7 +21,7 @@ COPY . .
 RUN chmod +x start.sh
 
 # Install dependencies
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev --group prod
 
 # Create staticfiles directory
 RUN mkdir -p /app/staticfiles

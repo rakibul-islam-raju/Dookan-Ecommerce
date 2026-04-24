@@ -35,7 +35,11 @@ export function useLogin() {
 		onSuccess: async () => {
 			// Invalidate and refetch user data
 			await queryClient.invalidateQueries({ queryKey: authKeys.user() });
-			router.push("/");
+			const redirectTo =
+				typeof window !== "undefined"
+					? new URLSearchParams(window.location.search).get("redirect")
+					: null;
+			router.push(redirectTo || "/");
 			// toast.success("Logged in successfully");
 		},
 	});
