@@ -40,7 +40,7 @@ export const authApi = {
 	 */
 	async login(credentials: LoginCredentials): Promise<LoginResponse> {
 		const { data } = await clientApi.post<LoginResponse>(
-			"/auth/login/",
+			"/auth/staff/login/",
 			credentials
 		);
 		return data;

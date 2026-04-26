@@ -52,7 +52,7 @@ export const createClientAxios = (): AxiosInstance => {
 			// Handle 401 Unauthorized - Token refresh logic
 			if (
 				error.response?.status === 401 &&
-				!originalRequest?.url?.includes("/auth/login") &&
+				!originalRequest?.url?.includes("/auth/staff/login") &&
 				originalRequest
 			) {
 				try {

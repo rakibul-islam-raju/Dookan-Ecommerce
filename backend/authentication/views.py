@@ -13,7 +13,8 @@ from utils.email import (
 )
 
 from .serializers import (
-    CustomTokenObtainPairSerializer,
+    StorefrontTokenObtainPairSerializer,
+    StaffTokenObtainPairSerializer,
     UserRegistrationSerializer,
     EmailVerificationSerializer,
     ResendVerificationSerializer,
@@ -23,13 +24,18 @@ from .serializers import (
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
-    """
-    Custom JWT token view with additional user data
-    POST /auth/login/
-    """
+    """Storefront customer login — POST /auth/login/"""
 
     permission_classes = [AllowAny]
-    serializer_class = CustomTokenObtainPairSerializer
+    serializer_class = StorefrontTokenObtainPairSerializer
+    throttle_scope = "auth_login"
+
+
+class StaffLoginView(TokenObtainPairView):
+    """Vendor staff login — POST /auth/staff/login/"""
+
+    permission_classes = [AllowAny]
+    serializer_class = StaffTokenObtainPairSerializer
     throttle_scope = "auth_login"
 
 

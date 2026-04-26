@@ -9,27 +9,60 @@ from utils.email import send_verification_otp_email
 from vendors.services import get_active_vendor_membership, serialize_vendor_context
 
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class StorefrontTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
-    Custom JWT token serializer with additional user data.
-    Requires email verification before login.
+    Storefront customer login. Blocks staff and superusers.
     """
 
     def validate(self, attrs):
         data = super().validate(attrs)
 
-        # Check if email is verified
+        if self.user.is_superuser or self.user.is_staff:
+            raise serializers.ValidationError(
+                {"detail": "Staff accounts must use the admin login."}
+            )
+
         if not self.user.is_email_verified:
             raise serializers.ValidationError(
                 {"detail": "Please verify your email before logging in."}
             )
 
-        membership = get_active_vendor_membership(self.user)
+        data["user"] = {
+            "id": str(self.user.id),
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "full_name": f"{self.user.first_name} {self.user.last_name}",
+            "email": self.user.email,
+            "mobile_number": self.user.mobile_number,
+            "is_active": self.user.is_active,
+            "is_email_verified": self.user.is_email_verified,
+            "is_mobile_verified": self.user.is_mobile_verified,
+        }
+
+        return data
+
+
+class StaffTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Admin/vendor staff login. Blocks customers and superusers.
+    """
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
 
         if self.user.is_superuser:
-            permissions = Role.ALL_PERMISSIONS
-            role_name = "Superuser"
-        elif membership and membership.is_owner:
+            raise serializers.ValidationError(
+                {"detail": "Superusers must log in via the admin control panel."}
+            )
+
+        if not self.user.is_staff:
+            raise serializers.ValidationError(
+                {"detail": "No vendor access. Please use the customer login."}
+            )
+
+        membership = get_active_vendor_membership(self.user)
+
+        if membership and membership.is_owner:
             permissions = Role.ALL_PERMISSIONS
             role_name = "Owner"
         elif membership and membership.role:
@@ -39,7 +72,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             permissions = []
             role_name = None
 
-        # Add custom user data to response
         data["user"] = {
             "id": str(self.user.id),
             "first_name": self.user.first_name,

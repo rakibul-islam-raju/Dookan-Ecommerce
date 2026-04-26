@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     CustomTokenObtainPairView,
+    StaffLoginView,
     CustomTokenRefreshView,
     UserRegistrationView,
     LogoutView,
@@ -15,6 +16,7 @@ app_name = "authentication"
 
 urlpatterns = [
     path("login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("staff/login/", StaffLoginView.as_view(), name="staff_token_obtain_pair"),
     path("register/", UserRegistrationView.as_view(), name="user_registration"),
     path("verify-email/", EmailVerificationView.as_view(), name="verify_email"),
     path(
