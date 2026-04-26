@@ -19,6 +19,7 @@ interface AuthState {
 	hasFeature: (feature: string) => boolean;
 	canAccessInventory: () => boolean;
 	canAccessExpenses: () => boolean;
+	canAccessStorefront: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -77,19 +78,26 @@ export const useAuthStore = create<AuthState>()(
 			canAccessInventory: () => {
 				const { user, vendorContext } = get();
 				if (!user) return false;
+				if (!(vendorContext?.enabled_features?.includes("inventory") ?? false)) return false;
 				if (user.is_superuser) return true;
 				if (vendorContext?.is_vendor_owner) return true;
-				return (
-					(user.permissions?.includes("manage_inventory") ?? false) &&
-					(vendorContext?.enabled_features?.includes("inventory") ?? false)
-				);
+				return user.permissions?.includes("manage_inventory") ?? false;
 			},
 			canAccessExpenses: () => {
 				const { user, vendorContext } = get();
 				if (!user) return false;
+				if (!(vendorContext?.enabled_features?.includes("expenses") ?? false)) return false;
 				if (user.is_superuser) return true;
 				if (vendorContext?.is_vendor_owner) return true;
 				return user.permissions?.includes("manage_expenses") ?? false;
+			},
+			canAccessStorefront: () => {
+				const { user, vendorContext } = get();
+				if (!user) return false;
+				if (!(vendorContext?.storefront_enabled ?? false)) return false;
+				if (user.is_superuser) return true;
+				if (vendorContext?.is_vendor_owner) return true;
+				return true;
 			},
 		}),
 		{

@@ -28,7 +28,7 @@ from orders.serializers import (
     OrderPaymentUpdateSerializer,
     OrderStatusUpdateSerializer,
 )
-from vendors.services import get_effective_permissions, get_request_vendor, get_request_vendor_membership
+from vendors.services import get_request_vendor, get_request_vendor_membership
 from vendors.services import assert_storefront_enabled
 
 logger = logging.getLogger(__name__)
@@ -92,7 +92,11 @@ class OrderListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        if user.is_superuser or user.is_staff or get_request_vendor_membership(self.request):
+        if (
+            user.is_superuser
+            or user.is_staff
+            or get_request_vendor_membership(self.request)
+        ):
             # Admin sees all orders
             queryset = Order.objects.all().prefetch_related("items")
             if not user.is_superuser:
@@ -123,7 +127,11 @@ class OrderDetailView(generics.RetrieveAPIView):
         user = self.request.user
         if user.is_superuser and not get_request_vendor(self.request):
             return queryset
-        if user.is_superuser or user.is_staff or get_request_vendor_membership(self.request):
+        if (
+            user.is_superuser
+            or user.is_staff
+            or get_request_vendor_membership(self.request)
+        ):
             return _filter_orders_for_vendor(self.request, queryset)
         return queryset
 
@@ -159,7 +167,9 @@ class OrderStatusUpdateView(APIView):
     permission_classes = [HasModulePermission("manage_orders")]
 
     def patch(self, request, id):
-        order = get_object_or_404(_filter_orders_for_vendor(request, Order.objects.all()), id=id)
+        order = get_object_or_404(
+            _filter_orders_for_vendor(request, Order.objects.all()), id=id
+        )
 
         serializer = OrderStatusUpdateSerializer(
             data=request.data, context={"order": order}
@@ -233,7 +243,9 @@ class OrderCancelView(APIView):
         if request.user.is_superuser and not get_request_vendor(request):
             order = get_object_or_404(base_queryset, id=id)
         else:
-            order = get_object_or_404(_filter_orders_for_vendor(request, base_queryset), id=id)
+            order = get_object_or_404(
+                _filter_orders_for_vendor(request, base_queryset), id=id
+            )
 
         # Check if user owns the order
         if not request.user.is_staff:
@@ -271,7 +283,9 @@ class OrderCancelView(APIView):
                 )
 
         # Create status history
-        cancel_note = f'Order cancelled by {"admin" if request.user.is_staff else "customer"}'
+        cancel_note = (
+            f'Order cancelled by {"admin" if request.user.is_staff else "customer"}'
+        )
         OrderStatusHistory.objects.create(
             order=order,
             status="cancelled",

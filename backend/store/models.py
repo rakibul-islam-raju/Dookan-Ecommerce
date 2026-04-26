@@ -42,7 +42,7 @@ class SiteConfig(BaseModel):
     free_shipping_threshold = models.DecimalField(
         max_digits=8,
         decimal_places=2,
-        default=1000,
+        default=0,
         help_text="Orders at or above this amount qualify for free shipping. Set to 0 to disable free shipping.",
     )
     tax_rate = models.DecimalField(

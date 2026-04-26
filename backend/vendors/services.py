@@ -131,6 +131,7 @@ def serialize_vendor_context(request):
         "enabled_features": context.enabled_features,
         "inventory_mode": vendor.inventory_mode if vendor else None,
         "storefront_enabled": bool(vendor and vendor.storefront_enabled),
+        "meta_pixel_enabled": bool(vendor and vendor.meta_pixel_enabled),
         "vendor_permissions": context.permissions,
         "is_vendor_owner": bool(membership and membership.is_owner),
     }

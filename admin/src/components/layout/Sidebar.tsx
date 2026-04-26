@@ -40,8 +40,6 @@ const sidebarItems: SidebarItem[] = [
 	{ icon: Users, label: "Customers", href: "/customers", permission: "manage_customers" },
 	{ icon: Grid2X2Check, label: "Categories", href: "/categories", permission: "manage_categories" },
 	{ icon: SwatchBook, label: "Variant Types", href: "/variant-types", permission: "manage_products" },
-	{ icon: MessageSquareText, label: "Reviews", href: "/reviews", permission: "manage_reviews" },
-	{ icon: Heart, label: "Wishlists", href: "/wishlists", permission: "manage_wishlists" },
 	{ icon: Tag, label: "Coupons", href: "/coupons", permission: "manage_coupons" },
 	{ icon: Percent, label: "Sales", href: "/sales", permission: "manage_sales" },
 ];
@@ -49,6 +47,8 @@ const sidebarItems: SidebarItem[] = [
 const storeItems: SidebarItem[] = [
 	{ icon: Image, label: "Banners", href: "/store/banners", permission: "manage_banners" },
 	{ icon: Megaphone, label: "Announcements", href: "/store/announcements", permission: "manage_announcements" },
+	{ icon: MessageSquareText, label: "Reviews", href: "/reviews", permission: "manage_reviews" },
+	{ icon: Heart, label: "Wishlists", href: "/wishlists", permission: "manage_wishlists" },
 	{ icon: Settings, label: "Site Settings", href: "/store/settings", permission: "manage_settings" },
 ];
 
@@ -63,14 +63,14 @@ const operationsItems: SidebarItem[] = [
 ];
 
 const SidebarContent = () => {
-	const { hasPermission, canAccessInventory, canAccessExpenses } = useAuthStore();
+	const { hasPermission, canAccessInventory, canAccessExpenses, canAccessStorefront } = useAuthStore();
 
 	const visibleSidebarItems = sidebarItems.filter(
 		(item) => !item.permission || hasPermission(item.permission)
 	);
-	const visibleStoreItems = storeItems.filter(
-		(item) => !item.permission || hasPermission(item.permission)
-	);
+	const visibleStoreItems = canAccessStorefront()
+		? storeItems.filter((item) => !item.permission || hasPermission(item.permission))
+		: [];
 	const visibleAdminItems = adminItems.filter(
 		(item) => !item.permission || hasPermission(item.permission)
 	);

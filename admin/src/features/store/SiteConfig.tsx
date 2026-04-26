@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useZodForm } from "@/hooks/useZodForm";
 import { getSiteConfig, useUpdateSiteConfig } from "@/lib/api/store";
+import { useAuthStore } from "@/store/useAuthStore";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -92,6 +93,7 @@ type SiteConfigFormData = z.infer<typeof siteConfigSchema>;
 export function SiteConfig() {
 	const { data: siteConfig, isLoading } = useQuery(getSiteConfig());
 	const { mutate: updateSiteConfig, isPending } = useUpdateSiteConfig();
+	const { vendorContext } = useAuthStore();
 	const [logoFile, setLogoFile] = useState<File | null>(null);
 	const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
@@ -221,7 +223,9 @@ export function SiteConfig() {
 						<TabsTrigger value="contact">Contact & Social</TabsTrigger>
 						<TabsTrigger value="shipping">Shipping & Tax</TabsTrigger>
 						<TabsTrigger value="branding">Branding</TabsTrigger>
-						<TabsTrigger value="meta">Meta Tracking</TabsTrigger>
+						{vendorContext?.meta_pixel_enabled && (
+							<TabsTrigger value="meta">Meta Tracking</TabsTrigger>
+						)}
 					</TabsList>
 
 					{/* ── General ── */}
@@ -379,46 +383,48 @@ export function SiteConfig() {
 					</TabsContent>
 
 					{/* ── Meta Tracking ── */}
-					<TabsContent value="meta" className="space-y-6">
-						<Card>
-							<CardHeader>
-								<CardTitle>Meta Pixel Credentials</CardTitle>
-								<CardDescription>
-									Configure your Meta Pixel and Conversions API credentials.
-									Enable or disable tracking from the Vendor settings.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<TextField
-									name="meta_pixel_id"
-									label="Pixel ID"
-									placeholder="e.g., 1234567890123456"
-									description="Your Meta Pixel ID. Found in Events Manager under Data Sources."
-								/>
-								<TextField
-									name="meta_access_token"
-									label="Access Token"
-									type="password"
-									placeholder="Leave blank to keep the current token"
-									description="Conversions API access token. Leave blank to keep the existing token unchanged."
-								/>
-								<div className="grid grid-cols-2 gap-4">
+					{vendorContext?.meta_pixel_enabled && (
+						<TabsContent value="meta" className="space-y-6">
+							<Card>
+								<CardHeader>
+									<CardTitle>Meta Pixel Credentials</CardTitle>
+									<CardDescription>
+										Configure your Meta Pixel and Conversions API credentials.
+										Enable or disable tracking from the Vendor settings.
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="space-y-4">
 									<TextField
-										name="meta_test_event_code"
-										label="Test Event Code"
-										placeholder="e.g., TEST12345"
-										description="Optional. Use during testing to verify events in Test Events tab."
+										name="meta_pixel_id"
+										label="Pixel ID"
+										placeholder="e.g., 1234567890123456"
+										description="Your Meta Pixel ID. Found in Events Manager under Data Sources."
 									/>
 									<TextField
-										name="meta_default_currency"
-										label="Default Currency"
-										placeholder="BDT"
-										description="ISO currency code for purchase events (e.g., BDT, USD)."
+										name="meta_access_token"
+										label="Access Token"
+										type="password"
+										placeholder="Leave blank to keep the current token"
+										description="Conversions API access token. Leave blank to keep the existing token unchanged."
 									/>
-								</div>
-							</CardContent>
-						</Card>
-					</TabsContent>
+									<div className="grid grid-cols-2 gap-4">
+										<TextField
+											name="meta_test_event_code"
+											label="Test Event Code"
+											placeholder="e.g., TEST12345"
+											description="Optional. Use during testing to verify events in Test Events tab."
+										/>
+										<TextField
+											name="meta_default_currency"
+											label="Default Currency"
+											placeholder="BDT"
+											description="ISO currency code for purchase events (e.g., BDT, USD)."
+										/>
+									</div>
+								</CardContent>
+							</Card>
+						</TabsContent>
+					)}
 
 					{/* ── Branding ── */}
 					<TabsContent value="branding" className="space-y-6">

@@ -30,6 +30,17 @@ interface SelectFieldProps<T extends FieldValues> {
 	helpText?: string;
 }
 
+// Radix Select forbids empty-string values; use this sentinel internally
+const EMPTY_SENTINEL = "__empty__";
+
+function toRadix(value: string): string {
+	return value === "" ? EMPTY_SENTINEL : value;
+}
+
+function fromRadix(value: string): string {
+	return value === EMPTY_SENTINEL ? "" : value;
+}
+
 export function SelectField<T extends FieldValues>({
 	name,
 	label,
@@ -57,9 +68,9 @@ export function SelectField<T extends FieldValues>({
 			{({ field, error }) => (
 				<div className="space-y-2">
 					<Select
-						onValueChange={field.onChange}
-						defaultValue={field.value}
-						value={field.value}
+						onValueChange={(val) => field.onChange(fromRadix(val))}
+						defaultValue={toRadix(field.value ?? "")}
+						value={toRadix(field.value ?? "")}
 						disabled={disabled}
 					>
 						<SelectTrigger
@@ -72,7 +83,7 @@ export function SelectField<T extends FieldValues>({
 						</SelectTrigger>
 						<SelectContent>
 							{options.map((option) => (
-								<SelectItem key={option.value} value={option.value}>
+								<SelectItem key={toRadix(option.value)} value={toRadix(option.value)}>
 									{option.label}
 								</SelectItem>
 							))}

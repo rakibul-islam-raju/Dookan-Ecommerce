@@ -3,6 +3,7 @@ export interface IVendorContext {
 	enabled_features: string[];
 	inventory_mode: "trading" | "manufacturing" | null;
 	storefront_enabled: boolean;
+	meta_pixel_enabled: boolean;
 	vendor_permissions: string[];
 	is_vendor_owner: boolean;
 }
@@ -37,6 +38,7 @@ export interface User {
 	enabled_features?: string[];
 	inventory_mode?: IVendorContext["inventory_mode"];
 	storefront_enabled?: boolean;
+	meta_pixel_enabled?: boolean;
 	vendor_permissions?: string[];
 	is_vendor_owner?: boolean;
 }
