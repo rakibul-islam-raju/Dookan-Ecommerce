@@ -1,10 +1,18 @@
+import { useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { vendorApi } from "@/lib/api/vendor";
 import { Navigate, Outlet } from "react-router-dom";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 
 export function DashboardLayout() {
-	const { user } = useAuthStore();
+	const { user, vendorContext, setVendorContext } = useAuthStore();
+
+	useEffect(() => {
+		if (user && !vendorContext) {
+			vendorApi.getContext().then(setVendorContext).catch(() => {});
+		}
+	}, [user, vendorContext, setVendorContext]);
 
 	if (!user) {
 		return <Navigate to="/login" />;

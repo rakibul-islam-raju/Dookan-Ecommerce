@@ -1,5 +1,6 @@
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { InventoryGuard } from "@/components/common/InventoryGuard";
 import { PermissionGuard } from "@/components/common/PermissionGuard";
 import { ForgotPassword } from "@/features/auth/ForgotPassword";
 import { Login } from "@/features/auth/Login";
@@ -25,6 +26,17 @@ import { SiteConfig } from "@/features/store/SiteConfig";
 import { StaffList } from "@/features/staff/StaffList";
 import { RoleList } from "@/features/roles/RoleList";
 import { WishlistList } from "@/features/wishlists/WishlistList";
+import { InventoryDashboard } from "@/features/inventory/InventoryDashboard";
+import { MaterialList } from "@/features/inventory/MaterialList";
+import { MaterialDetail } from "@/features/inventory/MaterialDetail";
+import { BatchList } from "@/features/inventory/BatchList";
+import { CreateBatch } from "@/features/inventory/CreateBatch";
+import { BatchDetail } from "@/features/inventory/BatchDetail";
+import { ReceiptList } from "@/features/inventory/ReceiptList";
+import { ExpenseDashboard } from "@/features/expenses/ExpenseDashboard";
+import { ExpenseCategoryList } from "@/features/expenses/ExpenseCategoryList";
+import { ExpenseList } from "@/features/expenses/ExpenseList";
+import { ExpenseReports } from "@/features/expenses/ExpenseReports";
 import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter([
@@ -197,6 +209,94 @@ export const router = createBrowserRouter([
 				element: (
 					<PermissionGuard permission="manage_wishlists">
 						<WishlistList />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "inventory",
+				element: (
+					<InventoryGuard>
+						<InventoryDashboard />
+					</InventoryGuard>
+				),
+			},
+			{
+				path: "inventory/materials",
+				element: (
+					<InventoryGuard>
+						<MaterialList />
+					</InventoryGuard>
+				),
+			},
+			{
+				path: "inventory/materials/:id",
+				element: (
+					<InventoryGuard>
+						<MaterialDetail />
+					</InventoryGuard>
+				),
+			},
+			{
+				path: "inventory/batches",
+				element: (
+					<InventoryGuard>
+						<BatchList />
+					</InventoryGuard>
+				),
+			},
+			{
+				path: "inventory/batches/create",
+				element: (
+					<InventoryGuard>
+						<CreateBatch />
+					</InventoryGuard>
+				),
+			},
+			{
+				path: "inventory/batches/:id",
+				element: (
+					<InventoryGuard>
+						<BatchDetail />
+					</InventoryGuard>
+				),
+			},
+			{
+				path: "inventory/receipts",
+				element: (
+					<InventoryGuard>
+						<ReceiptList />
+					</InventoryGuard>
+				),
+			},
+			{
+				path: "expenses",
+				element: (
+					<PermissionGuard permission="manage_expenses">
+						<ExpenseDashboard />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "expenses/categories",
+				element: (
+					<PermissionGuard permission="manage_expenses">
+						<ExpenseCategoryList />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "expenses/entries",
+				element: (
+					<PermissionGuard permission="manage_expenses">
+						<ExpenseList />
+					</PermissionGuard>
+				),
+			},
+			{
+				path: "expenses/reports",
+				element: (
+					<PermissionGuard permission="manage_expenses">
+						<ExpenseReports />
 					</PermissionGuard>
 				),
 			},

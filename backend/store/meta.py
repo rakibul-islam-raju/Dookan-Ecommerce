@@ -7,7 +7,8 @@ import urllib.parse
 import urllib.request
 import uuid
 
-from .models import SiteConfig
+from store.models import SiteConfig
+from vendors.services import get_singleton_vendor
 
 logger = logging.getLogger(__name__)
 
@@ -82,14 +83,9 @@ def build_purchase_event_payload(order):
 
 
 def order_meta_currency(order):
-    site_config = getattr(order, "_meta_site_config", None)
-    if site_config:
-        return site_config.meta_default_currency
-
-    site_config = SiteConfig.objects.first()
-    if site_config and site_config.meta_default_currency:
-        return site_config.meta_default_currency
-
+    config = SiteConfig.objects.first()
+    if config and config.meta_default_currency:
+        return config.meta_default_currency
     return "BDT"
 
 
@@ -141,12 +137,14 @@ def send_meta_event(
     event_source_url=None,
     request=None,
 ):
-    site_config = SiteConfig.objects.first()
-    if not site_config:
+    vendor = get_singleton_vendor(required=False)
+    if not vendor:
         return False
-    if not site_config.meta_capi_enabled:
+    if not vendor.meta_capi_enabled:
         return False
-    if not site_config.meta_pixel_id or not site_config.meta_access_token:
+
+    config = SiteConfig.objects.first()
+    if not config or not config.meta_pixel_id or not config.meta_access_token:
         return False
 
     payload = {
@@ -164,13 +162,13 @@ def send_meta_event(
 
     if event_source_url:
         payload["data"][0]["event_source_url"] = event_source_url
-    if site_config.meta_test_event_code:
-        payload["test_event_code"] = site_config.meta_test_event_code
+    if config.meta_test_event_code:
+        payload["test_event_code"] = config.meta_test_event_code
 
     url = (
         f"https://graph.facebook.com/{META_GRAPH_VERSION}/"
-        f"{site_config.meta_pixel_id}/events?"
-        f"{urllib.parse.urlencode({'access_token': site_config.meta_access_token})}"
+        f"{config.meta_pixel_id}/events?"
+        f"{urllib.parse.urlencode({'access_token': config.meta_access_token})}"
     )
     req = urllib.request.Request(
         url,
@@ -211,9 +209,9 @@ def send_purchase_event(order, request, event_id=None):
         .prefetch_related("items")
         .get(pk=order.pk)
     )
-    site_config = SiteConfig.objects.first()
-    if site_config:
-        order._meta_site_config = site_config
+    vendor = get_singleton_vendor(required=False)
+    if vendor:
+        order._meta_vendor = vendor
 
     resolved_event_id = event_id or generate_event_id()
     custom_data = build_purchase_event_payload(order)

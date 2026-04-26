@@ -13,6 +13,9 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
 	manage_settings: "Manage Settings",
 	manage_staff: "Manage Staff",
 	manage_sales: "Manage Sales",
+	manage_wishlists: "Manage Wishlists",
+	manage_inventory: "Manage Inventory",
+	manage_expenses: "Manage Expenses",
 };
 
 export const ALL_PERMISSIONS = Object.keys(PERMISSION_LABELS) as Permission[];

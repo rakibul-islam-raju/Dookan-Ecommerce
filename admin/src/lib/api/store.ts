@@ -110,16 +110,13 @@ export interface SiteConfigData {
 	instagram_url: string | null;
 	youtube_url: string | null;
 	logo: string | null;
-	meta_pixel_enabled: boolean;
-	meta_pixel_id: string;
-	meta_capi_enabled: boolean;
-	meta_test_event_code: string;
-	meta_default_currency: string;
-	has_meta_access_token?: boolean;
 	inside_dhaka_delivery_charge: string;
 	outside_dhaka_delivery_charge: string;
 	free_shipping_threshold: string;
 	tax_rate: string;
+	meta_pixel_id: string;
+	meta_test_event_code: string;
+	meta_default_currency: string;
 }
 
 export interface SiteConfigUpdateData {
@@ -131,16 +128,14 @@ export interface SiteConfigUpdateData {
 	instagram_url?: string | null;
 	youtube_url?: string | null;
 	logo?: File | null;
-	meta_pixel_enabled?: boolean;
-	meta_pixel_id?: string;
-	meta_capi_enabled?: boolean;
-	meta_access_token?: string;
-	meta_test_event_code?: string;
-	meta_default_currency?: string;
 	inside_dhaka_delivery_charge?: number;
 	outside_dhaka_delivery_charge?: number;
 	free_shipping_threshold?: number;
 	tax_rate?: number;
+	meta_pixel_id?: string;
+	meta_access_token?: string;
+	meta_test_event_code?: string;
+	meta_default_currency?: string;
 }
 
 // ============ Banner API ============
@@ -290,24 +285,6 @@ export const siteConfigApi = {
 		if (updateData.logo) {
 			formData.append("logo", updateData.logo);
 		}
-		if (updateData.meta_pixel_enabled !== undefined) {
-			formData.append("meta_pixel_enabled", String(updateData.meta_pixel_enabled));
-		}
-		if (updateData.meta_pixel_id !== undefined) {
-			formData.append("meta_pixel_id", updateData.meta_pixel_id);
-		}
-		if (updateData.meta_capi_enabled !== undefined) {
-			formData.append("meta_capi_enabled", String(updateData.meta_capi_enabled));
-		}
-		if (updateData.meta_access_token !== undefined) {
-			formData.append("meta_access_token", updateData.meta_access_token);
-		}
-		if (updateData.meta_test_event_code !== undefined) {
-			formData.append("meta_test_event_code", updateData.meta_test_event_code);
-		}
-		if (updateData.meta_default_currency !== undefined) {
-			formData.append("meta_default_currency", updateData.meta_default_currency);
-		}
 		if (updateData.inside_dhaka_delivery_charge !== undefined) {
 			formData.append(
 				"inside_dhaka_delivery_charge",
@@ -328,6 +305,18 @@ export const siteConfigApi = {
 		}
 		if (updateData.tax_rate !== undefined) {
 			formData.append("tax_rate", String(updateData.tax_rate));
+		}
+		if (updateData.meta_pixel_id !== undefined) {
+			formData.append("meta_pixel_id", updateData.meta_pixel_id);
+		}
+		if (updateData.meta_access_token !== undefined) {
+			formData.append("meta_access_token", updateData.meta_access_token);
+		}
+		if (updateData.meta_test_event_code !== undefined) {
+			formData.append("meta_test_event_code", updateData.meta_test_event_code);
+		}
+		if (updateData.meta_default_currency !== undefined) {
+			formData.append("meta_default_currency", updateData.meta_default_currency);
 		}
 
 		const { data } = await clientApi.patch<SiteConfigData>(

@@ -31,7 +31,7 @@ class MeView(APIView):
 
     def get(self, request):
         user = request.user
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -227,7 +227,7 @@ class StaffListCreateView(generics.ListCreateAPIView):
         return StaffListSerializer
 
     def get_queryset(self):
-        return User.objects.filter(is_staff=True).select_related("role")
+        return User.objects.filter(is_staff=True)
 
 
 class StaffDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -245,7 +245,7 @@ class StaffDetailView(generics.RetrieveUpdateDestroyAPIView):
         return StaffListSerializer
 
     def get_queryset(self):
-        return User.objects.filter(is_staff=True).select_related("role")
+        return User.objects.filter(is_staff=True)
 
     def perform_destroy(self, instance):
         if instance.is_superuser:

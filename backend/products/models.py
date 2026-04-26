@@ -66,6 +66,13 @@ class Product(BaseModel):
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name="products"
     )
+    vendor = models.ForeignKey(
+        "vendors.Vendor",
+        on_delete=models.PROTECT,
+        related_name="products",
+        null=True,
+        blank=True,
+    )
 
     # Pricing
     base_price = models.DecimalField(
@@ -112,6 +119,7 @@ class Product(BaseModel):
             models.Index(fields=["slug", "is_active"]),
             models.Index(fields=["sku"]),
             models.Index(fields=["category", "is_active"]),
+            models.Index(fields=["vendor", "is_active"]),
             models.Index(fields=["is_featured", "is_active"]),
             models.Index(fields=["base_price"]),
         ]

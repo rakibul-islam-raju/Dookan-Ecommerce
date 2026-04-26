@@ -415,6 +415,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             "id",
+            "vendor",
             "name",
             "slug",
             "sku",
@@ -433,7 +434,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             "is_active",
             "variants",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "vendor"]
 
     def validate_variants(self, value):
         if not value:
@@ -463,9 +464,13 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         from django.db import transaction
+
         variants_data = validated_data.pop("variants")
+        vendor = self.context.get("vendor")
+        if vendor is None:
+            raise serializers.ValidationError("An active vendor is required to create products.")
         with transaction.atomic():
-            product = Product.objects.create(**validated_data)
+            product = Product.objects.create(vendor=vendor, **validated_data)
             for variant_data in variants_data:
                 option_ids = variant_data.pop("option_ids", [])
                 variant = ProductVariant.objects.create(product=product, **variant_data)
@@ -488,6 +493,7 @@ class VendorProductListSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             "id",
+            "vendor",
             "name",
             "sku",
             "short_description",
@@ -546,6 +552,7 @@ class ConsumerProductListSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             "id",
+            "vendor",
             "name",
             "slug",
             "short_description",
@@ -647,6 +654,7 @@ class ConsumerProductDetailsSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             "id",
+            "vendor",
             "name",
             "slug",
             "sku",

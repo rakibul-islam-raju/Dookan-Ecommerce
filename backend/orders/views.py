@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 
 from utils.permissions import HasModulePermission
+from inventory.models import VariantStockTransaction
+from inventory.services import apply_variant_stock_transaction
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -26,8 +28,25 @@ from orders.serializers import (
     OrderPaymentUpdateSerializer,
     OrderStatusUpdateSerializer,
 )
+from vendors.services import get_effective_permissions, get_request_vendor, get_request_vendor_membership
+from vendors.services import assert_storefront_enabled
 
 logger = logging.getLogger(__name__)
+
+
+def _filter_orders_for_vendor(request, queryset):
+    vendor = get_request_vendor(request)
+    user = request.user
+
+    if not vendor:
+        return queryset if user.is_superuser else queryset
+
+    order_ids = (
+        Order.objects.filter(items__product__vendor=vendor)
+        .values_list("id", flat=True)
+        .distinct()
+    )
+    return queryset.filter(id__in=order_ids)
 
 
 class OrderCreateView(generics.CreateAPIView):
@@ -40,6 +59,7 @@ class OrderCreateView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        assert_storefront_enabled(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
@@ -72,9 +92,13 @@ class OrderListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        if user.is_staff:
+        if user.is_superuser or user.is_staff or get_request_vendor_membership(self.request):
             # Admin sees all orders
             queryset = Order.objects.all().prefetch_related("items")
+            if not user.is_superuser:
+                queryset = _filter_orders_for_vendor(self.request, queryset)
+            elif get_request_vendor(self.request):
+                queryset = _filter_orders_for_vendor(self.request, queryset)
         else:
             # Regular users see only their orders
             return Order.objects.filter(user=user).prefetch_related("items")
@@ -90,10 +114,18 @@ class OrderDetailView(generics.RetrieveAPIView):
 
     serializer_class = OrderDetailSerializer
     permission_classes = [IsOwnerOrAdmin]
-    queryset = Order.objects.all().prefetch_related(
-        "items__product", "shipping_address", "status_history"
-    )
     lookup_field = "id"
+
+    def get_queryset(self):
+        queryset = Order.objects.all().prefetch_related(
+            "items__product", "shipping_address", "status_history"
+        )
+        user = self.request.user
+        if user.is_superuser and not get_request_vendor(self.request):
+            return queryset
+        if user.is_superuser or user.is_staff or get_request_vendor_membership(self.request):
+            return _filter_orders_for_vendor(self.request, queryset)
+        return queryset
 
 
 class MyOrdersView(generics.ListAPIView):
@@ -127,7 +159,7 @@ class OrderStatusUpdateView(APIView):
     permission_classes = [HasModulePermission("manage_orders")]
 
     def patch(self, request, id):
-        order = get_object_or_404(Order, id=id)
+        order = get_object_or_404(_filter_orders_for_vendor(request, Order.objects.all()), id=id)
 
         serializer = OrderStatusUpdateSerializer(
             data=request.data, context={"order": order}
@@ -181,6 +213,12 @@ class OrderPaymentUpdateView(generics.UpdateAPIView):
     queryset = Order.objects.all()
     lookup_field = "id"
 
+    def get_queryset(self):
+        queryset = Order.objects.all()
+        if self.request.user.is_superuser and not get_request_vendor(self.request):
+            return queryset
+        return _filter_orders_for_vendor(self.request, queryset)
+
 
 class OrderCancelView(APIView):
     """
@@ -191,7 +229,11 @@ class OrderCancelView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        order = get_object_or_404(Order, id=id)
+        base_queryset = Order.objects.all()
+        if request.user.is_superuser and not get_request_vendor(request):
+            order = get_object_or_404(base_queryset, id=id)
+        else:
+            order = get_object_or_404(_filter_orders_for_vendor(request, base_queryset), id=id)
 
         # Check if user owns the order
         if not request.user.is_staff:
@@ -220,8 +262,13 @@ class OrderCancelView(APIView):
         # Restore variant stock (skip for digital products)
         for item in order.items.select_related("product", "variant").all():
             if item.variant and not item.product.is_digital:
-                item.variant.stock_quantity += item.quantity
-                item.variant.save(update_fields=["stock_quantity"])
+                apply_variant_stock_transaction(
+                    item.variant,
+                    VariantStockTransaction.TYPE_ORDER_CANCEL_RETURN,
+                    item.quantity,
+                    reference_obj=order,
+                    note=f"Order {order.order_number} cancelled",
+                )
 
         # Create status history
         cancel_note = f'Order cancelled by {"admin" if request.user.is_staff else "customer"}'
@@ -360,8 +407,11 @@ class ProductOrdersView(generics.ListAPIView):
     def get_queryset(self):
         product_id = self.kwargs["product_id"]
         # Get orders through OrderItem relationship
-        return (
+        queryset = (
             Order.objects.filter(items__product_id=product_id)
             .distinct()
             .prefetch_related("items", "shipping_address")
         )
+        if self.request.user.is_superuser and not get_request_vendor(self.request):
+            return queryset
+        return _filter_orders_for_vendor(self.request, queryset)

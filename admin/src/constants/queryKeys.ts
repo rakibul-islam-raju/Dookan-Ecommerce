@@ -17,4 +17,13 @@ export const queryKeys = {
 	roles: "roles",
 	sales: "sales",
 	wishlists: "wishlists",
+	vendorContext: "vendorContext",
+	materials: "materials",
+	materialTransactions: "materialTransactions",
+	batches: "batches",
+	receipts: "receipts",
+	variantTransactions: "variantTransactions",
+	expenseCategories: "expenseCategories",
+	expenses: "expenses",
+	expenseSummary: "expenseSummary",
 } as const;

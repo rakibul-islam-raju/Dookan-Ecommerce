@@ -4,6 +4,7 @@ import { useSidebarStore } from "@/store/useSidebarStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { Permission } from "@/@types/User.type";
 import {
+	Boxes,
 	Grid2X2Check,
 	Heart,
 	Image,
@@ -13,6 +14,7 @@ import {
 	MessageSquareText,
 	Package,
 	Percent,
+	Receipt,
 	Settings,
 	ShieldCheck,
 	ShoppingCart,
@@ -55,8 +57,13 @@ const adminItems: SidebarItem[] = [
 	{ icon: KeyRound, label: "Roles", href: "/roles", permission: "manage_staff" },
 ];
 
+const operationsItems: SidebarItem[] = [
+	{ icon: Boxes, label: "Inventory", href: "/inventory", permission: "manage_inventory" },
+	{ icon: Receipt, label: "Expenses", href: "/expenses", permission: "manage_expenses" },
+];
+
 const SidebarContent = () => {
-	const { hasPermission } = useAuthStore();
+	const { hasPermission, canAccessInventory, canAccessExpenses } = useAuthStore();
 
 	const visibleSidebarItems = sidebarItems.filter(
 		(item) => !item.permission || hasPermission(item.permission)
@@ -67,6 +74,11 @@ const SidebarContent = () => {
 	const visibleAdminItems = adminItems.filter(
 		(item) => !item.permission || hasPermission(item.permission)
 	);
+	const visibleOperationsItems = operationsItems.filter((item) => {
+		if (item.href === "/inventory") return canAccessInventory();
+		if (item.href === "/expenses") return canAccessExpenses();
+		return false;
+	});
 
 	const renderNavItems = (items: SidebarItem[]) =>
 		items.map((item) => (
@@ -107,6 +119,13 @@ const SidebarContent = () => {
 						<>
 							{renderSectionHeader(Store, "Store")}
 							{renderNavItems(visibleStoreItems)}
+						</>
+					)}
+
+					{visibleOperationsItems.length > 0 && (
+						<>
+							{renderSectionHeader(Boxes, "Operations")}
+							{renderNavItems(visibleOperationsItems)}
 						</>
 					)}
 

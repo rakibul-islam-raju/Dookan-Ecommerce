@@ -14,6 +14,7 @@ export interface ISiteConfig {
 	twitter?: string;
 	youtube?: string;
 	linkedin?: string;
+	storefront_enabled?: boolean;
 	meta_pixel_enabled?: boolean;
 	meta_pixel_id?: string;
 	meta_default_currency?: string;

@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
 from utils.permissions import HasModulePermission
+from vendors.services import assert_storefront_enabled, get_request_vendor
 
 from products.filters import ProductFilter
 from products.models import (
@@ -41,6 +42,17 @@ from products.serializers import (
 )
 
 
+def _filter_products_for_staff(request, queryset):
+    if request.user.is_superuser:
+        vendor = get_request_vendor(request)
+        return queryset.filter(vendor=vendor) if vendor else queryset
+
+    vendor = get_request_vendor(request)
+    if vendor:
+        return queryset.filter(vendor=vendor)
+    return queryset.none()
+
+
 class CategoryCreateListAPIView(generics.ListCreateAPIView):
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["name"]
@@ -52,6 +64,8 @@ class CategoryCreateListAPIView(generics.ListCreateAPIView):
             if self.request.user.is_staff
             else Category.objects.filter(is_active=True)
         )
+        if not self.request.user.is_staff:
+            assert_storefront_enabled(self.request)
         qs = qs.select_related("parent").prefetch_related("children")
 
         # Allow filtering for top-level categories (parent=null)
@@ -123,7 +137,11 @@ class ProductCreateListAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         if self.request.user.is_staff:
-            return Product.objects.all().prefetch_related("images", "variants")
+            queryset = Product.objects.all().select_related("vendor").prefetch_related(
+                "images", "variants"
+            )
+            return _filter_products_for_staff(self.request, queryset)
+        assert_storefront_enabled(self.request)
         return Product.objects.filter(is_active=True).prefetch_related(
             "images", "variants", "category__parent"
         )
@@ -150,21 +168,31 @@ class ProductCreateListAPIView(generics.ListCreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            context["vendor"] = get_request_vendor(self.request)
         if self.request.method == "GET":
             from sales.utils import get_sale_prices_bulk
 
             context["sale_prices"] = get_sale_prices_bulk(self.get_queryset())
         return context
 
+    def perform_create(self, serializer):
+        serializer.context["vendor"] = get_request_vendor(self.request, required=True)
+        serializer.save()
+
 
 class ProductDetailsAPIView(generics.RetrieveAPIView):
-    queryset = Product.objects.filter(is_active=True).prefetch_related(
+    queryset = Product.objects.filter(is_active=True).select_related("vendor").prefetch_related(
         "images", "variants__options__variant_type", "category__parent"
     )
     serializer_class = ConsumerProductDetailsSerializer
     permission_classes = [AllowAny]
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        assert_storefront_enabled(self.request)
+        return super().get_queryset()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -180,10 +208,12 @@ class ProductDetailsAPIView(generics.RetrieveAPIView):
 class ProductRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         if self.request.user.is_staff:
-            return Product.objects.all().prefetch_related(
+            queryset = Product.objects.all().select_related("vendor").prefetch_related(
                 "images", "variants__options__variant_type"
             )
-        return Product.objects.filter(is_active=True).prefetch_related(
+            return _filter_products_for_staff(self.request, queryset)
+        assert_storefront_enabled(self.request)
+        return Product.objects.filter(is_active=True).select_related("vendor").prefetch_related(
             "images", "variants__options__variant_type"
         )
 
@@ -200,6 +230,8 @@ class ProductRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            context["vendor"] = get_request_vendor(self.request)
         if self.request.method == "GET":
             from sales.utils import get_sale_prices_bulk
 
@@ -227,7 +259,10 @@ class ProductBulkStatusUpdateAPIView(APIView):
         product_ids = serializer.validated_data["ids"]
         is_active = serializer.validated_data["is_active"]
 
-        products = Product.objects.filter(id__in=product_ids)
+        products = _filter_products_for_staff(
+            request,
+            Product.objects.filter(id__in=product_ids),
+        )
         if products.count() != len(product_ids):
             return Response(
                 {"detail": "One or more products were not found."},
@@ -253,13 +288,29 @@ class ProductImageListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         if self.request.user.is_staff:
-            return ProductImage.objects.filter(product=self.kwargs["product_id"])
+            return ProductImage.objects.filter(
+                product__id=self.kwargs["product_id"],
+                product__in=_filter_products_for_staff(
+                    self.request,
+                    Product.objects.all(),
+                ),
+            )
         return ProductImage.objects.filter(
             is_active=True, product=self.kwargs["product_id"]
         )
 
     def create(self, request, *args, **kwargs):
         product_id = self.kwargs.get("product_id")
+        if request.user.is_staff:
+            accessible = _filter_products_for_staff(
+                request,
+                Product.objects.filter(id=product_id),
+            ).exists()
+            if not accessible:
+                return Response(
+                    {"detail": "Product not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
 
         # Pass product_id in serializer context
         serializer = self.get_serializer(
@@ -283,8 +334,17 @@ class ProductImageListCreateAPIView(generics.ListCreateAPIView):
 
 
 class ProductImageDestroyAPIView(generics.DestroyAPIView):
-    queryset = ProductImage.objects.all()
     permission_classes = [HasModulePermission("manage_products")]
+
+    def get_queryset(self):
+        queryset = ProductImage.objects.all()
+        if self.request.user.is_superuser:
+            vendor = get_request_vendor(self.request)
+            return queryset.filter(product__vendor=vendor) if vendor else queryset
+        if self.request.user.is_staff:
+            vendor = get_request_vendor(self.request)
+            return queryset.filter(product__vendor=vendor) if vendor else queryset.none()
+        return queryset.none()
 
 
 class ProductReviewListAPIView(generics.ListAPIView):
@@ -297,6 +357,7 @@ class ProductReviewListAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        assert_storefront_enabled(self.request)
         return ProductReview.objects.filter(
             product_id=self.kwargs["product_id"],
             is_approved=True,
@@ -313,6 +374,10 @@ class ProductReviewCreateAPIView(generics.CreateAPIView):
     serializer_class = ProductReviewCreateSerializer
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        assert_storefront_enabled(request)
+        return super().create(request, *args, **kwargs)
+
 
 class AdminReviewListAPIView(generics.ListAPIView):
     """
@@ -327,7 +392,14 @@ class AdminReviewListAPIView(generics.ListAPIView):
     search_fields = ["product__name", "user__email", "title", "comment"]
 
     def get_queryset(self):
-        return ProductReview.objects.all().select_related("user", "product")
+        queryset = ProductReview.objects.all().select_related("user", "product")
+        if self.request.user.is_superuser:
+            vendor = get_request_vendor(self.request)
+            return queryset.filter(product__vendor=vendor) if vendor else queryset
+        if self.request.user.is_staff:
+            vendor = get_request_vendor(self.request)
+            return queryset.filter(product__vendor=vendor) if vendor else queryset.none()
+        return queryset.none()
 
 
 class AdminReviewStatusUpdateAPIView(APIView):
@@ -340,7 +412,18 @@ class AdminReviewStatusUpdateAPIView(APIView):
 
     def patch(self, request, pk):
         try:
-            review = ProductReview.objects.select_related("user", "product").get(pk=pk)
+            review_queryset = ProductReview.objects.select_related("user", "product")
+            if request.user.is_superuser:
+                vendor = get_request_vendor(request)
+                if vendor:
+                    review_queryset = review_queryset.filter(product__vendor=vendor)
+            elif request.user.is_staff:
+                vendor = get_request_vendor(request)
+                if vendor:
+                    review_queryset = review_queryset.filter(product__vendor=vendor)
+                else:
+                    review_queryset = review_queryset.none()
+            review = review_queryset.get(pk=pk)
         except ProductReview.DoesNotExist:
             return Response(
                 {"detail": "Review not found."}, status=status.HTTP_404_NOT_FOUND
@@ -365,8 +448,17 @@ class AdminReviewDeleteAPIView(generics.DestroyAPIView):
     DELETE /products/reviews/<id>/
     """
 
-    queryset = ProductReview.objects.all()
     permission_classes = [HasModulePermission("manage_reviews")]
+
+    def get_queryset(self):
+        queryset = ProductReview.objects.all()
+        if self.request.user.is_superuser:
+            vendor = get_request_vendor(self.request)
+            return queryset.filter(product__vendor=vendor) if vendor else queryset
+        if self.request.user.is_staff:
+            vendor = get_request_vendor(self.request)
+            return queryset.filter(product__vendor=vendor) if vendor else queryset.none()
+        return queryset.none()
 
 
 # ============================================================
@@ -453,9 +545,14 @@ class ProductVariantListCreateAPIView(generics.ListCreateAPIView):
         return ProductVariantSerializer
 
     def get_queryset(self):
-        return ProductVariant.objects.filter(
+        queryset = ProductVariant.objects.filter(
             product_id=self.kwargs["product_id"]
         ).prefetch_related("options__variant_type")
+        if self.request.user.is_superuser:
+            vendor = get_request_vendor(self.request)
+            return queryset.filter(product__vendor=vendor) if vendor else queryset
+        vendor = get_request_vendor(self.request)
+        return queryset.filter(product__vendor=vendor) if vendor else queryset.none()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -469,8 +566,15 @@ class ProductVariantRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyA
     GET/PUT/PATCH/DELETE /products/variants/<id>/
     """
 
-    queryset = ProductVariant.objects.prefetch_related("options__variant_type").all()
     permission_classes = [HasModulePermission("manage_products")]
+
+    def get_queryset(self):
+        queryset = ProductVariant.objects.prefetch_related("options__variant_type").all()
+        if self.request.user.is_superuser:
+            vendor = get_request_vendor(self.request)
+            return queryset.filter(product__vendor=vendor) if vendor else queryset
+        vendor = get_request_vendor(self.request)
+        return queryset.filter(product__vendor=vendor) if vendor else queryset.none()
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:

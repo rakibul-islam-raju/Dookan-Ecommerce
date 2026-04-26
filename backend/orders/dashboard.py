@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from utils.permissions import HasModulePermission
+from vendors.services import get_request_vendor
 
 from orders.models import Order
 from products.models import Product, ProductVariant
@@ -27,17 +28,35 @@ class DashboardMetricsView(APIView):
         current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         last_month_start = (current_month_start - timedelta(days=1)).replace(day=1)
         last_month_end = current_month_start - timedelta(microseconds=1)
+        active_vendor = get_request_vendor(request)
+
+        order_queryset = Order.objects.all()
+        product_queryset = Product.objects.filter(is_active=True)
+        variant_queryset = ProductVariant.objects.filter(
+            is_active=True,
+            product__is_active=True,
+        )
+
+        if active_vendor:
+            order_ids = (
+                Order.objects.filter(items__product__vendor=active_vendor)
+                .values_list("id", flat=True)
+                .distinct()
+            )
+            order_queryset = order_queryset.filter(id__in=order_ids)
+            product_queryset = product_queryset.filter(vendor=active_vendor)
+            variant_queryset = variant_queryset.filter(product__vendor=active_vendor)
 
         # -- Revenue metrics --
         paid_filter = Q(payment_status="paid")
 
         current_month_revenue = (
-            Order.objects.filter(paid_filter, created_at__gte=current_month_start)
+            order_queryset.filter(paid_filter, created_at__gte=current_month_start)
             .aggregate(total=Sum("total_amount"))["total"]
             or Decimal("0")
         )
         last_month_revenue = (
-            Order.objects.filter(
+            order_queryset.filter(
                 paid_filter,
                 created_at__gte=last_month_start,
                 created_at__lte=last_month_end,
@@ -46,23 +65,23 @@ class DashboardMetricsView(APIView):
             or Decimal("0")
         )
         total_revenue = (
-            Order.objects.filter(paid_filter).aggregate(total=Sum("total_amount"))["total"]
+            order_queryset.filter(paid_filter).aggregate(total=Sum("total_amount"))["total"]
             or Decimal("0")
         )
 
         # -- Order metrics --
-        total_orders = Order.objects.count()
-        current_month_orders = Order.objects.filter(created_at__gte=current_month_start).count()
-        last_month_orders = Order.objects.filter(
+        total_orders = order_queryset.count()
+        current_month_orders = order_queryset.filter(created_at__gte=current_month_start).count()
+        last_month_orders = order_queryset.filter(
             created_at__gte=last_month_start, created_at__lte=last_month_end
         ).count()
 
         orders_by_status = dict(
-            Order.objects.values_list("status").annotate(count=Count("id")).values_list("status", "count")
+            order_queryset.values_list("status").annotate(count=Count("id")).values_list("status", "count")
         )
 
         avg_order_value = (
-            Order.objects.filter(paid_filter).aggregate(avg=Avg("total_amount"))["avg"]
+            order_queryset.filter(paid_filter).aggregate(avg=Avg("total_amount"))["avg"]
             or Decimal("0")
         )
 
@@ -78,11 +97,9 @@ class DashboardMetricsView(APIView):
         ).count()
 
         # -- Product metrics --
-        total_products = Product.objects.filter(is_active=True).count()
+        total_products = product_queryset.count()
         low_stock_variants = list(
-            ProductVariant.objects.filter(
-                is_active=True,
-                product__is_active=True,
+            variant_queryset.filter(
                 product__is_digital=False,
                 stock_quantity__gt=0,
                 stock_quantity__lte=F("low_stock_threshold"),
@@ -99,16 +116,14 @@ class DashboardMetricsView(APIView):
                 "product__slug",
             )[:10]
         )
-        out_of_stock_count = ProductVariant.objects.filter(
-            is_active=True,
-            product__is_active=True,
+        out_of_stock_count = variant_queryset.filter(
             product__is_digital=False,
             stock_quantity=0,
         ).count()
 
         # -- Recent orders --
         recent_orders = list(
-            Order.objects.order_by("-created_at")[:5].values(
+            order_queryset.order_by("-created_at")[:5].values(
                 "id",
                 "order_number",
                 "customer_name",

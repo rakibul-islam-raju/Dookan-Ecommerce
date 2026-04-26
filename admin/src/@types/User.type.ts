@@ -1,3 +1,12 @@
+export interface IVendorContext {
+	active_vendor: { id: string; name: string; slug: string } | null;
+	enabled_features: string[];
+	inventory_mode: "trading" | "manufacturing" | null;
+	storefront_enabled: boolean;
+	vendor_permissions: string[];
+	is_vendor_owner: boolean;
+}
+
 export type Permission =
 	| "view_dashboard"
 	| "manage_products"
@@ -11,7 +20,9 @@ export type Permission =
 	| "manage_settings"
 	| "manage_staff"
 	| "manage_sales"
-	| "manage_wishlists";
+	| "manage_wishlists"
+	| "manage_inventory"
+	| "manage_expenses";
 
 export interface User {
 	id: string;
@@ -22,6 +33,12 @@ export interface User {
 	is_superuser: boolean;
 	permissions: Permission[];
 	role_name: string | null;
+	active_vendor?: IVendorContext["active_vendor"];
+	enabled_features?: string[];
+	inventory_mode?: IVendorContext["inventory_mode"];
+	storefront_enabled?: boolean;
+	vendor_permissions?: string[];
+	is_vendor_owner?: boolean;
 }
 
 export interface Role {

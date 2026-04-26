@@ -10,6 +10,8 @@ from rest_framework import serializers
 from users.models import OTPVerification
 from utils.email import send_order_confirmation_email
 from coupons.models import Coupon
+from inventory.models import VariantStockTransaction
+from inventory.services import apply_variant_stock_transaction
 from products.models import ProductVariant
 from .models import (
     Order,
@@ -324,8 +326,13 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             product = item_data["product"]
             variant = item_data["variant"]
             if not product.is_digital:
-                variant.stock_quantity -= item_data["quantity"]
-                variant.save(update_fields=["stock_quantity"])
+                apply_variant_stock_transaction(
+                    variant,
+                    VariantStockTransaction.TYPE_ORDER_SALE,
+                    item_data["quantity"],
+                    reference_obj=order,
+                    note=f"Order {order.order_number} created",
+                )
 
         # Create shipping address
         ShippingAddress.objects.create(order=order, **shipping_data)

@@ -14,6 +14,8 @@ export const wishlistApi = {
 	},
 };
 
+export type { WishlistFilter };
+
 export const getWishlists = (params: WishlistFilter) =>
 	queryOptions({
 		queryKey: [queryKeys.wishlists, { params }],

@@ -46,11 +46,14 @@ INSTALLED_APPS = [
     # Local apps
     "store.apps.StoreConfig",
     "users.apps.UsersConfig",
+    "vendors.apps.VendorsConfig",
     "products.apps.ProductsConfig",
     "orders.apps.OrdersConfig",
     "coupons.apps.CouponsConfig",
     "wishlists.apps.WishlistsConfig",
     "sales.apps.SalesConfig",
+    "inventory.apps.InventoryConfig",
+    "expenses.apps.ExpensesConfig",
 ]
 
 MIDDLEWARE = [

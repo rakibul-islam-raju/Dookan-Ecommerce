@@ -11,6 +11,7 @@ import random
 
 from users.models import User
 from utils.email import send_staff_invitation_email
+from vendors.services import get_active_vendor_membership, serialize_vendor_context
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -142,16 +143,24 @@ class UserSerializer(serializers.ModelSerializer):
         primary_address_serializer = UserAddressSerializer(primary_address)
         data["default_address"] = primary_address_serializer.data
 
-        # Add permissions data for staff/admin users
+        membership = get_active_vendor_membership(instance)
+
         if instance.is_superuser:
             data["permissions"] = Role.ALL_PERMISSIONS
             data["role_name"] = "Superuser"
-        elif instance.is_staff and instance.role:
-            data["permissions"] = instance.role.permissions
-            data["role_name"] = instance.role.name
+        elif membership and membership.is_owner:
+            data["permissions"] = Role.ALL_PERMISSIONS
+            data["role_name"] = "Owner"
+        elif membership and membership.role:
+            data["permissions"] = membership.role.permissions or []
+            data["role_name"] = membership.role.name
         else:
             data["permissions"] = []
             data["role_name"] = None
+
+        request = self.context.get("request")
+        if request and request.user == instance:
+            data.update(serialize_vendor_context(request))
 
         return data
 
@@ -215,7 +224,7 @@ class RoleSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def get_user_count(self, obj):
-        return obj.users.count()
+        return obj.vendor_memberships.filter(is_active=True).count()
 
     def validate_permissions(self, value):
         if not isinstance(value, list):
@@ -232,7 +241,8 @@ class StaffListSerializer(serializers.ModelSerializer):
     Staff list/detail serializer
     """
 
-    role_name = serializers.CharField(source="role.name", read_only=True, default=None)
+    role = serializers.SerializerMethodField()
+    role_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -250,11 +260,40 @@ class StaffListSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def _get_membership(self, obj):
+        if not hasattr(obj, "_cached_staff_membership"):
+            from vendors.models import VendorMembership
+            from vendors.services import get_singleton_vendor
+
+            vendor = get_singleton_vendor()
+            obj._cached_staff_membership = (
+                VendorMembership.objects.filter(
+                    user=obj, vendor=vendor, is_active=True
+                )
+                .select_related("role")
+                .first()
+                if vendor
+                else None
+            )
+        return obj._cached_staff_membership
+
+    def get_role(self, obj):
+        membership = self._get_membership(obj)
+        return str(membership.role.id) if membership and membership.role else None
+
+    def get_role_name(self, obj):
+        membership = self._get_membership(obj)
+        return membership.role.name if membership and membership.role else None
+
 
 class StaffCreateSerializer(serializers.ModelSerializer):
     """
     Staff creation serializer
     """
+
+    role = serializers.PrimaryKeyRelatedField(
+        queryset=Role.objects.all(), required=False, allow_null=True, write_only=True
+    )
 
     class Meta:
         model = User
@@ -269,6 +308,7 @@ class StaffCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
     def create(self, validated_data):
+        role = validated_data.pop("role", None)
         with transaction.atomic():
             user = User.objects.create_user(
                 is_staff=True,
@@ -276,6 +316,14 @@ class StaffCreateSerializer(serializers.ModelSerializer):
                 is_email_verified=True,
                 **validated_data,
             )
+            from vendors.models import VendorMembership
+            from vendors.services import get_singleton_vendor
+
+            vendor = get_singleton_vendor()
+            if vendor:
+                VendorMembership.objects.create(
+                    user=user, vendor=vendor, role=role, is_owner=False
+                )
             send_staff_invitation_email(
                 email=user.email,
                 user_name=f"{user.first_name} {user.last_name}".strip() or "there",
@@ -288,6 +336,10 @@ class StaffUpdateSerializer(serializers.ModelSerializer):
     Staff update serializer
     """
 
+    role = serializers.PrimaryKeyRelatedField(
+        queryset=Role.objects.all(), required=False, allow_null=True, write_only=True
+    )
+
     class Meta:
         model = User
         fields = [
@@ -298,3 +350,17 @@ class StaffUpdateSerializer(serializers.ModelSerializer):
             "role",
             "is_active",
         ]
+
+    def update(self, instance, validated_data):
+        role = validated_data.pop("role", ...)
+        instance = super().update(instance, validated_data)
+        if role is not ...:
+            from vendors.models import VendorMembership
+            from vendors.services import get_singleton_vendor
+
+            vendor = get_singleton_vendor()
+            if vendor:
+                VendorMembership.objects.filter(
+                    user=instance, vendor=vendor
+                ).update(role=role)
+        return instance

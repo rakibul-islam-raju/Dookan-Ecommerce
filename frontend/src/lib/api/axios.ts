@@ -89,6 +89,15 @@ export const createClientAxios = (): AxiosInstance => {
 		async (error: AxiosError) => {
 			const originalRequest = error.config;
 
+			// Handle 503 storefront disabled
+			if (error.response?.status === 503) {
+				const data = error.response?.data as { code?: string } | undefined;
+				if (data?.code === "storefront_disabled" && typeof window !== "undefined") {
+					window.location.href = "/maintenance";
+					return Promise.reject(error);
+				}
+			}
+
 			// Handle 401 Unauthorized - Token refresh logic
 			if (
 				error.response?.status === 401 &&

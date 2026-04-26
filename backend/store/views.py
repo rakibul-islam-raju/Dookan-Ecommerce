@@ -1,7 +1,8 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, BasePermission
 
 from utils.permissions import HasModulePermission
+from vendors.services import assert_storefront_enabled, is_backoffice_request
 
 from .models import Announcement, Banner, SiteConfig
 from .serializers import (
@@ -11,12 +12,19 @@ from .serializers import (
 )
 
 
+class IsSuperUser(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        return bool(user and user.is_authenticated and user.is_superuser)
+
+
 class AnnouncementListCreateView(generics.ListCreateAPIView):
     serializer_class = AnnouncementSerializer
 
     def get_queryset(self):
         if self.request.user.is_staff:
             return Announcement.objects.all()
+        assert_storefront_enabled(self.request)
         return Announcement.objects.filter(is_active=True)
 
     def get_permissions(self):
@@ -34,6 +42,7 @@ class AnnouncementRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
     def get_queryset(self):
         if self.request.user.is_staff:
             return Announcement.objects.all()
+        assert_storefront_enabled(self.request)
         return Announcement.objects.filter(is_active=True)
 
 
@@ -48,13 +57,15 @@ class SiteConfigView(generics.RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
 
     def get_object(self):
+        if self.request.method == "GET" and not is_backoffice_request(self.request):
+            assert_storefront_enabled(self.request)
         # Get or create the singleton SiteConfig instance
         obj, created = SiteConfig.objects.get_or_create()
         return obj
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
-            self.permission_classes = [HasModulePermission("manage_settings")]
+            self.permission_classes = [IsSuperUser]
         else:
             self.permission_classes = [AllowAny]
         return super().get_permissions()
@@ -72,6 +83,7 @@ class BannerListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         if self.request.user.is_staff:
             return Banner.objects.all()
+        assert_storefront_enabled(self.request)
         return Banner.objects.filter(is_active=True)
 
     def get_permissions(self):
@@ -94,4 +106,5 @@ class BannerRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         if self.request.user.is_staff:
             return Banner.objects.all()
+        assert_storefront_enabled(self.request)
         return Banner.objects.filter(is_active=True)

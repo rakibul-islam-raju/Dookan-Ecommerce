@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from users.models import User, OTPVerification, Role
 from utils.email import send_verification_otp_email
+from vendors.services import get_active_vendor_membership, serialize_vendor_context
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -23,13 +24,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 {"detail": "Please verify your email before logging in."}
             )
 
-        # Build permissions list
+        membership = get_active_vendor_membership(self.user)
+
         if self.user.is_superuser:
             permissions = Role.ALL_PERMISSIONS
             role_name = "Superuser"
-        elif self.user.is_staff and self.user.role:
-            permissions = self.user.role.permissions
-            role_name = self.user.role.name
+        elif membership and membership.is_owner:
+            permissions = Role.ALL_PERMISSIONS
+            role_name = "Owner"
+        elif membership and membership.role:
+            permissions = membership.role.permissions or []
+            role_name = membership.role.name
         else:
             permissions = []
             role_name = None
@@ -49,6 +54,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "permissions": permissions,
             "role_name": role_name,
         }
+        data["user"].update(serialize_vendor_context(self.context["request"]))
 
         return data
 

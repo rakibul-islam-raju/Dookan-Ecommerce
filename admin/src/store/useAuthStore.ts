@@ -1,5 +1,5 @@
 import { localStorageKeys } from "@/config";
-import type { Permission, User } from "@/@types/User.type";
+import type { IVendorContext, Permission, User } from "@/@types/User.type";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -8,12 +8,17 @@ interface AuthState {
 	accessToken: string | null;
 	refreshToken: string | null;
 	isAuthenticated: boolean;
+	vendorContext: IVendorContext | null;
 	setAuth: (user: User, accessToken: string, refreshToken: string) => void;
 	logout: () => void;
 	setUser: (user: User) => void;
 	setTokens: (accessToken: string, refreshToken: string) => void;
+	setVendorContext: (ctx: IVendorContext) => void;
 	hasPermission: (permission: Permission) => boolean;
 	hasAnyPermission: (permissions: Permission[]) => boolean;
+	hasFeature: (feature: string) => boolean;
+	canAccessInventory: () => boolean;
+	canAccessExpenses: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
 			accessToken: null,
 			refreshToken: null,
 			isAuthenticated: false,
+			vendorContext: null,
 			setAuth: (user, accessToken, refreshToken) => {
 				set({
 					user,
@@ -32,7 +38,6 @@ export const useAuthStore = create<AuthState>()(
 				});
 			},
 			logout: () => {
-				// Remove cookies
 				localStorage.removeItem(localStorageKeys.ACCESS_TOKEN);
 				localStorage.removeItem(localStorageKeys.REFRESH_TOKEN);
 
@@ -41,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
 					accessToken: null,
 					refreshToken: null,
 					isAuthenticated: false,
+					vendorContext: null,
 				});
 			},
 			setUser: (user) => {
@@ -48,6 +54,9 @@ export const useAuthStore = create<AuthState>()(
 			},
 			setTokens: (accessToken, refreshToken) => {
 				set({ accessToken, refreshToken });
+			},
+			setVendorContext: (ctx) => {
+				set({ vendorContext: ctx });
 			},
 			hasPermission: (permission) => {
 				const user = get().user;
@@ -61,6 +70,27 @@ export const useAuthStore = create<AuthState>()(
 				if (user.is_superuser) return true;
 				return permissions.some((p) => user.permissions?.includes(p) ?? false);
 			},
+			hasFeature: (feature) => {
+				const ctx = get().vendorContext;
+				return ctx?.enabled_features?.includes(feature) ?? false;
+			},
+			canAccessInventory: () => {
+				const { user, vendorContext } = get();
+				if (!user) return false;
+				if (user.is_superuser) return true;
+				if (vendorContext?.is_vendor_owner) return true;
+				return (
+					(user.permissions?.includes("manage_inventory") ?? false) &&
+					(vendorContext?.enabled_features?.includes("inventory") ?? false)
+				);
+			},
+			canAccessExpenses: () => {
+				const { user, vendorContext } = get();
+				if (!user) return false;
+				if (user.is_superuser) return true;
+				if (vendorContext?.is_vendor_owner) return true;
+				return user.permissions?.includes("manage_expenses") ?? false;
+			},
 		}),
 		{
 			name: "auth-storage",
@@ -69,6 +99,7 @@ export const useAuthStore = create<AuthState>()(
 				accessToken: state.accessToken,
 				refreshToken: state.refreshToken,
 				isAuthenticated: state.isAuthenticated,
+				vendorContext: state.vendorContext,
 			}),
 		}
 	)

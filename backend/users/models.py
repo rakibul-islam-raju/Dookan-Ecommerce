@@ -27,6 +27,8 @@ class Role(BaseModel):
         ("manage_staff", "Manage Staff"),
         ("manage_sales", "Manage Sales"),
         ("manage_wishlists", "Manage Wishlists"),
+        ("manage_inventory", "Manage Inventory"),
+        ("manage_expenses", "Manage Expenses"),
     ]
 
     ALL_PERMISSIONS = [code for code, _ in PERMISSION_CHOICES]
@@ -68,9 +70,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    role = models.ForeignKey(
-        Role, on_delete=models.SET_NULL, null=True, blank=True, related_name="users"
-    )
     password = models.CharField(max_length=128, blank=True, null=True)
     password_reset_token = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -50,6 +50,8 @@ urlpatterns = [
     path("api/v1/auth/", include("authentication.urls", namespace="authentication")),
     # Users
     path("api/v1/users/", include("users.urls", namespace="users")),
+    # Vendors
+    path("api/v1/vendors/", include("vendors.urls", namespace="vendors")),
     # Products
     path("api/v1/products/", include("products.urls", namespace="products")),
     # Orders
@@ -60,6 +62,10 @@ urlpatterns = [
     path("api/v1/wishlists/", include("wishlists.urls", namespace="wishlists")),
     # Sales
     path("api/v1/sales/", include("sales.urls", namespace="sales")),
+    # Inventory
+    path("api/v1/inventory/", include("inventory.urls", namespace="inventory")),
+    # Expenses
+    path("api/v1/expenses/", include("expenses.urls", namespace="expenses")),
 ]
 
 if settings.DEBUG:

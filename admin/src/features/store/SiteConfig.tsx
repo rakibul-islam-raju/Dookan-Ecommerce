@@ -2,8 +2,6 @@
 import { BaseForm } from "@/components/ui/@form/BaseForm";
 import { TextField } from "@/components/ui/@form/TextField";
 import { TextareaField } from "@/components/ui/@form/TextareaField";
-import { PasswordField } from "@/components/ui/@form/PasswordField";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -11,23 +9,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useZodForm } from "@/hooks/useZodForm";
 import { getSiteConfig, useUpdateSiteConfig } from "@/lib/api/store";
 import { useQuery } from "@tanstack/react-query";
-import { Controller } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -67,14 +56,6 @@ const siteConfigSchema = z.object({
 		.optional()
 		.or(z.literal(""))
 		.nullable(),
-	meta_pixel_enabled: z.boolean(),
-	meta_pixel_id: z.string().max(32, "Pixel ID must not exceed 32 characters"),
-	meta_capi_enabled: z.boolean(),
-	meta_access_token: z.string().optional().or(z.literal("")),
-	meta_test_event_code: z.string().max(100).optional().or(z.literal("")),
-	meta_default_currency: z
-		.string()
-		.max(10, "Currency code must not exceed 10 characters"),
 	inside_dhaka_delivery_charge: z.coerce
 		.number()
 		.min(0, "Charge cannot be negative"),
@@ -88,6 +69,22 @@ const siteConfigSchema = z.object({
 		.number()
 		.min(0, "Tax rate cannot be negative")
 		.max(100, "Tax rate cannot exceed 100%"),
+	meta_pixel_id: z
+		.string()
+		.max(32, "Pixel ID must not exceed 32 characters")
+		.optional()
+		.or(z.literal("")),
+	meta_access_token: z.string().optional().or(z.literal("")),
+	meta_test_event_code: z
+		.string()
+		.max(100, "Test event code must not exceed 100 characters")
+		.optional()
+		.or(z.literal("")),
+	meta_default_currency: z
+		.string()
+		.max(10, "Currency code must not exceed 10 characters")
+		.optional()
+		.or(z.literal("")),
 });
 
 type SiteConfigFormData = z.infer<typeof siteConfigSchema>;
@@ -97,8 +94,6 @@ export function SiteConfig() {
 	const { mutate: updateSiteConfig, isPending } = useUpdateSiteConfig();
 	const [logoFile, setLogoFile] = useState<File | null>(null);
 	const [logoPreview, setLogoPreview] = useState<string | null>(null);
-	const [hasStoredMetaToken, setHasStoredMetaToken] = useState(false);
-	const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 
 	const form = useZodForm(siteConfigSchema, {
 		defaultValues: {
@@ -109,16 +104,14 @@ export function SiteConfig() {
 			facebook_url: "",
 			instagram_url: "",
 			youtube_url: "",
-			meta_pixel_enabled: false,
-			meta_pixel_id: "",
-			meta_capi_enabled: false,
-			meta_access_token: "",
-			meta_test_event_code: "",
-			meta_default_currency: "BDT",
 			inside_dhaka_delivery_charge: 60,
 			outside_dhaka_delivery_charge: 120,
 			free_shipping_threshold: 1000,
 			tax_rate: 0,
+			meta_pixel_id: "",
+			meta_access_token: "",
+			meta_test_event_code: "",
+			meta_default_currency: "BDT",
 		},
 	});
 
@@ -135,55 +128,22 @@ export function SiteConfig() {
 	};
 
 	const onSubmit = async (data: SiteConfigFormData) => {
-		const metaPixelId = data.meta_pixel_id.trim();
-		const metaAccessToken = data.meta_access_token?.trim() || "";
-		const metaTestEventCode = data.meta_test_event_code?.trim() || "";
-		const metaDefaultCurrency = data.meta_default_currency.trim().toUpperCase();
-
-		if (data.meta_pixel_enabled && !metaPixelId) {
-			form.setError("meta_pixel_id", {
-				message: "Pixel ID is required when Meta Pixel is enabled",
-			});
-			return;
+		const payload: Parameters<typeof updateSiteConfig>[0] = {
+			...data,
+			facebook_url: data.facebook_url || null,
+			instagram_url: data.instagram_url || null,
+			youtube_url: data.youtube_url || null,
+			...(logoFile && { logo: logoFile }),
+		};
+		if (!data.meta_access_token) {
+			delete payload.meta_access_token;
 		}
-
-		if (data.meta_capi_enabled) {
-			if (!metaPixelId) {
-				form.setError("meta_pixel_id", {
-					message: "Pixel ID is required when Conversions API is enabled",
-				});
-				return;
-			}
-
-			if (!metaAccessToken && !hasStoredMetaToken) {
-				form.setError("meta_access_token", {
-					message:
-						"Access token is required when Conversions API is enabled",
-				});
-				return;
-			}
-		}
-
 		updateSiteConfig(
-			{
-				...data,
-				facebook_url: data.facebook_url || null,
-				instagram_url: data.instagram_url || null,
-				youtube_url: data.youtube_url || null,
-				meta_pixel_id: metaPixelId,
-				meta_test_event_code: metaTestEventCode,
-				meta_default_currency: metaDefaultCurrency,
-				...(metaAccessToken ? { meta_access_token: metaAccessToken } : {}),
-				...(logoFile && { logo: logoFile }),
-			},
+			payload,
 			{
 				onSuccess: () => {
 					toast.success("Site configuration updated successfully");
 					setLogoFile(null);
-					form.setValue("meta_access_token", "");
-					setHasStoredMetaToken(
-						Boolean(metaAccessToken) || hasStoredMetaToken
-					);
 				},
 			}
 		);
@@ -199,12 +159,6 @@ export function SiteConfig() {
 				facebook_url: siteConfig.facebook_url || "",
 				instagram_url: siteConfig.instagram_url || "",
 				youtube_url: siteConfig.youtube_url || "",
-				meta_pixel_enabled: siteConfig.meta_pixel_enabled || false,
-				meta_pixel_id: siteConfig.meta_pixel_id || "",
-				meta_capi_enabled: siteConfig.meta_capi_enabled || false,
-				meta_access_token: "",
-				meta_test_event_code: siteConfig.meta_test_event_code || "",
-				meta_default_currency: siteConfig.meta_default_currency || "BDT",
 				inside_dhaka_delivery_charge: parseFloat(
 					siteConfig.inside_dhaka_delivery_charge ?? "60"
 				),
@@ -215,11 +169,14 @@ export function SiteConfig() {
 					siteConfig.free_shipping_threshold ?? "1000"
 				),
 				tax_rate: parseFloat(siteConfig.tax_rate ?? "0"),
+				meta_pixel_id: siteConfig.meta_pixel_id || "",
+				meta_access_token: "",
+				meta_test_event_code: siteConfig.meta_test_event_code || "",
+				meta_default_currency: siteConfig.meta_default_currency || "BDT",
 			});
 			if (siteConfig.logo) {
 				setLogoPreview(siteConfig.logo);
 			}
-			setHasStoredMetaToken(Boolean(siteConfig.has_meta_access_token));
 		}
 	}, [siteConfig]);
 
@@ -262,9 +219,9 @@ export function SiteConfig() {
 					<TabsList className="mb-6">
 						<TabsTrigger value="general">General</TabsTrigger>
 						<TabsTrigger value="contact">Contact & Social</TabsTrigger>
-						<TabsTrigger value="tracking">Tracking</TabsTrigger>
 						<TabsTrigger value="shipping">Shipping & Tax</TabsTrigger>
 						<TabsTrigger value="branding">Branding</TabsTrigger>
+						<TabsTrigger value="meta">Meta Tracking</TabsTrigger>
 					</TabsList>
 
 					{/* ── General ── */}
@@ -352,120 +309,6 @@ export function SiteConfig() {
 						</Card>
 					</TabsContent>
 
-					<TabsContent value="tracking" className="space-y-6">
-						<Card>
-							<CardHeader>
-								<div className="flex items-start justify-between gap-4">
-									<div className="space-y-1">
-										<CardTitle>Meta Pixel</CardTitle>
-										<CardDescription>
-											Load Meta browser tracking on the storefront. This sends
-											standard pixel events like page views and add-to-cart.
-										</CardDescription>
-									</div>
-									<Button
-										type="button"
-										variant="outline"
-										onClick={() => setIsTutorialOpen(true)}
-									>
-										Setup Tutorial
-									</Button>
-								</div>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<Controller
-									name="meta_pixel_enabled"
-									control={form.control}
-									render={({ field }) => (
-										<div className="flex items-center justify-between rounded-lg border p-4">
-											<div className="space-y-1">
-												<Label htmlFor="meta_pixel_enabled">
-													Enable Meta Pixel
-												</Label>
-												<p className="text-sm text-muted-foreground">
-													Turn on browser-based Meta Pixel tracking for the
-													storefront.
-												</p>
-											</div>
-											<Switch
-												id="meta_pixel_enabled"
-												checked={field.value}
-												onCheckedChange={field.onChange}
-											/>
-										</div>
-									)}
-								/>
-								<TextField
-									name="meta_pixel_id"
-									label="Meta Pixel ID"
-									placeholder="123456789012345"
-									description="Required when browser pixel tracking is enabled."
-								/>
-								<TextField
-									name="meta_default_currency"
-									label="Default Currency"
-									placeholder="BDT"
-									description="Used for Meta event payloads when sending value-based ecommerce events."
-								/>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<CardTitle>Conversions API</CardTitle>
-								<CardDescription>
-									Send purchase events from the backend for more reliable
-									attribution. Browser Pixel and Conversions API can be used
-									independently or together.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<Controller
-									name="meta_capi_enabled"
-									control={form.control}
-									render={({ field }) => (
-										<div className="flex items-center justify-between rounded-lg border p-4">
-											<div className="space-y-1">
-												<Label htmlFor="meta_capi_enabled">
-													Enable Conversions API
-												</Label>
-												<p className="text-sm text-muted-foreground">
-													Send server-side purchase events to Meta using your
-													access token.
-												</p>
-											</div>
-											<Switch
-												id="meta_capi_enabled"
-												checked={field.value}
-												onCheckedChange={field.onChange}
-											/>
-										</div>
-									)}
-								/>
-								<PasswordField
-									name="meta_access_token"
-									label="Conversions API Access Token"
-									placeholder={
-										hasStoredMetaToken
-											? "Leave blank to keep the saved token"
-											: "Enter a Meta access token"
-									}
-									description={
-										hasStoredMetaToken
-											? "A token is already saved. Enter a new one only if you want to replace it."
-											: "Required when Conversions API is enabled."
-									}
-								/>
-								<TextField
-									name="meta_test_event_code"
-									label="Test Event Code"
-									placeholder="TEST12345"
-									description="Optional. Use this while validating events in Meta Events Manager."
-								/>
-							</CardContent>
-						</Card>
-					</TabsContent>
-
 					{/* ── Shipping & Tax ── */}
 					<TabsContent value="shipping" className="space-y-6">
 						<Card>
@@ -535,6 +378,48 @@ export function SiteConfig() {
 						</Card>
 					</TabsContent>
 
+					{/* ── Meta Tracking ── */}
+					<TabsContent value="meta" className="space-y-6">
+						<Card>
+							<CardHeader>
+								<CardTitle>Meta Pixel Credentials</CardTitle>
+								<CardDescription>
+									Configure your Meta Pixel and Conversions API credentials.
+									Enable or disable tracking from the Vendor settings.
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<TextField
+									name="meta_pixel_id"
+									label="Pixel ID"
+									placeholder="e.g., 1234567890123456"
+									description="Your Meta Pixel ID. Found in Events Manager under Data Sources."
+								/>
+								<TextField
+									name="meta_access_token"
+									label="Access Token"
+									type="password"
+									placeholder="Leave blank to keep the current token"
+									description="Conversions API access token. Leave blank to keep the existing token unchanged."
+								/>
+								<div className="grid grid-cols-2 gap-4">
+									<TextField
+										name="meta_test_event_code"
+										label="Test Event Code"
+										placeholder="e.g., TEST12345"
+										description="Optional. Use during testing to verify events in Test Events tab."
+									/>
+									<TextField
+										name="meta_default_currency"
+										label="Default Currency"
+										placeholder="BDT"
+										description="ISO currency code for purchase events (e.g., BDT, USD)."
+									/>
+								</div>
+							</CardContent>
+						</Card>
+					</TabsContent>
+
 					{/* ── Branding ── */}
 					<TabsContent value="branding" className="space-y-6">
 						<Card>
@@ -583,172 +468,6 @@ export function SiteConfig() {
 					</LoadingButton>
 				</div>
 			</BaseForm>
-
-			<Dialog open={isTutorialOpen} onOpenChange={setIsTutorialOpen}>
-				<DialogContent className="sm:max-w-[760px] max-h-[85vh] overflow-y-auto">
-					<DialogHeader>
-						<DialogTitle>Meta Pixel and Conversions API Setup Guide</DialogTitle>
-						<DialogDescription>
-							Follow these steps to connect your store with Meta Events
-							Manager and verify that browser Pixel and server-side purchase
-							events are working correctly.
-						</DialogDescription>
-					</DialogHeader>
-
-					<div className="space-y-6 text-sm leading-6">
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								1. Open Meta Events Manager
-							</h3>
-							<p className="text-muted-foreground">
-								Log in to your Facebook Business account and open Meta Events
-								Manager. Choose the correct business account if you manage more
-								than one.
-							</p>
-							<p className="text-muted-foreground">
-								If you already have a pixel, open it. If you do not have one,
-								create a new Data Source and choose Web.
-							</p>
-						</section>
-
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								2. Copy your Meta Pixel ID
-							</h3>
-							<p className="text-muted-foreground">
-								In Events Manager, open the Data Source details and copy the
-								Pixel ID. It is usually a long numeric value.
-							</p>
-							<p className="text-muted-foreground">
-								Return to this admin page, turn on <strong>Enable Meta Pixel</strong>,
-								paste the Pixel ID into <strong>Meta Pixel ID</strong>, and keep
-								the default currency as <strong>BDT</strong> unless your store
-								needs something else.
-							</p>
-						</section>
-
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								3. Create a Conversions API access token
-							</h3>
-							<p className="text-muted-foreground">
-								Inside the same Data Source in Events Manager, find the
-								Conversions API or Settings section. Look for the option to
-								generate an access token.
-							</p>
-							<p className="text-muted-foreground">
-								Copy that token and paste it into <strong>Conversions API Access Token</strong>.
-								Then turn on <strong>Enable Conversions API</strong>.
-							</p>
-							<p className="text-muted-foreground">
-								This token is used by the backend to send server-side
-								<code>Purchase</code> events after an order is successfully
-								created.
-							</p>
-						</section>
-
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								4. Add a test event code before going live
-							</h3>
-							<p className="text-muted-foreground">
-								In Events Manager, open the <strong>Test Events</strong> tab.
-								Meta will show you a temporary <strong>Test Event Code</strong>.
-							</p>
-							<p className="text-muted-foreground">
-								Copy that code and paste it into the <strong>Test Event Code</strong>
-								field on this page. This lets you see test traffic immediately
-								without waiting for standard reporting.
-							</p>
-						</section>
-
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								5. Save the settings
-							</h3>
-							<p className="text-muted-foreground">
-								Click <strong>Save Changes</strong>. After saving, refresh the
-								storefront. The storefront will load the browser Pixel, and the
-								backend will be ready to send server-side purchase events.
-							</p>
-							<p className="text-muted-foreground">
-								If you replace the access token later, enter the new token and
-								save again. Leaving the token field empty keeps the existing
-								saved token.
-							</p>
-						</section>
-
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								6. Test browser Pixel events
-							</h3>
-							<p className="text-muted-foreground">
-								Open your storefront in a new browser tab and browse like a real
-								customer:
-							</p>
-							<ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
-								<li>Visit the home page to trigger <code>PageView</code>.</li>
-								<li>Open a product page to trigger <code>ViewContent</code>.</li>
-								<li>Add a product to cart to trigger <code>AddToCart</code>.</li>
-								<li>Open the checkout page to trigger <code>InitiateCheckout</code>.</li>
-							</ol>
-							<p className="text-muted-foreground">
-								Go back to Meta Events Manager and confirm these test events are
-								appearing.
-							</p>
-						</section>
-
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								7. Test the server-side purchase event
-							</h3>
-							<p className="text-muted-foreground">
-								Place a real test order from the storefront. When the order is
-								successfully created, the storefront sends a browser
-								<code>Purchase</code> event and the backend sends a
-								server-side <code>Purchase</code> event to Meta.
-							</p>
-							<p className="text-muted-foreground">
-								Both events use the same event ID so Meta can deduplicate them
-								and treat them as one purchase.
-							</p>
-						</section>
-
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								8. Confirm everything is connected correctly
-							</h3>
-							<p className="text-muted-foreground">
-								You should see event activity in Meta Events Manager. For this
-								project, the expected events are:
-							</p>
-							<ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
-								<li><code>PageView</code></li>
-								<li><code>ViewContent</code></li>
-								<li><code>AddToCart</code></li>
-								<li><code>InitiateCheckout</code></li>
-								<li><code>Purchase</code></li>
-							</ol>
-							<p className="text-muted-foreground">
-								If you see Pixel events but no purchase event, check your access
-								token, Conversions API toggle, and backend logs.
-							</p>
-						</section>
-
-						<section className="space-y-2">
-							<h3 className="font-semibold text-foreground">
-								9. Remove the test event code after verification
-							</h3>
-							<p className="text-muted-foreground">
-								Once you confirm everything is working, clear the
-								<strong> Test Event Code </strong>
-								field and save again. This moves traffic back to normal
-								production reporting.
-							</p>
-						</section>
-					</div>
-				</DialogContent>
-			</Dialog>
 		</div>
 	);
 }
