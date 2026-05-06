@@ -25,44 +25,47 @@ import {
 	type LucideIcon,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useIntl } from "react-intl";
 
 interface SidebarItem {
 	icon: LucideIcon;
-	label: string;
+	labelId: string;
+	defaultLabel: string;
 	href: string;
 	permission?: Permission;
 }
 
 const sidebarItems: SidebarItem[] = [
-	{ icon: LayoutDashboard, label: "Dashboard", href: "/", permission: "view_dashboard" },
-	{ icon: Package, label: "Products", href: "/products", permission: "manage_products" },
-	{ icon: ShoppingCart, label: "Orders", href: "/orders", permission: "manage_orders" },
-	{ icon: Users, label: "Customers", href: "/customers", permission: "manage_customers" },
-	{ icon: Grid2X2Check, label: "Categories", href: "/categories", permission: "manage_categories" },
-	{ icon: SwatchBook, label: "Variant Types", href: "/variant-types", permission: "manage_products" },
-	{ icon: Tag, label: "Coupons", href: "/coupons", permission: "manage_coupons" },
-	{ icon: Percent, label: "Sales", href: "/sales", permission: "manage_sales" },
+	{ icon: LayoutDashboard, labelId: "layout.nav.dashboard", defaultLabel: "Dashboard", href: "/", permission: "view_dashboard" },
+	{ icon: Package, labelId: "layout.nav.products", defaultLabel: "Products", href: "/products", permission: "manage_products" },
+	{ icon: ShoppingCart, labelId: "layout.nav.orders", defaultLabel: "Orders", href: "/orders", permission: "manage_orders" },
+	{ icon: Users, labelId: "layout.nav.customers", defaultLabel: "Customers", href: "/customers", permission: "manage_customers" },
+	{ icon: Grid2X2Check, labelId: "layout.nav.categories", defaultLabel: "Categories", href: "/categories", permission: "manage_categories" },
+	{ icon: SwatchBook, labelId: "layout.nav.variantTypes", defaultLabel: "Variant Types", href: "/variant-types", permission: "manage_products" },
+	{ icon: Tag, labelId: "layout.nav.coupons", defaultLabel: "Coupons", href: "/coupons", permission: "manage_coupons" },
+	{ icon: Percent, labelId: "layout.nav.sales", defaultLabel: "Sales", href: "/sales", permission: "manage_sales" },
 ];
 
 const storeItems: SidebarItem[] = [
-	{ icon: Image, label: "Banners", href: "/store/banners", permission: "manage_banners" },
-	{ icon: Megaphone, label: "Announcements", href: "/store/announcements", permission: "manage_announcements" },
-	{ icon: MessageSquareText, label: "Reviews", href: "/reviews", permission: "manage_reviews" },
-	{ icon: Heart, label: "Wishlists", href: "/wishlists", permission: "manage_wishlists" },
-	{ icon: Settings, label: "Site Settings", href: "/store/settings", permission: "manage_settings" },
+	{ icon: Image, labelId: "layout.nav.banners", defaultLabel: "Banners", href: "/store/banners", permission: "manage_banners" },
+	{ icon: Megaphone, labelId: "layout.nav.announcements", defaultLabel: "Announcements", href: "/store/announcements", permission: "manage_announcements" },
+	{ icon: MessageSquareText, labelId: "layout.nav.reviews", defaultLabel: "Reviews", href: "/reviews", permission: "manage_reviews" },
+	{ icon: Heart, labelId: "layout.nav.wishlists", defaultLabel: "Wishlists", href: "/wishlists", permission: "manage_wishlists" },
+	{ icon: Settings, labelId: "layout.nav.siteSettings", defaultLabel: "Site Settings", href: "/store/settings", permission: "manage_settings" },
 ];
 
 const adminItems: SidebarItem[] = [
-	{ icon: ShieldCheck, label: "Staff", href: "/staff", permission: "manage_staff" },
-	{ icon: KeyRound, label: "Roles", href: "/roles", permission: "manage_staff" },
+	{ icon: ShieldCheck, labelId: "layout.nav.staff", defaultLabel: "Staff", href: "/staff", permission: "manage_staff" },
+	{ icon: KeyRound, labelId: "layout.nav.roles", defaultLabel: "Roles", href: "/roles", permission: "manage_staff" },
 ];
 
 const operationsItems: SidebarItem[] = [
-	{ icon: Boxes, label: "Inventory", href: "/inventory", permission: "manage_inventory" },
-	{ icon: Receipt, label: "Expenses", href: "/expenses", permission: "manage_expenses" },
+	{ icon: Boxes, labelId: "layout.nav.inventory", defaultLabel: "Inventory", href: "/inventory", permission: "manage_inventory" },
+	{ icon: Receipt, labelId: "layout.nav.expenses", defaultLabel: "Expenses", href: "/expenses", permission: "manage_expenses" },
 ];
 
 const SidebarContent = () => {
+	const intl = useIntl();
 	const { hasPermission, canAccessInventory, canAccessExpenses, canAccessStorefront } = useAuthStore();
 
 	const visibleSidebarItems = sidebarItems.filter(
@@ -93,7 +96,12 @@ const SidebarContent = () => {
 				}
 			>
 				<item.icon className="h-4 w-4 shrink-0" />
-				<span className="whitespace-nowrap">{item.label}</span>
+				<span className="whitespace-nowrap">
+					{intl.formatMessage({
+						id: item.labelId,
+						defaultMessage: item.defaultLabel,
+					})}
+				</span>
 			</NavLink>
 		));
 
@@ -117,21 +125,39 @@ const SidebarContent = () => {
 
 					{visibleStoreItems.length > 0 && (
 						<>
-							{renderSectionHeader(Store, "Store")}
+							{renderSectionHeader(
+								Store,
+								intl.formatMessage({
+									id: "layout.sidebar.store",
+									defaultMessage: "Store",
+								})
+							)}
 							{renderNavItems(visibleStoreItems)}
 						</>
 					)}
 
 					{visibleOperationsItems.length > 0 && (
 						<>
-							{renderSectionHeader(Boxes, "Operations")}
+							{renderSectionHeader(
+								Boxes,
+								intl.formatMessage({
+									id: "layout.sidebar.operations",
+									defaultMessage: "Operations",
+								})
+							)}
 							{renderNavItems(visibleOperationsItems)}
 						</>
 					)}
 
 					{visibleAdminItems.length > 0 && (
 						<>
-							{renderSectionHeader(ShieldCheck, "Administration")}
+							{renderSectionHeader(
+								ShieldCheck,
+								intl.formatMessage({
+									id: "layout.sidebar.administration",
+									defaultMessage: "Administration",
+								})
+							)}
 							{renderNavItems(visibleAdminItems)}
 						</>
 					)}

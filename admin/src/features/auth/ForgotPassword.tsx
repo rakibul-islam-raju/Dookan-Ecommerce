@@ -17,34 +17,60 @@ import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
 import { z } from "zod";
-
-const emailSchema = z.object({
-	email: z.string().email("Please enter a valid email address"),
-});
-
-const resetSchema = z
-	.object({
-		otp_code: z
-			.string()
-			.length(6, "OTP must be 6 digits")
-			.regex(/^\d+$/, "OTP must contain only numbers"),
-		new_password: z.string().min(8, "Password must be at least 8 characters"),
-		confirm_password: z.string(),
-	})
-	.refine((data) => data.new_password === data.confirm_password, {
-		message: "Passwords do not match",
-		path: ["confirm_password"],
-	});
-
-type EmailFormValues = z.infer<typeof emailSchema>;
-type ResetFormValues = z.infer<typeof resetSchema>;
 
 export function ForgotPassword() {
 	const navigate = useNavigate();
 	const [step, setStep] = useState<"email" | "reset">("email");
 	const [email, setEmail] = useState("");
+	const intl = useIntl();
+	const emailSchema = z.object({
+		email: z.string().email(
+			intl.formatMessage({
+				id: "auth.validation.email",
+				defaultMessage: "Please enter a valid email address",
+			})
+		),
+	});
+	const resetSchema = z
+		.object({
+			otp_code: z
+				.string()
+				.length(
+					6,
+					intl.formatMessage({
+						id: "auth.forgotPassword.otpLength",
+						defaultMessage: "OTP must be 6 digits",
+					})
+				)
+				.regex(
+					/^\d+$/,
+					intl.formatMessage({
+						id: "auth.forgotPassword.otpNumbers",
+						defaultMessage: "OTP must contain only numbers",
+					})
+				),
+			new_password: z.string().min(
+				8,
+				intl.formatMessage({
+					id: "auth.forgotPassword.passwordMin",
+					defaultMessage: "Password must be at least 8 characters",
+				})
+			),
+			confirm_password: z.string(),
+		})
+		.refine((data) => data.new_password === data.confirm_password, {
+			message: intl.formatMessage({
+				id: "auth.forgotPassword.passwordsMismatch",
+				defaultMessage: "Passwords do not match",
+			}),
+			path: ["confirm_password"],
+		});
+
+	type EmailFormValues = z.infer<typeof emailSchema>;
+	type ResetFormValues = z.infer<typeof resetSchema>;
 
 	const emailForm = useZodForm(emailSchema, {
 		defaultValues: { email: "" },
@@ -60,7 +86,12 @@ export function ForgotPassword() {
 		onSuccess: () => {
 			setEmail(emailForm.getValues("email"));
 			setStep("reset");
-			toast.success("OTP sent to your email address.");
+			toast.success(
+				intl.formatMessage({
+					id: "auth.forgotPassword.otpSent",
+					defaultMessage: "OTP sent to your email address.",
+				})
+			);
 		},
 	});
 
@@ -68,25 +99,47 @@ export function ForgotPassword() {
 		mutationFn: (data: ResetFormValues) =>
 			authApi.confirmPasswordReset(email, data.otp_code, data.new_password),
 		onSuccess: () => {
-			toast.success("Password reset successfully! Please login.");
+			toast.success(
+				intl.formatMessage({
+					id: "auth.forgotPassword.resetSuccess",
+					defaultMessage: "Password reset successfully! Please login.",
+				})
+			);
 			navigate("/login");
 		},
 	});
 
 	const handleResendOTP = async () => {
 		await authApi.requestPasswordReset(email);
-		toast.success("OTP resent to your email.");
+		toast.success(
+			intl.formatMessage({
+				id: "auth.forgotPassword.otpResent",
+				defaultMessage: "OTP resent to your email.",
+			})
+		);
 	};
 
 	if (step === "reset") {
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-2xl">Reset Password</CardTitle>
+					<CardTitle className="text-2xl">
+						{intl.formatMessage({
+							id: "auth.forgotPassword.resetTitle",
+							defaultMessage: "Reset Password",
+						})}
+					</CardTitle>
 					<CardDescription>
-						Enter the OTP sent to{" "}
-						<span className="font-medium text-foreground">{email}</span> and
-						your new password.
+						{intl.formatMessage(
+							{
+								id: "auth.forgotPassword.resetDescription",
+								defaultMessage:
+									"Enter the OTP sent to {email} and your new password.",
+							},
+							{
+								email: <span className="font-medium text-foreground">{email}</span>,
+							}
+						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -94,21 +147,42 @@ export function ForgotPassword() {
 						<div className="grid gap-4">
 							<TextField
 								name="otp_code"
-								label="Verification Code"
-								placeholder="Enter 6-digit OTP"
+								label={intl.formatMessage({
+									id: "auth.forgotPassword.verificationCode",
+									defaultMessage: "Verification Code",
+								})}
+								placeholder={intl.formatMessage({
+									id: "auth.forgotPassword.verificationPlaceholder",
+									defaultMessage: "Enter 6-digit OTP",
+								})}
 								required
-								description="Check your email for the verification code"
+								description={intl.formatMessage({
+									id: "auth.forgotPassword.verificationHelp",
+									defaultMessage: "Check your email for the verification code",
+								})}
 							/>
 							<PasswordField
 								name="new_password"
-								label="New Password"
-								placeholder="Enter new password"
+								label={intl.formatMessage({
+									id: "auth.forgotPassword.newPassword",
+									defaultMessage: "New Password",
+								})}
+								placeholder={intl.formatMessage({
+									id: "auth.forgotPassword.newPasswordPlaceholder",
+									defaultMessage: "Enter new password",
+								})}
 								required
 							/>
 							<PasswordField
 								name="confirm_password"
-								label="Confirm Password"
-								placeholder="Confirm new password"
+								label={intl.formatMessage({
+									id: "auth.forgotPassword.confirmPassword",
+									defaultMessage: "Confirm Password",
+								})}
+								placeholder={intl.formatMessage({
+									id: "auth.forgotPassword.confirmPasswordPlaceholder",
+									defaultMessage: "Confirm new password",
+								})}
 								required
 							/>
 							<LoadingButton
@@ -116,7 +190,10 @@ export function ForgotPassword() {
 								isLoading={isConfirming}
 								className="w-full"
 							>
-								Reset Password
+								{intl.formatMessage({
+									id: "auth.forgotPassword.submit",
+									defaultMessage: "Reset Password",
+								})}
 							</LoadingButton>
 						</div>
 					</BaseForm>
@@ -128,7 +205,10 @@ export function ForgotPassword() {
 						className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
 					>
 						<ArrowLeft className="size-4" />
-						Change email
+						{intl.formatMessage({
+							id: "auth.forgotPassword.changeEmail",
+							defaultMessage: "Change email",
+						})}
 					</button>
 					<Button
 						type="button"
@@ -136,7 +216,10 @@ export function ForgotPassword() {
 						onClick={handleResendOTP}
 						className="text-sm"
 					>
-						Resend OTP
+						{intl.formatMessage({
+							id: "auth.forgotPassword.resendOtp",
+							defaultMessage: "Resend OTP",
+						})}
 					</Button>
 				</CardFooter>
 			</Card>
@@ -146,9 +229,17 @@ export function ForgotPassword() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="text-2xl">Forgot Password</CardTitle>
+				<CardTitle className="text-2xl">
+					{intl.formatMessage({
+						id: "auth.forgotPassword.title",
+						defaultMessage: "Forgot Password",
+					})}
+				</CardTitle>
 				<CardDescription>
-					Enter your email to receive a password reset OTP
+					{intl.formatMessage({
+						id: "auth.forgotPassword.description",
+						defaultMessage: "Enter your email to receive a password reset OTP",
+					})}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -156,7 +247,10 @@ export function ForgotPassword() {
 					<div className="grid gap-4">
 						<TextField
 							name="email"
-							label="Email"
+							label={intl.formatMessage({
+								id: "auth.login.email",
+								defaultMessage: "Email",
+							})}
 							placeholder="m@example.com"
 							type="email"
 							required
@@ -166,7 +260,10 @@ export function ForgotPassword() {
 							isLoading={isRequesting}
 							className="w-full"
 						>
-							Send OTP
+							{intl.formatMessage({
+								id: "auth.forgotPassword.sendOtp",
+								defaultMessage: "Send OTP",
+							})}
 						</LoadingButton>
 					</div>
 				</BaseForm>
@@ -176,7 +273,10 @@ export function ForgotPassword() {
 					to="/login"
 					className="text-sm text-center w-full text-muted-foreground hover:underline"
 				>
-					Remember your password? Login
+					{intl.formatMessage({
+						id: "auth.forgotPassword.rememberPassword",
+						defaultMessage: "Remember your password? Login",
+					})}
 				</Link>
 			</CardFooter>
 		</Card>

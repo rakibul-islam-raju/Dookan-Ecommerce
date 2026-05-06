@@ -13,6 +13,7 @@ import { Input } from "../input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { FormField } from "./FormField";
 import { Link } from "react-router-dom";
+import { useIntl } from "react-intl";
 
 interface PasswordFieldProps<T extends FieldValues> {
 	name: Path<T>;
@@ -39,6 +40,7 @@ export function PasswordField<T extends FieldValues>({
 	forgetPasswordPath,
 	helpText,
 }: PasswordFieldProps<T>) {
+	const intl = useIntl();
 	const { control: contextControl } = useFormContext<T>();
 	const control = externalControl || contextControl;
 	const [showPassword, setShowPassword] = useState(false);
@@ -74,7 +76,10 @@ export function PasswordField<T extends FieldValues>({
 				{required && <span className="ml-1 text-red-500">*</span>}
 			</div>
 			<Link to={forgetPasswordPath} className="text-muted-foreground text-sm">
-				Forgot Password?
+				{intl.formatMessage({
+					id: "passwordField.forgotPassword",
+					defaultMessage: "Forgot Password?",
+				})}
 			</Link>
 		</div>
 	);
@@ -114,7 +119,15 @@ export function PasswordField<T extends FieldValues>({
 								<Eye className="h-4 w-4 text-gray-500" />
 							)}
 							<span className="sr-only">
-								{showPassword ? "Hide password" : "Show password"}
+								{showPassword
+									? intl.formatMessage({
+											id: "passwordField.hidePassword",
+											defaultMessage: "Hide password",
+									  })
+									: intl.formatMessage({
+											id: "passwordField.showPassword",
+											defaultMessage: "Show password",
+									  })}
 							</span>
 						</Button>
 					</div>
