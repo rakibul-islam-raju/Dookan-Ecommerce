@@ -1,5 +1,7 @@
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -13,12 +15,11 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { CircleUser, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useIntl } from "react-intl";
 
 export function Header() {
 	const { open, isOpen } = useSidebarStore();
 	const { logout } = useAuthStore();
-	const intl = useIntl();
+	const t = useT();
 
 	return (
 		<header className="sticky top-0 text-foreground flex h-[60px] w-full items-center gap-2 border-b bg-white px-5">
@@ -32,10 +33,10 @@ export function Header() {
 					>
 						{isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
 						<span className="sr-only">
-							{intl.formatMessage({
-								id: "layout.toggleNavigation",
-								defaultMessage: "Toggle navigation menu",
-							})}
+							<T
+								id="layout.toggleNavigation"
+								defaultMessage="Toggle navigation menu"
+							/>
 						</span>
 					</Button>
 					<NavLink to="/" className="flex items-center gap-2 font-semibold">
@@ -55,39 +56,27 @@ export function Header() {
 							>
 								<CircleUser className="h-5 w-5" />
 								<span className="sr-only">
-									{intl.formatMessage({
-										id: "layout.toggleUserMenu",
-										defaultMessage: "Toggle user menu",
-									})}
+									<T
+										id="layout.toggleUserMenu"
+										defaultMessage="Toggle user menu"
+									/>
 								</span>
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
 							<DropdownMenuLabel>
-								{intl.formatMessage({
-									id: "layout.account",
-									defaultMessage: "My Account",
-								})}
+								<T id="layout.account" defaultMessage="My Account" />
 							</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem>
-								{intl.formatMessage({
-									id: "layout.settings",
-									defaultMessage: "Settings",
-								})}
+								<T id="layout.settings" defaultMessage="Settings" />
 							</DropdownMenuItem>
 							<DropdownMenuItem>
-								{intl.formatMessage({
-									id: "layout.support",
-									defaultMessage: "Support",
-								})}
+								<T id="layout.support" defaultMessage="Support" />
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem variant="destructive" onClick={logout}>
-								{intl.formatMessage({
-									id: "layout.logout",
-									defaultMessage: "Logout",
-								})}
+								{t("layout.logout", "Logout")}
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

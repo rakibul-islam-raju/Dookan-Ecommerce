@@ -13,7 +13,7 @@ import {
 import { pagination } from "@/config";
 import { getBatches, useDeleteBatch, type IProductionBatch } from "@/lib/api/inventory";
 import { useQuery } from "@tanstack/react-query";
-import { Eye, Factory, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";

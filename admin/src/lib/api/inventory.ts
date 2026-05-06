@@ -11,7 +11,6 @@ import type {
 	IMaterialUpdateData,
 	IProductionBatch,
 	IProductionBatchCreateData,
-	IBatchFilter as IBatchFilterAlias,
 	IProductionBatchUpdateData,
 	IReceiptFilter,
 	IVariantStockTransaction,
@@ -19,6 +18,23 @@ import type {
 import { queryKeys } from "@/constants/queryKeys";
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { clientApi } from "./axios";
+
+export type {
+	IBatchFilter,
+	IFinishedGoodsReceipt,
+	IFinishedGoodsReceiptCreateData,
+	IMaterial,
+	IMaterialCreateData,
+	IMaterialFilter,
+	IMaterialTransaction,
+	IMaterialTransactionCreateData,
+	IMaterialUpdateData,
+	IProductionBatch,
+	IProductionBatchCreateData,
+	IProductionBatchUpdateData,
+	IReceiptFilter,
+	IVariantStockTransaction,
+} from "@/@types/Inventory";
 
 export const materialApi = {
 	async list(params: IMaterialFilter): Promise<IPaginatedResponse<IMaterial>> {

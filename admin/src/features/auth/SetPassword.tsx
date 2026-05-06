@@ -11,58 +11,42 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { authApi } from "@/lib/api/auth";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
 export function SetPassword() {
 	const navigate = useNavigate();
 	const [searchParams, setSearchParams] = useSearchParams();
-	const intl = useIntl();
+	const t = useT();
 	const setPasswordSchema = z
 		.object({
-			email: z.string().email(
-				intl.formatMessage({
-					id: "auth.validation.email",
-					defaultMessage: "Please enter a valid email address",
-				})
-			),
+			email: z.string().email(t("auth.validation.email", "Please enter a valid email address") as string),
 			otp_code: z
 				.string()
 				.length(
 					6,
-					intl.formatMessage({
-						id: "auth.forgotPassword.otpLength",
-						defaultMessage: "OTP must be 6 digits",
-					})
+					t("auth.forgotPassword.otpLength", "OTP must be 6 digits") as string
 				)
 				.regex(
 					/^\d+$/,
-					intl.formatMessage({
-						id: "auth.forgotPassword.otpNumbers",
-						defaultMessage: "OTP must contain only numbers",
-					})
+					t("auth.forgotPassword.otpNumbers", "OTP must contain only numbers") as string
 				),
 			new_password: z.string().min(
 				8,
-				intl.formatMessage({
-					id: "auth.forgotPassword.passwordMin",
-					defaultMessage: "Password must be at least 8 characters",
-				})
+				t("auth.forgotPassword.passwordMin", "Password must be at least 8 characters") as string
 			),
 			confirm_password: z.string(),
 		})
 		.refine((data) => data.new_password === data.confirm_password, {
-			message: intl.formatMessage({
-				id: "auth.forgotPassword.passwordsMismatch",
-				defaultMessage: "Passwords do not match",
-			}),
+			message: t("auth.forgotPassword.passwordsMismatch", "Passwords do not match") as string,
 			path: ["confirm_password"],
 		});
 
@@ -98,12 +82,7 @@ export function SetPassword() {
 				data.new_password
 			),
 		onSuccess: () => {
-			toast.success(
-				intl.formatMessage({
-					id: "auth.setPassword.success",
-					defaultMessage: "Password set successfully. You can now log in.",
-				})
-			);
+			toast.success(t("auth.setPassword.success", "Password set successfully. You can now log in.") as string);
 			navigate("/login");
 		},
 	});
@@ -111,13 +90,7 @@ export function SetPassword() {
 	const { mutate: resendCode, isPending: isResendingCode } = useMutation({
 		mutationFn: (email: string) => authApi.requestPasswordReset(email),
 		onSuccess: () => {
-			toast.success(
-				intl.formatMessage({
-					id: "auth.setPassword.resent",
-					defaultMessage:
-						"A fresh password setup code has been sent to your email.",
-				})
-			);
+			toast.success(t("auth.setPassword.resent", "A fresh password setup code has been sent to your email.") as string);
 			if (emailFromQuery || otpFromQuery) {
 				setSearchParams({ email: form.getValues("email") });
 			}
@@ -131,10 +104,7 @@ export function SetPassword() {
 		if (!parsed.success) {
 			form.setError("email", {
 				type: "manual",
-				message: intl.formatMessage({
-					id: "auth.setPassword.invalidEmail",
-					defaultMessage: "Enter a valid email before requesting a new code",
-				}),
+				message: t("auth.setPassword.invalidEmail", "Enter a valid email before requesting a new code") as string,
 			});
 			return;
 		}
@@ -146,23 +116,12 @@ export function SetPassword() {
 		<Card>
 			<CardHeader>
 				<CardTitle className="text-2xl">
-					{intl.formatMessage({
-						id: "auth.setPassword.title",
-						defaultMessage: "Set Your Password",
-					})}
+					<T id="auth.setPassword.title" defaultMessage="Set Your Password" />
 				</CardTitle>
 				<CardDescription>
 					{hasInviteLink
-						? intl.formatMessage({
-								id: "auth.setPassword.description.invite",
-								defaultMessage:
-									"Choose a password to finish setting up your admin account.",
-						  })
-						: intl.formatMessage({
-								id: "auth.setPassword.description.manual",
-								defaultMessage:
-									"Enter the email and code from your invitation, then choose a password.",
-						  })}
+						? t("auth.setPassword.description.invite", "Choose a password to finish setting up your admin account.")
+						: t("auth.setPassword.description.manual", "Enter the email and code from your invitation, then choose a password.")}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -170,65 +129,36 @@ export function SetPassword() {
 					<div className="grid gap-4">
 						<TextField
 							name="email"
-							label={intl.formatMessage({
-								id: "auth.login.email",
-								defaultMessage: "Email",
-							})}
+							label={t("auth.login.email", "Email") as string}
 							type="email"
 							placeholder="m@example.com"
 							required
 							disabled={hasInviteLink}
 							description={
 								hasInviteLink
-									? intl.formatMessage({
-											id: "auth.setPassword.emailDescription",
-											defaultMessage:
-												"This invite is linked to the email address below.",
-									  })
+									? (t("auth.setPassword.emailDescription", "This invite is linked to the email address below.") as string)
 									: undefined
 							}
 						/>
 						{!hasInviteLink && (
 							<TextField
 								name="otp_code"
-								label={intl.formatMessage({
-									id: "auth.setPassword.invitationCode",
-									defaultMessage: "Invitation Code",
-								})}
-								placeholder={intl.formatMessage({
-									id: "auth.setPassword.invitationPlaceholder",
-									defaultMessage: "Enter 6-digit code",
-								})}
+								label={t("auth.setPassword.invitationCode", "Invitation Code") as string}
+								placeholder={t("auth.setPassword.invitationPlaceholder", "Enter 6-digit code") as string}
 								required
-								description={intl.formatMessage({
-									id: "auth.setPassword.invitationHelp",
-									defaultMessage:
-										"Use the code from your email if the invite link was not opened directly.",
-								})}
+								description={t("auth.setPassword.invitationHelp", "Use the code from your email if the invite link was not opened directly.") as string}
 							/>
 						)}
 						<PasswordField
 							name="new_password"
-							label={intl.formatMessage({
-								id: "auth.setPassword.newPassword",
-								defaultMessage: "New Password",
-							})}
-							placeholder={intl.formatMessage({
-								id: "auth.setPassword.newPasswordPlaceholder",
-								defaultMessage: "Enter your password",
-							})}
+							label={t("auth.setPassword.newPassword", "New Password") as string}
+							placeholder={t("auth.setPassword.newPasswordPlaceholder", "Enter your password") as string}
 							required
 						/>
 						<PasswordField
 							name="confirm_password"
-							label={intl.formatMessage({
-								id: "auth.setPassword.confirmPassword",
-								defaultMessage: "Confirm Password",
-							})}
-							placeholder={intl.formatMessage({
-								id: "auth.setPassword.confirmPasswordPlaceholder",
-								defaultMessage: "Confirm your password",
-							})}
+							label={t("auth.setPassword.confirmPassword", "Confirm Password") as string}
+							placeholder={t("auth.setPassword.confirmPasswordPlaceholder", "Confirm your password") as string}
 							required
 						/>
 						<LoadingButton
@@ -236,10 +166,7 @@ export function SetPassword() {
 							isLoading={isSettingPassword}
 							className="w-full"
 						>
-							{intl.formatMessage({
-								id: "auth.setPassword.submit",
-								defaultMessage: "Set Password",
-							})}
+							<T id="auth.setPassword.submit" defaultMessage="Set Password" />
 						</LoadingButton>
 					</div>
 				</BaseForm>
@@ -250,10 +177,7 @@ export function SetPassword() {
 					className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
 				>
 					<ArrowLeft className="size-4" />
-					{intl.formatMessage({
-						id: "auth.setPassword.backToLogin",
-						defaultMessage: "Back to login",
-					})}
+					<T id="auth.setPassword.backToLogin" defaultMessage="Back to login" />
 				</Link>
 				<Button
 					type="button"
@@ -262,10 +186,7 @@ export function SetPassword() {
 					disabled={isResendingCode}
 					className="text-sm"
 				>
-					{intl.formatMessage({
-						id: "auth.setPassword.requestNewCode",
-						defaultMessage: "Request new code",
-					})}
+					<T id="auth.setPassword.requestNewCode" defaultMessage="Request new code" />
 				</Button>
 			</CardFooter>
 		</Card>

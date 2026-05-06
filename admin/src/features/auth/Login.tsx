@@ -10,6 +10,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { queryKeys } from "@/constants/queryKeys";
 import { useZodForm } from "@/hooks/useZodForm";
 import { authApi } from "@/lib/api/auth";
@@ -17,27 +19,20 @@ import { queryClient } from "@/lib/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
 import z from "zod";
 
 export function Login() {
 	const navigate = useNavigate();
 	const setAuth = useAuthStore((state) => state.setAuth);
-	const intl = useIntl();
+	const t = useT();
 	const schema = z.object({
 		email: z.email({
-			message: intl.formatMessage({
-				id: "auth.validation.email",
-				defaultMessage: "Please enter a valid email address",
-			}),
+			message: t("auth.validation.email", "Please enter a valid email address") as string,
 		}),
 		password: z.string().min(
 			6,
-			intl.formatMessage({
-				id: "auth.validation.passwordMin",
-				defaultMessage: "Password must be at least 6 characters long",
-			})
+			t("auth.validation.passwordMin", "Password must be at least 6 characters long") as string
 		),
 	});
 
@@ -54,12 +49,7 @@ export function Login() {
 		mutationFn: authApi.login,
 		onSuccess: (response) => {
 			setAuth(response.user, response.access, response.refresh);
-			toast.success(
-				intl.formatMessage({
-					id: "auth.login.success",
-					defaultMessage: "Login successful!",
-				})
-			);
+			toast.success(t("auth.login.success", "Login successful!") as string);
 			navigate("/");
 			queryClient.invalidateQueries({ queryKey: [queryKeys.me] });
 		},
@@ -77,16 +67,13 @@ export function Login() {
 		<Card>
 			<CardHeader>
 				<CardTitle className="text-2xl">
-					{intl.formatMessage({
-						id: "auth.login.title",
-						defaultMessage: "Login",
-					})}
+					<T id="auth.login.title" defaultMessage="Login" />
 				</CardTitle>
 				<CardDescription>
-					{intl.formatMessage({
-						id: "auth.login.description",
-						defaultMessage: "Enter your email below to log in to your account",
-					})}
+					<T
+						id="auth.login.description"
+						defaultMessage="Enter your email below to log in to your account"
+					/>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -94,25 +81,16 @@ export function Login() {
 					<div className="space-y-2">
 						<TextField<LoginFormValues>
 							name="email"
-							label={intl.formatMessage({
-								id: "auth.login.email",
-								defaultMessage: "Email",
-							})}
+							label={t("auth.login.email", "Email") as string}
 							type="email"
 						/>
 						<PasswordField<LoginFormValues>
 							name="password"
-							label={intl.formatMessage({
-								id: "auth.login.password",
-								defaultMessage: "Password",
-							})}
+							label={t("auth.login.password", "Password") as string}
 						/>
 					</div>
 					<LoadingButton className="w-full" type="submit" isLoading={isPending}>
-						{intl.formatMessage({
-							id: "auth.login.submit",
-							defaultMessage: "Sign in",
-						})}
+						<T id="auth.login.submit" defaultMessage="Sign in" />
 					</LoadingButton>
 				</BaseForm>
 			</CardContent>
@@ -121,10 +99,7 @@ export function Login() {
 					to="/forgot-password"
 					className="text-sm text-center w-full text-muted-foreground hover:underline"
 				>
-					{intl.formatMessage({
-						id: "auth.login.forgotPassword",
-						defaultMessage: "Forgot Password?",
-					})}
+					<T id="auth.login.forgotPassword" defaultMessage="Forgot Password?" />
 				</Link>
 			</CardFooter>
 		</Card>

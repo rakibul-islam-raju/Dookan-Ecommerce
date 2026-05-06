@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
-import { useIntl } from "react-intl";
 
 import type { AppLocale } from "@/i18n/messages";
 
@@ -12,7 +13,7 @@ interface LanguageSwitcherProps {
 const localeOptions: AppLocale[] = ["en", "bn"];
 
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
-	const intl = useIntl();
+	const t = useT();
 	const { locale, setLocale } = useLocale();
 
 	return (
@@ -21,10 +22,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 				"inline-flex items-center gap-1 rounded-full border bg-muted/40 p-1",
 				className
 			)}
-			aria-label={intl.formatMessage({
-				id: "app.language",
-				defaultMessage: "Language",
-			})}
+			aria-label={t("app.language", "Language") as string}
 		>
 			{localeOptions.map((option) => (
 				<Button
@@ -35,10 +33,10 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 					className="h-8 rounded-full px-3 text-xs"
 					onClick={() => setLocale(option)}
 				>
-					{intl.formatMessage({
-						id: `app.language.${option}`,
-						defaultMessage: option.toUpperCase(),
-					})}
+					<T
+						id={`app.language.${option}`}
+						defaultMessage={option.toUpperCase()}
+					/>
 				</Button>
 			))}
 		</div>

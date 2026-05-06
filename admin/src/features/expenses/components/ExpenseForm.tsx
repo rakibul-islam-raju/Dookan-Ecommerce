@@ -6,11 +6,11 @@ import { TextField } from "@/components/ui/@form/TextField";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Separator } from "@/components/ui/separator";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
-	expenseCategoryApi,
-	expenseApi,
 	useCreateExpense,
 	useUpdateExpense,
 	type IExpense,
@@ -19,22 +19,10 @@ import {
 import { getExpenseCategories } from "@/lib/api/expenses";
 import { getBatches } from "@/lib/api/inventory";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 import { z } from "zod";
 import { format } from "date-fns";
-
-const schema = z.object({
-	category: z.string().min(1, "Category is required"),
-	amount: z.coerce.number().positive("Amount must be greater than 0"),
-	incurred_on: z.string().min(1, "Date is required"),
-	reference: z.string().max(100).optional().or(z.literal("")),
-	notes: z.string().optional().or(z.literal("")),
-	production_batch: z.string().nullable().optional(),
-	product_variant: z.string().nullable().optional(),
-});
-
-type FormData = z.infer<typeof schema>;
 
 interface ExpenseFormProps {
 	handleClose: () => void;
@@ -43,9 +31,23 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ handleClose, expense, mode }: ExpenseFormProps) {
+	const t = useT();
 	const isEditMode = mode === "edit";
 	const { vendorContext } = useAuthStore();
 	const isManufacturing = vendorContext?.inventory_mode === "manufacturing";
+	const schema = z.object({
+		category: z.string().min(1, t("expenses.form.validation.category", "Category is required")),
+		amount: z.coerce
+			.number()
+			.positive(t("expenses.form.validation.amount", "Amount must be greater than 0")),
+		incurred_on: z.string().min(1, t("expenses.form.validation.date", "Date is required")),
+		reference: z.string().max(100).optional().or(z.literal("")),
+		notes: z.string().optional().or(z.literal("")),
+		production_batch: z.string().nullable().optional(),
+		product_variant: z.string().nullable().optional(),
+	});
+
+	type FormData = z.infer<typeof schema>;
 
 	const { mutate: createExpense, isPending: isCreating } = useCreateExpense();
 	const { mutate: updateExpense, isPending: isUpdating } = useUpdateExpense();
@@ -103,7 +105,7 @@ export function ExpenseForm({ handleClose, expense, mode }: ExpenseFormProps) {
 				product_variant: null,
 			});
 		}
-	}, [expense]);
+	}, [expense, form]);
 
 	const handleCancel = () => {
 		form.reset();
@@ -123,18 +125,18 @@ export function ExpenseForm({ handleClose, expense, mode }: ExpenseFormProps) {
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Expense updated successfully");
+						toast.success(t("expenses.form.updateSuccess", "Expense updated successfully"));
 					},
-					onError: () => toast.error("Failed to update expense"),
+					onError: () => toast.error(t("expenses.form.updateFailed", "Failed to update expense")),
 				},
 			);
 		} else {
 			createExpense(payload, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Expense recorded successfully");
+					toast.success(t("expenses.form.createSuccess", "Expense recorded successfully"));
 				},
-				onError: () => toast.error("Failed to record expense"),
+				onError: () => toast.error(t("expenses.form.createFailed", "Failed to record expense")),
 			});
 		}
 	};
@@ -144,63 +146,79 @@ export function ExpenseForm({ handleClose, expense, mode }: ExpenseFormProps) {
 			<div className="grid gap-4 py-4">
 				<SelectField
 					name="category"
-					label="Category"
-					placeholder="Select a category"
+					label={t("expenses.list.table.category", "Category")}
+					placeholder={t("expenses.form.selectCategory", "Select a category")}
 					required
 					options={categoryOptions}
-					helpText="Choose the type of expense."
+					helpText={t("expenses.form.categoryHelp", "Choose the type of expense.")}
 				/>
 
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="amount"
-						label="Amount (৳)"
+						label={t("expenses.form.amount", "Amount (৳)")}
 						placeholder="0.00"
 						type="number"
 						required
-						helpText="Total amount for this expense."
+						helpText={t("expenses.form.amountHelp", "Total amount for this expense.")}
 					/>
 					<DateField
 						name="incurred_on"
-						label="Date"
+						label={t("expenses.list.table.date", "Date")}
 						required
-						helpText="When this expense was incurred."
+						helpText={t("expenses.form.dateHelp", "When this expense was incurred.")}
 					/>
 				</div>
 
 				<TextField
 					name="reference"
-					label="Reference"
-					placeholder="e.g., INV-2026-001"
-					helpText="Optional — invoice number, receipt ID, or other reference."
+					label={t("expenses.list.table.reference", "Reference")}
+					placeholder={t("expenses.form.referencePlaceholder", "e.g., INV-2026-001")}
+					helpText={t(
+						"expenses.form.referenceHelp",
+						"Optional - invoice number, receipt ID, or other reference.",
+					)}
 				/>
 
 				<TextareaField
 					name="notes"
-					label="Notes"
-					placeholder="Any additional details about this expense..."
+					label={t("expenses.list.table.notes", "Notes")}
+					placeholder={t(
+						"expenses.form.notesPlaceholder",
+						"Any additional details about this expense...",
+					)}
 					rows={3}
-					helpText="Optional — extra context or breakdown for this entry."
+					helpText={t(
+						"expenses.form.notesHelp",
+						"Optional - extra context or breakdown for this entry.",
+					)}
 				/>
 
 				{(isManufacturing || expense?.production_batch) && (
 					<>
 						<Separator />
 						<div className="space-y-1">
-							<p className="text-sm font-medium">Optional Linking</p>
+							<p className="text-sm font-medium">
+								<T id="expenses.form.optionalLinking" defaultMessage="Optional Linking" />
+							</p>
 							<p className="text-xs text-muted-foreground">
-								Link this expense to a production batch or product variant for
-								more accurate cost tracking.
+								<T
+									id="expenses.form.optionalLinkingHelp"
+									defaultMessage="Link this expense to a production batch or product variant for more accurate cost tracking."
+								/>
 							</p>
 						</div>
 
 						{isManufacturing && (
 							<SelectField
 								name="production_batch"
-								label="Production Batch"
-								placeholder="None"
-								options={[{ value: "", label: "None" }, ...batchOptions]}
-								helpText="Batch expenses are included in production cost calculations."
+								label={t("expenses.form.productionBatch", "Production Batch")}
+								placeholder={t("expenses.form.none", "None")}
+								options={[{ value: "", label: t("expenses.form.none", "None") }, ...batchOptions]}
+								helpText={t(
+									"expenses.form.batchHelp",
+									"Batch expenses are included in production cost calculations.",
+								)}
 							/>
 						)}
 					</>
@@ -209,10 +227,12 @@ export function ExpenseForm({ handleClose, expense, mode }: ExpenseFormProps) {
 
 			<div className="flex justify-end gap-2">
 				<Button type="button" variant="outline" onClick={handleCancel} disabled={isPending}>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Expense" : "Record Expense"}
+					{isEditMode
+						? t("expenses.form.update", "Update Expense")
+						: t("expenses.form.create", "Record Expense")}
 				</LoadingButton>
 			</div>
 		</BaseForm>

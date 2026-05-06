@@ -1,6 +1,8 @@
 import { AppTable, type Column } from "@/components/common/AppTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -21,6 +23,7 @@ import { toast } from "react-toastify";
 import { RoleFormModal } from "./components/RoleFormModal";
 
 export function RoleList() {
+	const t = useT();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editRole, setEditRole] = useState<Role | null>(null);
 	const [modalMode, setModalMode] = useState<"create" | "edit">("create");
@@ -43,32 +46,44 @@ export function RoleList() {
 	const handleDelete = async (role: Role) => {
 		if (role.user_count > 0) {
 			toast.error(
-				`Cannot delete role "${role.name}" - it is assigned to ${role.user_count} staff member(s)`
+				t(
+					"roles.delete.blocked",
+					'Cannot delete role "{name}" - it is assigned to {count} staff member(s)',
+					{ name: role.name, count: role.user_count }
+				)
 			);
 			return;
 		}
-		if (!confirm(`Are you sure you want to delete "${role.name}"?`)) {
+		if (
+			!confirm(
+				t(
+					"roles.delete.confirm",
+					'Are you sure you want to delete "{name}"?',
+					{ name: role.name }
+				)
+			)
+		) {
 			return;
 		}
 		try {
 			await deleteMutation.mutateAsync(role.id);
-			toast.success("Role deleted successfully");
+			toast.success(t("roles.delete.success", "Role deleted successfully") as string);
 		} catch {
-			toast.error("Failed to delete role");
+			toast.error(t("roles.delete.failed", "Failed to delete role") as string);
 		}
 	};
 
 	const columns: Column<Role>[] = [
 		{
 			key: "name",
-			header: "Name",
+			header: t("roles.table.name", "Name") as string,
 			render: (role) => (
 				<div className="font-medium">{role.name}</div>
 			),
 		},
 		{
 			key: "description",
-			header: "Description",
+			header: t("roles.table.description", "Description") as string,
 			render: (role) => (
 				<span className="text-muted-foreground">
 					{role.description || "-"}
@@ -77,20 +92,27 @@ export function RoleList() {
 		},
 		{
 			key: "permissions",
-			header: "Permissions",
+			header: t("roles.table.permissions", "Permissions") as string,
 			render: (role) => (
 				<Badge variant="secondary">
-					{role.permissions.length} permission
-					{role.permissions.length !== 1 ? "s" : ""}
+					{t(
+						"roles.table.permissionCount",
+						"{count, plural, one {# permission} other {# permissions}}",
+						{ count: role.permissions.length }
+					)}
 				</Badge>
 			),
 		},
 		{
 			key: "user_count",
-			header: "Staff",
+			header: t("roles.table.staff", "Staff") as string,
 			render: (role) => (
 				<span className="text-muted-foreground">
-					{role.user_count} member{role.user_count !== 1 ? "s" : ""}
+					{t(
+						"roles.table.memberCount",
+						"{count, plural, one {# member} other {# members}}",
+						{ count: role.user_count }
+					)}
 				</span>
 			),
 		},
@@ -109,11 +131,13 @@ export function RoleList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="roles.actions.label" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => handleEdit(role)}>
 							<Pencil className="h-4 w-4 mr-2" />
-							Edit
+							<T id="roles.actions.edit" defaultMessage="Edit" />
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleDelete(role)}
@@ -121,7 +145,7 @@ export function RoleList() {
 							disabled={deleteMutation.isPending}
 						>
 							<Trash2 className="h-4 w-4 mr-2" />
-							Delete
+							<T id="roles.actions.delete" defaultMessage="Delete" />
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -134,14 +158,19 @@ export function RoleList() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Roles</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="roles.title" defaultMessage="Roles" />
+					</h1>
 					<p className="text-muted-foreground">
-						Manage roles and their permissions
+						<T
+							id="roles.description"
+							defaultMessage="Manage roles and their permissions"
+						/>
 					</p>
 				</div>
 				<Button onClick={handleCreate}>
 					<Plus className="h-4 w-4 mr-2" />
-					Create Role
+					<T id="roles.create" defaultMessage="Create Role" />
 				</Button>
 			</div>
 
@@ -149,7 +178,7 @@ export function RoleList() {
 				data={roles || []}
 				columns={columns}
 				isLoading={isFetching}
-				emptyMessage="No roles created yet"
+				emptyMessage={t("roles.empty", "No roles created yet") as string}
 			/>
 
 			<RoleFormModal

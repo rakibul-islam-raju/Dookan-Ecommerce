@@ -1,9 +1,22 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AppTable, type Column } from "@/components/common/AppTable";
-import { getExpenses, getExpenseSummary, type IExpense } from "@/lib/api/expenses";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
+import {
+	getExpenses,
+	getExpenseSummary,
+	type IExpense,
+} from "@/lib/api/expenses";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, BookOpen, ChevronRight, Plus, Receipt, Tag } from "lucide-react";
+import { BarChart3, BookOpen, ChevronRight, Plus, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useState } from "react";
@@ -13,10 +26,9 @@ const today = new Date();
 const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
 const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
 
-const formatAmount = (amount: string) =>
-	`৳${parseFloat(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
-
 export function ExpenseDashboard() {
+	const t = useT();
+	const { locale } = useLocale();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const { data: summary, isLoading: summaryLoading } = useQuery(
@@ -27,8 +39,13 @@ export function ExpenseDashboard() {
 		getExpenses({ limit: 10, page: 1 }),
 	);
 
+	const formatAmount = (amount: string) =>
+		`৳${parseFloat(amount).toLocaleString(locale === "bn" ? "bn-BD" : "en-IN", {
+			minimumFractionDigits: 2,
+		})}`;
+
 	const formatDate = (date: string) =>
-		new Date(date).toLocaleDateString("en-GB", {
+		new Date(date).toLocaleDateString(locale === "bn" ? "bn-BD" : "en-GB", {
 			day: "2-digit",
 			month: "short",
 			year: "numeric",
@@ -37,31 +54,41 @@ export function ExpenseDashboard() {
 	const recentColumns: Column<IExpense>[] = [
 		{
 			key: "incurred_on",
-			header: "Date",
-			render: (e) => <span className="text-sm whitespace-nowrap">{formatDate(e.incurred_on)}</span>,
+			header: t("expenses.dashboard.table.date", "Date") as string,
+			render: (e) => (
+				<span className="text-sm whitespace-nowrap">
+					{formatDate(e.incurred_on)}
+				</span>
+			),
 		},
 		{
 			key: "category",
-			header: "Category",
-			render: (e) => <span className="text-sm font-medium">{e.category_name}</span>,
+			header: t("expenses.dashboard.table.category", "Category") as string,
+			render: (e) => (
+				<span className="text-sm font-medium">{e.category_name}</span>
+			),
 		},
 		{
 			key: "amount",
-			header: "Amount",
+			header: t("expenses.dashboard.table.amount", "Amount") as string,
 			render: (e) => (
-				<span className="font-medium tabular-nums">{formatAmount(e.amount)}</span>
+				<span className="font-medium tabular-nums">
+					{formatAmount(e.amount)}
+				</span>
 			),
 		},
 		{
 			key: "reference",
-			header: "Reference",
+			header: t("expenses.dashboard.table.reference", "Reference") as string,
 			render: (e) => (
-				<span className="text-sm text-muted-foreground">{e.reference || "—"}</span>
+				<span className="text-sm text-muted-foreground">
+					{e.reference || "—"}
+				</span>
 			),
 		},
 		{
 			key: "linked_to",
-			header: "Linked To",
+			header: t("expenses.dashboard.table.linkedTo", "Linked To") as string,
 			render: (e) =>
 				e.batch_code ? (
 					<span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
@@ -78,15 +105,19 @@ export function ExpenseDashboard() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="expenses.dashboard.title" defaultMessage="Expenses" />
+					</h1>
 					<p className="text-muted-foreground mt-1">
-						Track all business costs — purchases, labour, transport, advertising,
-						and more. Link expenses to production batches for accurate costing.
+						<T
+							id="expenses.dashboard.description"
+							defaultMessage="Track all business costs - purchases, labour, transport, advertising, and more. Link expenses to production batches for accurate costing."
+						/>
 					</p>
 				</div>
 				<Button onClick={() => setIsModalOpen(true)}>
 					<Plus className="h-4 w-4 mr-2" />
-					Add Expense
+					<T id="expenses.dashboard.addExpense" defaultMessage="Add Expense" />
 				</Button>
 			</div>
 
@@ -95,42 +126,63 @@ export function ExpenseDashboard() {
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium text-muted-foreground">
-							This Month — Total
+							<T
+								id="expenses.dashboard.summary.thisMonthTotal"
+								defaultMessage="This Month - Total"
+							/>
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-2xl font-bold tabular-nums">
-							{summaryLoading ? "—" : formatAmount(summary?.total_expense || "0")}
+							{summaryLoading
+								? "—"
+								: formatAmount(summary?.total_expense || "0")}
 						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium text-muted-foreground">
-							Batch-Linked
+							<T
+								id="expenses.dashboard.summary.batchLinked"
+								defaultMessage="Batch-Linked"
+							/>
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-2xl font-bold tabular-nums">
-							{summaryLoading ? "—" : formatAmount(summary?.batch_linked_total || "0")}
+							{summaryLoading
+								? "—"
+								: formatAmount(summary?.batch_linked_total || "0")}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
-							In production cost
+							<T
+								id="expenses.dashboard.summary.inProductionCost"
+								defaultMessage="In production cost"
+							/>
 						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium text-muted-foreground">
-							General
+							<T
+								id="expenses.dashboard.summary.general"
+								defaultMessage="General"
+							/>
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-2xl font-bold tabular-nums">
-							{summaryLoading ? "—" : formatAmount(summary?.general_total || "0")}
+							{summaryLoading
+								? "—"
+								: formatAmount(summary?.general_total || "0")}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
-							Not linked to a batch
+							<T
+								id="expenses.dashboard.summary.notLinked"
+								defaultMessage="Not linked to a batch"
+							/>
 						</p>
 					</CardContent>
 				</Card>
@@ -142,16 +194,28 @@ export function ExpenseDashboard() {
 					<CardHeader className="pb-3">
 						<div className="flex items-center gap-2">
 							<BookOpen className="h-5 w-5 text-primary" />
-							<CardTitle className="text-base">All Expenses</CardTitle>
+							<CardTitle className="text-base">
+								<T
+									id="expenses.dashboard.cards.allExpenses.title"
+									defaultMessage="All Expenses"
+								/>
+							</CardTitle>
 						</div>
 						<CardDescription>
-							Record and review all expense entries with full filter and search.
+							<T
+								id="expenses.dashboard.cards.allExpenses.description"
+								defaultMessage="Record and review all expense entries with full filter and search."
+							/>
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<Button asChild variant="outline" size="sm" className="w-full">
 							<Link to="/expenses/entries">
-								View Expenses <ChevronRight className="h-4 w-4 ml-1" />
+								<T
+									id="expenses.dashboard.cards.allExpenses.cta"
+									defaultMessage="View Expenses"
+								/>{" "}
+								<ChevronRight className="h-4 w-4 ml-1" />
 							</Link>
 						</Button>
 					</CardContent>
@@ -161,16 +225,28 @@ export function ExpenseDashboard() {
 					<CardHeader className="pb-3">
 						<div className="flex items-center gap-2">
 							<Tag className="h-5 w-5 text-primary" />
-							<CardTitle className="text-base">Categories</CardTitle>
+							<CardTitle className="text-base">
+								<T
+									id="expenses.dashboard.cards.categories.title"
+									defaultMessage="Categories"
+								/>
+							</CardTitle>
 						</div>
 						<CardDescription>
-							Manage custom expense categories to organise your entries.
+							<T
+								id="expenses.dashboard.cards.categories.description"
+								defaultMessage="Manage custom expense categories to organise your entries."
+							/>
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<Button asChild variant="outline" size="sm" className="w-full">
 							<Link to="/expenses/categories">
-								Manage Categories <ChevronRight className="h-4 w-4 ml-1" />
+								<T
+									id="expenses.dashboard.cards.categories.cta"
+									defaultMessage="Manage Categories"
+								/>{" "}
+								<ChevronRight className="h-4 w-4 ml-1" />
 							</Link>
 						</Button>
 					</CardContent>
@@ -180,16 +256,28 @@ export function ExpenseDashboard() {
 					<CardHeader className="pb-3">
 						<div className="flex items-center gap-2">
 							<BarChart3 className="h-5 w-5 text-primary" />
-							<CardTitle className="text-base">Reports</CardTitle>
+							<CardTitle className="text-base">
+								<T
+									id="expenses.dashboard.cards.reports.title"
+									defaultMessage="Reports"
+								/>
+							</CardTitle>
 						</div>
 						<CardDescription>
-							View total expenses by category and custom date range.
+							<T
+								id="expenses.dashboard.cards.reports.description"
+								defaultMessage="View total expenses by category and custom date range."
+							/>
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<Button asChild variant="outline" size="sm" className="w-full">
 							<Link to="/expenses/reports">
-								View Reports <ChevronRight className="h-4 w-4 ml-1" />
+								<T
+									id="expenses.dashboard.cards.reports.cta"
+									defaultMessage="View Reports"
+								/>{" "}
+								<ChevronRight className="h-4 w-4 ml-1" />
 							</Link>
 						</Button>
 					</CardContent>
@@ -199,10 +287,19 @@ export function ExpenseDashboard() {
 			{/* Recent expenses */}
 			<div>
 				<div className="flex items-center justify-between mb-3">
-					<h2 className="text-lg font-semibold">Recent Expenses</h2>
+					<h2 className="text-lg font-semibold">
+						<T
+							id="expenses.dashboard.recent.title"
+							defaultMessage="Recent Expenses"
+						/>
+					</h2>
 					<Button asChild variant="ghost" size="sm">
 						<Link to="/expenses/entries">
-							View all <ChevronRight className="h-4 w-4 ml-1" />
+							<T
+								id="expenses.dashboard.recent.viewAll"
+								defaultMessage="View all"
+							/>{" "}
+							<ChevronRight className="h-4 w-4 ml-1" />
 						</Link>
 					</Button>
 				</div>
@@ -211,7 +308,12 @@ export function ExpenseDashboard() {
 					columns={recentColumns}
 					isLoading={expensesLoading}
 					rowKey={(e) => e.id}
-					emptyMessage="No expenses recorded yet."
+					emptyMessage={
+						t(
+							"expenses.dashboard.recent.empty",
+							"No expenses recorded yet.",
+						) as string
+					}
 				/>
 			</div>
 

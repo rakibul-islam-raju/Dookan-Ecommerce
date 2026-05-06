@@ -1,4 +1,6 @@
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -25,7 +27,6 @@ import {
 	type LucideIcon,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useIntl } from "react-intl";
 
 interface SidebarItem {
 	icon: LucideIcon;
@@ -65,7 +66,7 @@ const operationsItems: SidebarItem[] = [
 ];
 
 const SidebarContent = () => {
-	const intl = useIntl();
+	const t = useT();
 	const { hasPermission, canAccessInventory, canAccessExpenses, canAccessStorefront } = useAuthStore();
 
 	const visibleSidebarItems = sidebarItems.filter(
@@ -97,10 +98,7 @@ const SidebarContent = () => {
 			>
 				<item.icon className="h-4 w-4 shrink-0" />
 				<span className="whitespace-nowrap">
-					{intl.formatMessage({
-						id: item.labelId,
-						defaultMessage: item.defaultLabel,
-					})}
+					<T id={item.labelId} defaultMessage={item.defaultLabel} />
 				</span>
 			</NavLink>
 		));
@@ -127,10 +125,7 @@ const SidebarContent = () => {
 						<>
 							{renderSectionHeader(
 								Store,
-								intl.formatMessage({
-									id: "layout.sidebar.store",
-									defaultMessage: "Store",
-								})
+								t("layout.sidebar.store", "Store") as string
 							)}
 							{renderNavItems(visibleStoreItems)}
 						</>
@@ -140,10 +135,7 @@ const SidebarContent = () => {
 						<>
 							{renderSectionHeader(
 								Boxes,
-								intl.formatMessage({
-									id: "layout.sidebar.operations",
-									defaultMessage: "Operations",
-								})
+								t("layout.sidebar.operations", "Operations") as string
 							)}
 							{renderNavItems(visibleOperationsItems)}
 						</>
@@ -153,10 +145,7 @@ const SidebarContent = () => {
 						<>
 							{renderSectionHeader(
 								ShieldCheck,
-								intl.formatMessage({
-									id: "layout.sidebar.administration",
-									defaultMessage: "Administration",
-								})
+								t("layout.sidebar.administration", "Administration") as string
 							)}
 							{renderNavItems(visibleAdminItems)}
 						</>

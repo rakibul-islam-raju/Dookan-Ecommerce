@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { getExpenseSummary } from "@/lib/api/expenses";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -10,16 +13,24 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths } from "date-fns";
+import {
+	format,
+	startOfMonth,
+	endOfMonth,
+	startOfYear,
+	endOfYear,
+	subMonths,
+} from "date-fns";
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseISO } from "date-fns";
-
-const formatAmount = (amount: string) =>
-	`৳${parseFloat(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
 const today = new Date();
 
@@ -86,11 +97,23 @@ function DatePickerButton({
 type QuickFilter = "this_month" | "last_month" | "this_year" | "custom";
 
 export function ExpenseReports() {
-	const [startDate, setStartDate] = useState(() => format(startOfMonth(today), "yyyy-MM-dd"));
-	const [endDate, setEndDate] = useState(() => format(endOfMonth(today), "yyyy-MM-dd"));
-	const [activeQuickFilter, setActiveQuickFilter] = useState<QuickFilter>("this_month");
+	const t = useT();
+	const { locale } = useLocale();
+	const [startDate, setStartDate] = useState(() =>
+		format(startOfMonth(today), "yyyy-MM-dd"),
+	);
+	const [endDate, setEndDate] = useState(() =>
+		format(endOfMonth(today), "yyyy-MM-dd"),
+	);
+	const [activeQuickFilter, setActiveQuickFilter] =
+		useState<QuickFilter>("this_month");
 
 	const { data, isLoading } = useQuery(getExpenseSummary(startDate, endDate));
+
+	const formatAmount = (amount: string) =>
+		`৳${parseFloat(amount).toLocaleString(locale === "bn" ? "bn-BD" : "en-IN", {
+			minimumFractionDigits: 2,
+		})}`;
 
 	const applyQuickFilter = (filter: QuickFilter) => {
 		setActiveQuickFilter(filter);
@@ -108,8 +131,6 @@ export function ExpenseReports() {
 	};
 
 	const totalExpense = parseFloat(data?.total_expense || "0");
-	const batchLinked = parseFloat(data?.batch_linked_total || "0");
-	const general = parseFloat(data?.general_total || "0");
 
 	const byCategory = data?.by_category || [];
 	const sortedCategories = [...byCategory].sort(
@@ -119,10 +140,14 @@ export function ExpenseReports() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Expense Reports</h1>
+				<h1 className="text-3xl font-bold tracking-tight">
+					<T id="expenses.reports.title" defaultMessage="Expense Reports" />
+				</h1>
 				<p className="text-muted-foreground mt-1">
-					Summarise your expenses for any time period. Select a date range to
-					see totals by category.
+					<T
+						id="expenses.reports.description"
+						defaultMessage="Summarise your expenses for any time period. Select a date range to see totals by category."
+					/>
 				</p>
 			</div>
 
@@ -135,32 +160,34 @@ export function ExpenseReports() {
 							setStartDate(val);
 							setActiveQuickFilter("custom");
 						}}
-						placeholder="Start date"
+						placeholder={t("expenses.reports.startDate", "Start date")}
 					/>
-					<span className="text-muted-foreground text-sm">to</span>
+					<span className="text-muted-foreground text-sm">
+						<T id="expenses.reports.to" defaultMessage="to" />
+					</span>
 					<DatePickerButton
 						value={endDate}
 						onChange={(val) => {
 							setEndDate(val);
 							setActiveQuickFilter("custom");
 						}}
-						placeholder="End date"
+						placeholder={t("expenses.reports.endDate", "End date")}
 					/>
 				</div>
 
 				<div className="flex items-center gap-2 border-l pl-3">
 					<QuickFilterButton
-						label="This Month"
+						label={t("expenses.reports.thisMonth", "This Month")}
 						active={activeQuickFilter === "this_month"}
 						onClick={() => applyQuickFilter("this_month")}
 					/>
 					<QuickFilterButton
-						label="Last Month"
+						label={t("expenses.reports.lastMonth", "Last Month")}
 						active={activeQuickFilter === "last_month"}
 						onClick={() => applyQuickFilter("last_month")}
 					/>
 					<QuickFilterButton
-						label="This Year"
+						label={t("expenses.reports.thisYear", "This Year")}
 						active={activeQuickFilter === "this_year"}
 						onClick={() => applyQuickFilter("this_year")}
 					/>
@@ -172,7 +199,7 @@ export function ExpenseReports() {
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium text-muted-foreground">
-							Total Expenses
+							<T id="expenses.reports.summary.total" defaultMessage="Total Expenses" />
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -184,7 +211,7 @@ export function ExpenseReports() {
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium text-muted-foreground">
-							Batch-Linked
+							<T id="expenses.dashboard.summary.batchLinked" defaultMessage="Batch-Linked" />
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -192,14 +219,17 @@ export function ExpenseReports() {
 							{isLoading ? "—" : formatAmount(data?.batch_linked_total || "0")}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
-							Included in production cost calculations
+							<T
+								id="expenses.reports.summary.batchHelp"
+								defaultMessage="Included in production cost calculations"
+							/>
 						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium text-muted-foreground">
-							General Expenses
+							<T id="expenses.reports.summary.general" defaultMessage="General Expenses" />
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -207,7 +237,10 @@ export function ExpenseReports() {
 							{isLoading ? "—" : formatAmount(data?.general_total || "0")}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
-							Not linked to any production batch
+							<T
+								id="expenses.reports.summary.generalHelp"
+								defaultMessage="Not linked to any production batch"
+							/>
 						</p>
 					</CardContent>
 				</Card>
@@ -216,7 +249,9 @@ export function ExpenseReports() {
 			{/* Category breakdown */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Breakdown by Category</CardTitle>
+					<CardTitle>
+						<T id="expenses.reports.breakdown" defaultMessage="Breakdown by Category" />
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					{isLoading ? (
@@ -227,22 +262,33 @@ export function ExpenseReports() {
 						</div>
 					) : sortedCategories.length === 0 ? (
 						<p className="text-center text-muted-foreground py-8 text-sm">
-							No expenses found for the selected period.
+							<T
+								id="expenses.reports.empty"
+								defaultMessage="No expenses found for the selected period."
+							/>
 						</p>
 					) : (
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Category</TableHead>
-									<TableHead className="text-right">Amount (৳)</TableHead>
-									<TableHead className="text-right w-[100px]">% of Total</TableHead>
+									<TableHead>
+										<T id="expenses.list.table.category" defaultMessage="Category" />
+									</TableHead>
+									<TableHead className="text-right">
+										<T id="expenses.reports.table.amount" defaultMessage="Amount (৳)" />
+									</TableHead>
+									<TableHead className="text-right w-[100px]">
+										<T id="expenses.reports.table.percent" defaultMessage="% of Total" />
+									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
 								{sortedCategories.map((row) => {
 									const pct =
 										totalExpense > 0
-											? ((parseFloat(row.total) / totalExpense) * 100).toFixed(1)
+											? ((parseFloat(row.total) / totalExpense) * 100).toFixed(
+													1,
+												)
 											: "0.0";
 									return (
 										<TableRow key={row.category_id}>
@@ -259,7 +305,9 @@ export function ExpenseReports() {
 									);
 								})}
 								<TableRow className="border-t-2 font-bold">
-									<TableCell>Total</TableCell>
+									<TableCell>
+										<T id="expenses.reports.table.total" defaultMessage="Total" />
+									</TableCell>
 									<TableCell className="text-right tabular-nums">
 										{formatAmount(data?.total_expense || "0")}
 									</TableCell>

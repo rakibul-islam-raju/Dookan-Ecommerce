@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import {
@@ -13,7 +15,6 @@ import { Input } from "../input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { FormField } from "./FormField";
 import { Link } from "react-router-dom";
-import { useIntl } from "react-intl";
 
 interface PasswordFieldProps<T extends FieldValues> {
 	name: Path<T>;
@@ -40,7 +41,7 @@ export function PasswordField<T extends FieldValues>({
 	forgetPasswordPath,
 	helpText,
 }: PasswordFieldProps<T>) {
-	const intl = useIntl();
+	const t = useT();
 	const { control: contextControl } = useFormContext<T>();
 	const control = externalControl || contextControl;
 	const [showPassword, setShowPassword] = useState(false);
@@ -76,10 +77,7 @@ export function PasswordField<T extends FieldValues>({
 				{required && <span className="ml-1 text-red-500">*</span>}
 			</div>
 			<Link to={forgetPasswordPath} className="text-muted-foreground text-sm">
-				{intl.formatMessage({
-					id: "passwordField.forgotPassword",
-					defaultMessage: "Forgot Password?",
-				})}
+				<T id="passwordField.forgotPassword" defaultMessage="Forgot Password?" />
 			</Link>
 		</div>
 	);
@@ -120,14 +118,8 @@ export function PasswordField<T extends FieldValues>({
 							)}
 							<span className="sr-only">
 								{showPassword
-									? intl.formatMessage({
-											id: "passwordField.hidePassword",
-											defaultMessage: "Hide password",
-									  })
-									: intl.formatMessage({
-											id: "passwordField.showPassword",
-											defaultMessage: "Show password",
-									  })}
+									? t("passwordField.hidePassword", "Hide password")
+									: t("passwordField.showPassword", "Show password")}
 							</span>
 						</Button>
 					</div>

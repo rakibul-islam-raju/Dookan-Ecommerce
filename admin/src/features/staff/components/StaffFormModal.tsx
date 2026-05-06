@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import type { StaffMember } from "@/@types/User.type";
 import { StaffForm } from "./StaffForm";
 
@@ -28,12 +29,19 @@ export function StaffFormModal({
 			<DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
-						{isEditMode ? "Edit Staff Member" : "Add Staff Member"}
+						{isEditMode
+							? <T id="staff.modal.editTitle" defaultMessage="Edit Staff Member" />
+							: <T id="staff.modal.createTitle" defaultMessage="Add Staff Member" />}
 					</DialogTitle>
 					<DialogDescription>
 						{isEditMode
-							? "Update staff member details and role."
-							: "Create a new staff member and send them an email to set their password."}
+							? <T id="staff.modal.editDescription" defaultMessage="Update staff member details and role." />
+							: (
+								<T
+									id="staff.modal.createDescription"
+									defaultMessage="Create a new staff member and send them an email to set their password."
+								/>
+							)}
 					</DialogDescription>
 				</DialogHeader>
 

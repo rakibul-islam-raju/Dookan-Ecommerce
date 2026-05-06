@@ -6,7 +6,6 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { getBatches, getMaterials, getVariantTransactions, type IVariantStockTransaction } from "@/lib/api/inventory";
 import { useQuery } from "@tanstack/react-query";
 import {
-	Boxes,
 	ChevronRight,
 	Factory,
 	Layers,

@@ -12,6 +12,7 @@ import { Checkbox } from "../checkbox";
 type Props<T extends FieldValues> = {
 	name: Path<T>;
 	label?: string;
+	description?: string;
 	required?: boolean;
 	disabled?: boolean;
 	column?: boolean;
@@ -44,6 +45,7 @@ type Props<T extends FieldValues> = {
 export const CheckboxField = <T extends FieldValues>({
 	name,
 	label,
+	description,
 	disabled = false,
 	required = false,
 	column = false,
@@ -89,6 +91,9 @@ export const CheckboxField = <T extends FieldValues>({
 					</FormControl>
 
 					<FormMessage className="ml-6 text-xs mt-1" />
+					{description && (
+						<p className="ml-6 mt-1 text-xs text-muted-foreground">{description}</p>
+					)}
 				</FormItem>
 			)}
 		/>

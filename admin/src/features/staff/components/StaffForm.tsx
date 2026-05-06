@@ -3,6 +3,8 @@ import { SelectField } from "@/components/ui/@form/SelectField";
 import { TextField } from "@/components/ui/@form/TextField";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
 	useCreateStaff,
@@ -20,16 +22,6 @@ import { z } from "zod";
 /** Radix Select.Item cannot use value=""; map this to null on submit. */
 const NO_ROLE_VALUE = "__no_role__";
 
-const staffCreateSchema = z.object({
-	first_name: z.string().min(1, "First name is required"),
-	last_name: z.string().min(1, "Last name is required"),
-	email: z.string().email("Valid email is required"),
-	mobile_number: z.string().min(1, "Mobile number is required"),
-	role: z.string(),
-});
-
-type StaffFormData = z.infer<typeof staffCreateSchema>;
-
 interface StaffFormProps {
 	handleClose: () => void;
 	staff?: StaffMember | null;
@@ -37,9 +29,28 @@ interface StaffFormProps {
 }
 
 export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
+	const t = useT();
 	const { mutate: createStaff, isPending: isCreating } = useCreateStaff();
 	const { mutate: updateStaff, isPending: isUpdating } = useUpdateStaff();
 	const { data: roles } = useQuery(getRoles());
+	const staffCreateSchema = z.object({
+		first_name: z.string().min(
+			1,
+			t("staff.form.validation.firstName", "First name is required") as string
+		),
+		last_name: z.string().min(
+			1,
+			t("staff.form.validation.lastName", "Last name is required") as string
+		),
+		email: z.string().email(t("staff.form.validation.email", "Valid email is required") as string),
+		mobile_number: z.string().min(
+			1,
+			t("staff.form.validation.mobile", "Mobile number is required") as string
+		),
+		role: z.string(),
+	});
+
+	type StaffFormData = z.infer<typeof staffCreateSchema>;
 
 	const isEditMode = mode === "edit";
 	const isPending = isCreating || isUpdating;
@@ -73,7 +84,7 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Staff member updated successfully");
+						toast.success(t("staff.form.updateSuccess", "Staff member updated successfully") as string);
 					},
 				}
 			);
@@ -88,7 +99,7 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 			createStaff(createData, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Staff member created and password setup email sent");
+					toast.success(t("staff.form.createSuccess", "Staff member created and password setup email sent") as string);
 				},
 			});
 		}
@@ -104,10 +115,13 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 				role: staff.role || NO_ROLE_VALUE,
 			});
 		}
-	}, [staff, isEditMode]);
+	}, [form, staff, isEditMode]);
 
 	const roleOptions = [
-		{ value: NO_ROLE_VALUE, label: "No Role" },
+		{
+			value: NO_ROLE_VALUE,
+			label: t("staff.role.none", "No Role") as string,
+		},
 		...(roles?.map((r) => ({ value: r.id, label: r.name })) || []),
 	];
 
@@ -117,14 +131,14 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="first_name"
-						label="First Name"
-						placeholder="John"
+						label={t("staff.form.firstName", "First Name") as string}
+						placeholder={t("staff.form.firstNamePlaceholder", "John") as string}
 						required
 					/>
 					<TextField
 						name="last_name"
-						label="Last Name"
-						placeholder="Doe"
+						label={t("staff.form.lastName", "Last Name") as string}
+						placeholder={t("staff.form.lastNamePlaceholder", "Doe") as string}
 						required
 					/>
 				</div>
@@ -132,31 +146,33 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="email"
-						label="Email"
-						placeholder="john@example.com"
+						label={t("staff.table.email", "Email") as string}
+						placeholder={t("staff.form.emailPlaceholder", "john@example.com") as string}
 						type="email"
 						required
 					/>
 					<TextField
 						name="mobile_number"
-						label="Mobile Number"
-						placeholder="+8801XXXXXXXXX"
+						label={t("staff.form.mobileNumber", "Mobile Number") as string}
+						placeholder={t("staff.form.mobilePlaceholder", "+8801XXXXXXXXX") as string}
 						required
 					/>
 				</div>
 
 				{!isEditMode && (
 					<p className="rounded-md border border-dashed bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-						The staff member will receive an email with a secure link to set
-						their password.
+						<T
+							id="staff.form.inviteNotice"
+							defaultMessage="The staff member will receive an email with a secure link to set their password."
+						/>
 					</p>
 				)}
 
 				<SelectField
 					name="role"
-					label="Role"
+					label={t("staff.table.role", "Role") as string}
 					options={roleOptions}
-					description="Assign a role to define permissions"
+					description={t("staff.form.roleDescription", "Assign a role to define permissions") as string}
 				/>
 			</div>
 
@@ -167,10 +183,12 @@ export const StaffForm = ({ handleClose, staff, mode }: StaffFormProps) => {
 					onClick={handleCancel}
 					disabled={isPending}
 				>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Staff" : "Create Staff & Send Invite"}
+					{isEditMode
+						? t("staff.form.update", "Update Staff")
+						: t("staff.form.create", "Create Staff & Send Invite")}
 				</LoadingButton>
 			</div>
 		</BaseForm>

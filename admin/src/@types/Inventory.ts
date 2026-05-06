@@ -157,7 +157,10 @@ export interface IProductionBatchCreateData {
 	outputs: IProductionBatchOutputInput[];
 }
 
-export interface IProductionBatchUpdateData extends Partial<IProductionBatchCreateData> {}
+export interface IProductionBatchUpdateData
+	extends Partial<Omit<IProductionBatchCreateData, "status">> {
+	status?: IProductionBatch["status"];
+}
 
 export interface IFinishedGoodsReceiptCreateData {
 	variant: string;

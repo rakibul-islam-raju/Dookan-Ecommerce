@@ -7,7 +7,6 @@ import { pagination } from "@/config";
 import {
 	getMaterial,
 	getMaterialTransactions,
-	type IMaterial,
 	type IMaterialTransaction,
 } from "@/lib/api/inventory";
 import { useQuery } from "@tanstack/react-query";

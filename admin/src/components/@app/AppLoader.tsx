@@ -1,30 +1,25 @@
 import React from "react";
-import { useIntl } from "react-intl";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 
 /**
  * AppLoader Component
  * Displays a loading screen during app initialization
  */
 const AppLoader: React.FC = () => {
-	const intl = useIntl();
+	const t = useT();
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100">
 			<div className="flex flex-col items-center gap-6">
 				<img
 					src="/images/dookan.jpg"
-					alt={intl.formatMessage({
-						id: "auth.logoAlt",
-						defaultMessage: "Dookan logo",
-					})}
+					alt={t("auth.logoAlt", "Dookan logo") as string}
 					className="w-40 h-40"
 				/>
 				<h1 className="text-3xl font-bold text-slate-800 mb-2">Dookan</h1>
 				<p className="text-sm text-slate-500">
-					{intl.formatMessage({
-						id: "app.brand.adminDashboard",
-						defaultMessage: "Admin Dashboard",
-					})}
+					<T id="app.brand.adminDashboard" defaultMessage="Admin Dashboard" />
 				</p>
 
 				<div className="relative">
@@ -36,10 +31,7 @@ const AppLoader: React.FC = () => {
 
 				<div className="flex items-center gap-2">
 					<span className="text-sm text-slate-600 font-medium">
-						{intl.formatMessage({
-							id: "app.loading",
-							defaultMessage: "Loading",
-						})}
+						<T id="app.loading" defaultMessage="Loading" />
 					</span>
 					<div className="flex gap-1">
 						<span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:0ms]"></span>

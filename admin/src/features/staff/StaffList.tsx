@@ -2,6 +2,9 @@ import { AppTable, type Column } from "@/components/common/AppTable";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -39,6 +42,8 @@ const initialParams: StaffFilter = {
 };
 
 export function StaffList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { params } = useFilterParams({ initialParams });
 	const [searchQuery, setSearchQuery] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
@@ -73,30 +78,45 @@ export function StaffList() {
 
 	const handleDelete = async (staff: StaffMember) => {
 		if (staff.is_superuser) {
-			toast.error("Cannot delete a superuser account");
+			toast.error(
+				t("staff.delete.superuserBlocked", "Cannot delete a superuser account") as string
+			);
 			return;
 		}
 		if (
 			!confirm(
-				`Are you sure you want to delete "${staff.first_name} ${staff.last_name}"?`
+				t(
+					"staff.delete.confirm",
+					'Are you sure you want to delete "{name}"?',
+					{ name: `${staff.first_name} ${staff.last_name}` }
+				)
 			)
 		) {
 			return;
 		}
 		try {
 			await deleteMutation.mutateAsync(staff.id);
-			toast.success("Staff member deleted successfully");
+			toast.success(t("staff.delete.success", "Staff member deleted successfully") as string);
 		} catch {
-			toast.error("Failed to delete staff member");
+			toast.error(t("staff.delete.failed", "Failed to delete staff member") as string);
 		}
 	};
 
 	const handleToggleStatus = async (staff: StaffMember) => {
 		const newStatus = !staff.is_active;
-		const action = newStatus ? "activate" : "deactivate";
 		if (
 			!confirm(
-				`Are you sure you want to ${action} "${staff.first_name} ${staff.last_name}"?`
+				t(
+					"staff.status.confirm",
+					'Are you sure you want to {action} "{name}"?',
+					{
+						action: t(
+							newStatus ? "staff.status.activate" : "staff.status.deactivate",
+							newStatus ? "activate" : "deactivate",
+						),
+						name: `${staff.first_name} ${staff.last_name}`,
+					}
+				)
 			)
 		) {
 			return;
@@ -106,17 +126,20 @@ export function StaffList() {
 				id: staff.id,
 				updateData: { is_active: newStatus },
 			});
-			toast.success(
-				`Staff member ${newStatus ? "activated" : "deactivated"} successfully`
-			);
+			toast.success(t("staff.status.success", "Staff member {status} successfully", {
+				status: t(
+					newStatus ? "staff.status.activated" : "staff.status.deactivated",
+					newStatus ? "activated" : "deactivated",
+				),
+			}) as string);
 		} catch {
-			toast.error("Failed to update staff member status");
+			toast.error(t("staff.status.failed", "Failed to update staff member status") as string);
 		}
 	};
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
-		return new Intl.DateTimeFormat("en-US", {
+		return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-US", {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
@@ -126,7 +149,7 @@ export function StaffList() {
 	const columns: Column<StaffMember>[] = [
 		{
 			key: "name",
-			header: "Name",
+			header: t("staff.table.name", "Name") as string,
 			render: (staff) => (
 				<div className="font-medium">
 					{staff.first_name} {staff.last_name}
@@ -135,36 +158,38 @@ export function StaffList() {
 		},
 		{
 			key: "email",
-			header: "Email",
+			header: t("staff.table.email", "Email") as string,
 			render: (staff) => (
 				<span className="text-muted-foreground">{staff.email}</span>
 			),
 		},
 		{
 			key: "role",
-			header: "Role",
+			header: t("staff.table.role", "Role") as string,
 			render: (staff) => (
 				<Badge variant={staff.is_superuser ? "default" : "secondary"}>
 					{staff.is_superuser
-						? "Superuser"
-						: staff.role_name || "No Role"}
+						? t("staff.role.superuser", "Superuser")
+						: staff.role_name || t("staff.role.none", "No Role")}
 				</Badge>
 			),
 		},
 		{
 			key: "is_active",
-			header: "Status",
+			header: t("staff.table.status", "Status") as string,
 			render: (staff) => (
 				<Badge
 					variant={staff.is_active ? "default" : "destructive"}
 				>
-					{staff.is_active ? "Active" : "Inactive"}
+					{staff.is_active
+						? t("staff.status.active", "Active")
+						: t("staff.status.inactive", "Inactive")}
 				</Badge>
 			),
 		},
 		{
 			key: "created_at",
-			header: "Added",
+			header: t("staff.table.added", "Added") as string,
 			render: (staff) => (
 				<span className="text-muted-foreground">
 					{formatDate(staff.created_at)}
@@ -186,11 +211,13 @@ export function StaffList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="staff.actions.label" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => handleEdit(staff)}>
 							<Pencil className="h-4 w-4 mr-2" />
-							Edit
+							<T id="staff.actions.edit" defaultMessage="Edit" />
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleToggleStatus(staff)}
@@ -199,12 +226,12 @@ export function StaffList() {
 							{staff.is_active ? (
 								<>
 									<ShieldOff className="h-4 w-4 mr-2" />
-									Deactivate
+									<T id="staff.actions.deactivate" defaultMessage="Deactivate" />
 								</>
 							) : (
 								<>
 									<ShieldCheck className="h-4 w-4 mr-2" />
-									Activate
+									<T id="staff.actions.activate" defaultMessage="Activate" />
 								</>
 							)}
 						</DropdownMenuItem>
@@ -215,7 +242,7 @@ export function StaffList() {
 								disabled={deleteMutation.isPending}
 							>
 								<Trash2 className="h-4 w-4 mr-2" />
-								Delete
+								<T id="staff.actions.delete" defaultMessage="Delete" />
 							</DropdownMenuItem>
 						)}
 					</DropdownMenuContent>
@@ -232,14 +259,19 @@ export function StaffList() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Staff</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="staff.title" defaultMessage="Staff" />
+					</h1>
 					<p className="text-muted-foreground">
-						Manage staff members and their access
+						<T
+							id="staff.description"
+							defaultMessage="Manage staff members and their access"
+						/>
 					</p>
 				</div>
 				<Button onClick={handleCreate}>
 					<Plus className="h-4 w-4 mr-2" />
-					Add Staff
+					<T id="staff.add" defaultMessage="Add Staff" />
 				</Button>
 			</div>
 
@@ -247,7 +279,7 @@ export function StaffList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search by email or name..."
+					placeholder={t("staff.searchPlaceholder", "Search by email or name...") as string}
 					className="flex-1"
 				/>
 			</div>
@@ -256,7 +288,7 @@ export function StaffList() {
 				data={staffMembers}
 				columns={columns}
 				isLoading={isFetching}
-				emptyMessage="No staff members found"
+				emptyMessage={t("staff.empty", "No staff members found") as string}
 				pagination={{
 					currentPage,
 					totalPages,

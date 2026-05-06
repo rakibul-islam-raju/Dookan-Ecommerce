@@ -2,6 +2,8 @@ import { AppTable, type Column } from "@/components/common/AppTable";
 import { AppConfirmDialog } from "@/components/@app/AppConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -22,6 +24,7 @@ import { toast } from "react-toastify";
 import { ExpenseCategoryFormModal } from "./components/ExpenseCategoryFormModal";
 
 export function ExpenseCategoryList() {
+	const t = useT();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 	const [selectedCategory, setSelectedCategory] = useState<IExpenseCategory | null>(null);
@@ -48,9 +51,9 @@ export function ExpenseCategoryList() {
 		if (!categoryToDelete) return;
 		try {
 			await deleteMutation.mutateAsync(categoryToDelete.id);
-			toast.success("Category deleted");
+			toast.success(t("expenses.categories.deleteSuccess", "Category deleted"));
 		} catch {
-			toast.error("Failed to delete category");
+			toast.error(t("expenses.categories.deleteFailed", "Failed to delete category"));
 		} finally {
 			setDeleteDialogOpen(false);
 			setCategoryToDelete(null);
@@ -60,12 +63,12 @@ export function ExpenseCategoryList() {
 	const columns: Column<IExpenseCategory>[] = [
 		{
 			key: "name",
-			header: "Name",
+			header: t("expenses.categories.table.name", "Name"),
 			render: (cat) => <span className="font-medium">{cat.name}</span>,
 		},
 		{
 			key: "description",
-			header: "Description",
+			header: t("expenses.categories.table.description", "Description"),
 			render: (cat) => (
 				<span className="text-muted-foreground text-sm">
 					{cat.description || "—"}
@@ -74,12 +77,16 @@ export function ExpenseCategoryList() {
 		},
 		{
 			key: "type",
-			header: "Type",
+			header: t("expenses.categories.table.type", "Type"),
 			render: (cat) =>
 				cat.is_global ? (
-					<Badge variant="secondary">Default</Badge>
+					<Badge variant="secondary">
+						<T id="expenses.categories.type.default" defaultMessage="Default" />
+					</Badge>
 				) : (
-					<Badge variant="outline">Custom</Badge>
+					<Badge variant="outline">
+						<T id="expenses.categories.type.custom" defaultMessage="Custom" />
+					</Badge>
 				),
 		},
 		{
@@ -87,7 +94,9 @@ export function ExpenseCategoryList() {
 			header: "",
 			render: (cat) =>
 				cat.is_global ? (
-					<span className="text-xs text-muted-foreground">Read-only</span>
+					<span className="text-xs text-muted-foreground">
+						<T id="expenses.categories.readOnly" defaultMessage="Read-only" />
+					</span>
 				) : (
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
@@ -96,18 +105,20 @@ export function ExpenseCategoryList() {
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
-							<DropdownMenuLabel>Actions</DropdownMenuLabel>
+							<DropdownMenuLabel>
+								<T id="expenses.categories.actions.label" defaultMessage="Actions" />
+							</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem onClick={() => handleEdit(cat)}>
 								<Pencil className="h-4 w-4 mr-2" />
-								Edit
+								<T id="expenses.categories.actions.edit" defaultMessage="Edit" />
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								className="text-destructive"
 								onClick={() => handleDeleteClick(cat)}
 							>
 								<Trash2 className="h-4 w-4 mr-2" />
-								Delete
+								<T id="expenses.categories.actions.delete" defaultMessage="Delete" />
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -120,10 +131,14 @@ export function ExpenseCategoryList() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Expense Categories</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="expenses.categories.title" defaultMessage="Expense Categories" />
+					</h1>
 					<p className="text-muted-foreground mt-1">
-						Organise your expenses with categories. Default categories are provided
-						— you can also create custom ones specific to your business.
+						<T
+							id="expenses.categories.description"
+							defaultMessage="Organise your expenses with categories. Default categories are provided - you can also create custom ones specific to your business."
+						/>
 					</p>
 				</div>
 				<Button
@@ -134,7 +149,7 @@ export function ExpenseCategoryList() {
 					}}
 				>
 					<Plus className="h-4 w-4 mr-2" />
-					Add Category
+					<T id="expenses.categories.add" defaultMessage="Add Category" />
 				</Button>
 			</div>
 
@@ -144,7 +159,9 @@ export function ExpenseCategoryList() {
 				isLoading={isLoading}
 				rowKey={(cat) => cat.id}
 				emptyMessage={
-					error ? "Error loading categories" : "No categories found"
+					error
+						? t("expenses.categories.error", "Error loading categories")
+						: t("expenses.categories.empty", "No categories found")
 				}
 			/>
 
@@ -157,10 +174,14 @@ export function ExpenseCategoryList() {
 
 			<AppConfirmDialog
 				open={deleteDialogOpen}
-				title="Delete Category"
-				description={`Are you sure you want to delete "${categoryToDelete?.name}"? This cannot be undone.`}
-				confirmButtonText="Delete"
-				cancelButtonText="Cancel"
+				title={t("expenses.categories.deleteTitle", "Delete Category")}
+				description={t(
+					"expenses.categories.deleteDescription",
+					'Are you sure you want to delete "{name}"? This action cannot be undone.',
+					{ name: categoryToDelete?.name ?? "" },
+				)}
+				confirmButtonText={t("expenses.categories.actions.delete", "Delete")}
+				cancelButtonText={t("common.cancel", "Cancel")}
 				confirmButtonVariant="destructive"
 				onConfirm={handleConfirmDelete}
 				onCancel={() => setDeleteDialogOpen(false)}

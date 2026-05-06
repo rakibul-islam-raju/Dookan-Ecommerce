@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import type { IExpense } from "@/lib/api/expenses";
 import { ExpenseForm } from "./ExpenseForm";
 
@@ -22,11 +23,27 @@ export function ExpenseFormModal({ open, onOpenChange, expense, mode }: ExpenseF
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[540px]">
 				<DialogHeader>
-					<DialogTitle>{isEditMode ? "Edit Expense" : "Record Expense"}</DialogTitle>
+					<DialogTitle>
+						{isEditMode ? (
+							<T id="expenses.modal.editTitle" defaultMessage="Edit Expense" />
+						) : (
+							<T id="expenses.modal.createTitle" defaultMessage="Record Expense" />
+						)}
+					</DialogTitle>
 					<DialogDescription>
 						{isEditMode
-							? "Update the details of this expense entry."
-							: "Record a new business expense. You can optionally link it to a production batch for accurate costing."}
+							? (
+								<T
+									id="expenses.modal.editDescription"
+									defaultMessage="Update the details of this expense entry."
+								/>
+							)
+							: (
+								<T
+									id="expenses.modal.createDescription"
+									defaultMessage="Record a new business expense. You can optionally link it to a production batch for accurate costing."
+								/>
+							)}
 					</DialogDescription>
 				</DialogHeader>
 				<ExpenseForm

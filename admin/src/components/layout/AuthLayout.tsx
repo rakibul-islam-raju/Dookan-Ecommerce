@@ -1,12 +1,12 @@
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import { useT } from "@/i18n/use-t";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useIntl } from "react-intl";
 
 export function AuthLayout() {
 	const { user } = useAuthStore();
 	const location = useLocation();
-	const intl = useIntl();
+	const t = useT();
 	const allowAuthenticatedAccess = location.pathname === "/set-password";
 
 	if (user && !allowAuthenticatedAccess) {
@@ -21,10 +21,7 @@ export function AuthLayout() {
 				</div>
 				<img
 					src="/images/dookan.jpg"
-					alt={intl.formatMessage({
-						id: "auth.logoAlt",
-						defaultMessage: "Dookan logo",
-					})}
+					alt={t("auth.logoAlt", "Dookan logo") as string}
 					className="w-32 h-32 mx-auto mb-4 rounded-lg"
 				/>
 				<Outlet />

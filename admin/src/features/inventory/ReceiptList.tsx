@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { pagination } from "@/config";
 import { getReceipts, type IFinishedGoodsReceipt } from "@/lib/api/inventory";
 import { useQuery } from "@tanstack/react-query";
-import { PackagePlus, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { ReceiptFormModal } from "./components/ReceiptFormModal";
 

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
 	useCreateRole,
@@ -17,22 +19,19 @@ import { useController } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const roleSchema = z.object({
-	name: z.string().min(1, "Role name is required"),
-	description: z.string().optional().or(z.literal("")),
-	permissions: z.array(z.string()).min(1, "Select at least one permission"),
-});
-
-type RoleFormData = z.infer<typeof roleSchema>;
-
 interface RoleFormProps {
 	handleClose: () => void;
 	role?: Role | null;
 	mode: "create" | "edit";
 }
 
+type RolePermissionsFormData = {
+	permissions: string[];
+};
+
 function PermissionCheckboxes() {
-	const { field } = useController<RoleFormData, "permissions">({
+	const t = useT();
+	const { field } = useController<RolePermissionsFormData, "permissions">({
 		name: "permissions",
 	});
 
@@ -60,7 +59,8 @@ function PermissionCheckboxes() {
 		<div className="space-y-3">
 			<div className="flex items-center justify-between">
 				<Label className="text-sm font-medium">
-					Permissions <span className="text-destructive">*</span>
+					<T id="roles.form.permissions" defaultMessage="Permissions" />{" "}
+					<span className="text-destructive">*</span>
 				</Label>
 				<Button
 					type="button"
@@ -69,8 +69,8 @@ function PermissionCheckboxes() {
 					onClick={handleSelectAll}
 				>
 					{selectedPermissions.length === ALL_PERMISSIONS.length
-						? "Deselect All"
-						: "Select All"}
+						? t("roles.form.deselectAll", "Deselect All")
+						: t("roles.form.selectAll", "Select All")}
 				</Button>
 			</div>
 			<div className="grid grid-cols-2 gap-3 rounded-lg border p-4">
@@ -84,7 +84,10 @@ function PermissionCheckboxes() {
 							onCheckedChange={() => handleToggle(permission)}
 						/>
 						<span className="text-sm">
-							{PERMISSION_LABELS[permission]}
+							<T
+								id={`roles.permissions.${permission}`}
+								defaultMessage={PERMISSION_LABELS[permission]}
+							/>
 						</span>
 					</label>
 				))}
@@ -94,8 +97,22 @@ function PermissionCheckboxes() {
 }
 
 export const RoleForm = ({ handleClose, role, mode }: RoleFormProps) => {
+	const t = useT();
 	const { mutate: createRole, isPending: isCreating } = useCreateRole();
 	const { mutate: updateRole, isPending: isUpdating } = useUpdateRole();
+	const roleSchema = z.object({
+		name: z.string().min(
+			1,
+			t("roles.form.validation.nameRequired", "Role name is required") as string
+		),
+		description: z.string().optional().or(z.literal("")),
+		permissions: z.array(z.string()).min(
+			1,
+			t("roles.form.validation.permissionsRequired", "Select at least one permission") as string
+		),
+	});
+
+	type RoleFormData = z.infer<typeof roleSchema>;
 
 	const isEditMode = mode === "edit";
 	const isPending = isCreating || isUpdating;
@@ -126,7 +143,7 @@ export const RoleForm = ({ handleClose, role, mode }: RoleFormProps) => {
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Role updated successfully");
+						toast.success(t("roles.form.updateSuccess", "Role updated successfully") as string);
 					},
 				}
 			);
@@ -134,7 +151,7 @@ export const RoleForm = ({ handleClose, role, mode }: RoleFormProps) => {
 			createRole(payload, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Role created successfully");
+					toast.success(t("roles.form.createSuccess", "Role created successfully") as string);
 				},
 			});
 		}
@@ -148,22 +165,22 @@ export const RoleForm = ({ handleClose, role, mode }: RoleFormProps) => {
 				permissions: role.permissions,
 			});
 		}
-	}, [role, isEditMode]);
+	}, [form, role, isEditMode]);
 
 	return (
 		<BaseForm form={form} onSubmit={onSubmit}>
 			<div className="grid gap-4 py-4">
 				<TextField
 					name="name"
-					label="Role Name"
-					placeholder="e.g., Product Manager"
+					label={t("roles.form.name", "Role Name") as string}
+					placeholder={t("roles.form.namePlaceholder", "e.g., Product Manager") as string}
 					required
 				/>
 
 				<TextareaField
 					name="description"
-					label="Description"
-					placeholder="Brief description of this role..."
+					label={t("roles.form.description", "Description") as string}
+					placeholder={t("roles.form.descriptionPlaceholder", "Brief description of this role...") as string}
 				/>
 
 				<PermissionCheckboxes />
@@ -176,10 +193,12 @@ export const RoleForm = ({ handleClose, role, mode }: RoleFormProps) => {
 					onClick={handleCancel}
 					disabled={isPending}
 				>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Role" : "Create Role"}
+					{isEditMode
+						? t("roles.form.update", "Update Role")
+						: t("roles.form.create", "Create Role")}
 				</LoadingButton>
 			</div>
 		</BaseForm>

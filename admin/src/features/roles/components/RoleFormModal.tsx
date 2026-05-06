@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import type { Role } from "@/@types/User.type";
 import { RoleForm } from "./RoleForm";
 
@@ -28,12 +29,19 @@ export function RoleFormModal({
 			<DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
-						{isEditMode ? "Edit Role" : "Create New Role"}
+						{isEditMode
+							? <T id="roles.modal.editTitle" defaultMessage="Edit Role" />
+							: <T id="roles.modal.createTitle" defaultMessage="Create New Role" />}
 					</DialogTitle>
 					<DialogDescription>
 						{isEditMode
-							? "Update role details and permissions."
-							: "Create a new role with specific permissions."}
+							? <T id="roles.modal.editDescription" defaultMessage="Update role details and permissions." />
+							: (
+								<T
+									id="roles.modal.createDescription"
+									defaultMessage="Create a new role with specific permissions."
+								/>
+							)}
 					</DialogDescription>
 				</DialogHeader>
 

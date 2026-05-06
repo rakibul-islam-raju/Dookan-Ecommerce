@@ -9,6 +9,16 @@ import type {
 	IExpenseSummary,
 	IExpenseUpdateData,
 } from "@/@types/Expense";
+export type {
+	IExpense,
+	IExpenseCategory,
+	IExpenseCategoryCreateData,
+	IExpenseCategoryUpdateData,
+	IExpenseCreateData,
+	IExpenseFilter,
+	IExpenseSummary,
+	IExpenseUpdateData,
+} from "@/@types/Expense";
 import { queryKeys } from "@/constants/queryKeys";
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { clientApi } from "./axios";

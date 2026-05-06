@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import type { IExpenseCategory } from "@/lib/api/expenses";
 import { ExpenseCategoryForm } from "./ExpenseCategoryForm";
 
@@ -28,12 +29,26 @@ export function ExpenseCategoryFormModal({
 			<DialogContent className="sm:max-w-[480px]">
 				<DialogHeader>
 					<DialogTitle>
-						{isEditMode ? "Edit Category" : "New Expense Category"}
+						{isEditMode ? (
+							<T id="expenses.categories.modal.editTitle" defaultMessage="Edit Category" />
+						) : (
+							<T id="expenses.categories.modal.createTitle" defaultMessage="New Expense Category" />
+						)}
 					</DialogTitle>
 					<DialogDescription>
 						{isEditMode
-							? "Update the category name or description."
-							: "Add a custom category to organise your expense entries."}
+							? (
+								<T
+									id="expenses.categories.modal.editDescription"
+									defaultMessage="Update the category name or description."
+								/>
+							)
+							: (
+								<T
+									id="expenses.categories.modal.createDescription"
+									defaultMessage="Add a custom category to organise your expense entries."
+								/>
+							)}
 					</DialogDescription>
 				</DialogHeader>
 				<ExpenseCategoryForm

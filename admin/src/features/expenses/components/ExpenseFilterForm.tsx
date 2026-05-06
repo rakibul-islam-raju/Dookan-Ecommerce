@@ -1,6 +1,8 @@
 import { DateField } from "@/components/ui/@form/DateField";
 import { SelectField } from "@/components/ui/@form/SelectField";
 import { Button } from "@/components/ui/button";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { getExpenseCategories, type IExpenseCategory } from "@/lib/api/expenses";
 import { useQuery } from "@tanstack/react-query";
@@ -23,10 +25,11 @@ interface ExpenseFilterFormProps {
 }
 
 export function ExpenseFilterForm({ initialFilter, onFilter, onReset }: ExpenseFilterFormProps) {
+	const t = useT();
 	const { data: categoriesData } = useQuery(getExpenseCategories());
 
 	const categoryOptions = [
-		{ value: "", label: "All categories" },
+		{ value: "", label: t("expenses.filter.allCategories", "All categories") },
 		...(categoriesData?.results || []).map((c: IExpenseCategory) => ({
 			value: c.id,
 			label: c.name,
@@ -54,19 +57,29 @@ export function ExpenseFilterForm({ initialFilter, onFilter, onReset }: ExpenseF
 			<div className="space-y-4">
 				<SelectField
 					name="category"
-					label="Category"
-					placeholder="All categories"
+					label={t("expenses.list.table.category", "Category")}
+					placeholder={t("expenses.filter.allCategories", "All categories")}
 					options={categoryOptions}
 				/>
-				<DateField name="start_date" label="Date From" placeholder="Start date" />
-				<DateField name="end_date" label="Date To" placeholder="End date" />
+				<DateField
+					name="start_date"
+					label={t("expenses.filter.dateFrom", "Date From")}
+					placeholder={t("expenses.reports.startDate", "Start date")}
+				/>
+				<DateField
+					name="end_date"
+					label={t("expenses.filter.dateTo", "Date To")}
+					placeholder={t("expenses.reports.endDate", "End date")}
+				/>
 			</div>
 
 			<div className="flex justify-between mt-6">
 				<Button type="button" variant="outline" onClick={onReset}>
-					Reset
+					<T id="expenses.filter.reset" defaultMessage="Reset" />
 				</Button>
-				<Button type="submit">Apply Filters</Button>
+				<Button type="submit">
+					<T id="expenses.filter.apply" defaultMessage="Apply Filters" />
+				</Button>
 			</div>
 		</BaseForm>
 	);

@@ -3,6 +3,8 @@ import { TextareaField } from "@/components/ui/@form/TextareaField";
 import { TextField } from "@/components/ui/@form/TextField";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
 	useCreateExpenseCategory,
@@ -13,13 +15,6 @@ import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { z } from "zod";
 
-const schema = z.object({
-	name: z.string().min(1, "Name is required").max(120, "Name must not exceed 120 characters"),
-	description: z.string().max(500, "Description must not exceed 500 characters").optional().or(z.literal("")),
-});
-
-type FormData = z.infer<typeof schema>;
-
 interface ExpenseCategoryFormProps {
 	handleClose: () => void;
 	category?: IExpenseCategory | null;
@@ -27,10 +22,24 @@ interface ExpenseCategoryFormProps {
 }
 
 export function ExpenseCategoryForm({ handleClose, category, mode }: ExpenseCategoryFormProps) {
+	const t = useT();
 	const isEditMode = mode === "edit";
 	const { mutate: createCategory, isPending: isCreating } = useCreateExpenseCategory();
 	const { mutate: updateCategory, isPending: isUpdating } = useUpdateExpenseCategory();
 	const isPending = isCreating || isUpdating;
+	const schema = z.object({
+		name: z
+			.string()
+			.min(1, t("expenses.categories.form.validation.name", "Name is required"))
+			.max(120, t("expenses.categories.form.validation.nameMax", "Name must not exceed 120 characters")),
+		description: z
+			.string()
+			.max(500, t("expenses.categories.form.validation.descriptionMax", "Description must not exceed 500 characters"))
+			.optional()
+			.or(z.literal("")),
+	});
+
+	type FormData = z.infer<typeof schema>;
 
 	const form = useZodForm(schema, {
 		defaultValues: { name: "", description: "" },
@@ -42,7 +51,7 @@ export function ExpenseCategoryForm({ handleClose, category, mode }: ExpenseCate
 		} else {
 			form.reset({ name: "", description: "" });
 		}
-	}, [category]);
+	}, [category, form]);
 
 	const handleCancel = () => {
 		form.reset();
@@ -56,18 +65,18 @@ export function ExpenseCategoryForm({ handleClose, category, mode }: ExpenseCate
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Category updated successfully");
+						toast.success(t("expenses.categories.form.updateSuccess", "Category updated successfully"));
 					},
-					onError: () => toast.error("Failed to update category"),
+					onError: () => toast.error(t("expenses.categories.form.updateFailed", "Failed to update category")),
 				},
 			);
 		} else {
 			createCategory(data, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Category created successfully");
+					toast.success(t("expenses.categories.form.createSuccess", "Category created successfully"));
 				},
-				onError: () => toast.error("Failed to create category"),
+				onError: () => toast.error(t("expenses.categories.form.createFailed", "Failed to create category")),
 			});
 		}
 	};
@@ -77,26 +86,37 @@ export function ExpenseCategoryForm({ handleClose, category, mode }: ExpenseCate
 			<div className="grid gap-4 py-4">
 				<TextField
 					name="name"
-					label="Category Name"
-					placeholder="e.g., Equipment Maintenance"
+					label={t("expenses.categories.form.name", "Category Name")}
+					placeholder={t("expenses.categories.form.namePlaceholder", "e.g., Equipment Maintenance")}
 					required
-					helpText="A short, descriptive name for this expense category."
+					helpText={t(
+						"expenses.categories.form.nameHelp",
+						"A short, descriptive name for this expense category.",
+					)}
 				/>
 				<TextareaField
 					name="description"
-					label="Description"
-					placeholder="e.g., Costs related to equipment repair and upkeep"
+					label={t("expenses.list.table.description", "Description")}
+					placeholder={t(
+						"expenses.categories.form.descriptionPlaceholder",
+						"e.g., Costs related to equipment repair and upkeep",
+					)}
 					rows={3}
-					helpText="Optional — describe what kinds of expenses belong in this category."
+					helpText={t(
+						"expenses.categories.form.descriptionHelp",
+						"Optional - describe what kinds of expenses belong in this category.",
+					)}
 				/>
 			</div>
 
 			<div className="flex justify-end gap-2">
 				<Button type="button" variant="outline" onClick={handleCancel} disabled={isPending}>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Category" : "Create Category"}
+					{isEditMode
+						? t("expenses.categories.form.update", "Update Category")
+						: t("expenses.categories.form.create", "Create Category")}
 				</LoadingButton>
 			</div>
 		</BaseForm>
