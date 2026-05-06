@@ -20,6 +20,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -38,6 +40,33 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: ecommerce_celery_worker
+    restart: unless-stopped
+    init: true
+    command: >
+      uv run celery -A core worker
+      --loglevel=${CELERY_LOG_LEVEL:-info}
+      --concurrency=${CELERY_CONCURRENCY:-2}
+    env_file:
+      - .env
+    environment:
+      CACHE_DIR: ${CACHE_DIR:-/tmp/django-cache}
+      COLLECT_STATIC: "0"
+      RUN_MIGRATIONS: "0"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    mem_limit: 768m
+    mem_reservation: 256m
+    cpus: 1.00
+    pids_limit: 256
 
   db:
     image: postgres:16
@@ -59,6 +88,24 @@ services:
     mem_reservation: 256m
     cpus: 1.00
     pids_limit: 256
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce_redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.50
+    pids_limit: 128
 
   nginx:
     image: nginx:1.27-alpine

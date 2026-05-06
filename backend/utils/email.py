@@ -1,11 +1,13 @@
+import random
+from datetime import timedelta
+from urllib.parse import urlencode
+
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db import transaction
 from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 from django.utils import timezone
-from datetime import timedelta
-import random
-from urllib.parse import urlencode
+from django.utils.html import strip_tags
 
 from users.models import OTPVerification
 
@@ -36,21 +38,10 @@ def create_email_otp(email, purpose):
     return otp_code
 
 
-def send_verification_otp_email(email, user_name, purpose="registration"):
-    """
-    Generate and send OTP verification email.
+def _send_verification_otp_email(email, user_name, purpose="registration", otp_code=None):
+    """Send an OTP verification email immediately."""
+    otp_code = otp_code or create_email_otp(email=email, purpose=purpose)
 
-    Args:
-        email: Recipient email address
-        user_name: User's name for personalization
-        purpose: OTP purpose (registration, guest_order, password_reset)
-
-    Returns:
-        bool: True if email sent successfully
-    """
-    otp_code = create_email_otp(email=email, purpose=purpose)
-
-    # Determine subject based on purpose
     subjects = {
         "registration": "Verify Your Email - Dookan",
         "guest_order": "Your Order Tracking OTP - Dookan",
@@ -58,7 +49,6 @@ def send_verification_otp_email(email, user_name, purpose="registration"):
     }
     subject = subjects.get(purpose, "OTP Verification - Dookan")
 
-    # Render email template
     html_message = render_to_string(
         "emails/verification_otp.html",
         {
@@ -70,7 +60,6 @@ def send_verification_otp_email(email, user_name, purpose="registration"):
     )
     plain_message = strip_tags(html_message)
 
-    # Send email
     send_mail(
         subject=subject,
         message=plain_message,
@@ -79,19 +68,25 @@ def send_verification_otp_email(email, user_name, purpose="registration"):
         html_message=html_message,
         fail_silently=False,
     )
-
     return True
 
 
-def send_staff_invitation_email(email, user_name):
-    """
-    Send a staff invitation email with a password setup link.
+def send_verification_otp_email(email, user_name, purpose="registration"):
+    """Queue OTP verification email delivery in the background."""
+    from utils.tasks import send_verification_otp_email_task
 
-    Args:
-        email: Staff member's email address
-        user_name: Staff member's display name
-    """
-    otp_code = create_email_otp(email=email, purpose="password_reset")
+    otp_code = create_email_otp(email=email, purpose=purpose)
+    transaction.on_commit(
+        lambda: send_verification_otp_email_task.delay(
+            email, user_name, purpose, otp_code
+        )
+    )
+    return True
+
+
+def _send_staff_invitation_email(email, user_name, otp_code=None):
+    """Send a staff invitation email immediately."""
+    otp_code = otp_code or create_email_otp(email=email, purpose="password_reset")
     query = urlencode({"email": email, "otp": otp_code})
     setup_url = f"{settings.ADMIN_URL.rstrip('/')}/set-password?{query}"
 
@@ -114,25 +109,26 @@ def send_staff_invitation_email(email, user_name):
         html_message=html_message,
         fail_silently=False,
     )
-
     return True
 
 
-def send_order_confirmation_email(order):
-    """
-    Send order confirmation email.
+def send_staff_invitation_email(email, user_name):
+    """Queue a staff invitation email for background delivery."""
+    from utils.tasks import send_staff_invitation_email_task
 
-    Args:
-        order: Order instance
+    otp_code = create_email_otp(email=email, purpose="password_reset")
+    transaction.on_commit(
+        lambda: send_staff_invitation_email_task.delay(email, user_name, otp_code)
+    )
+    return True
 
-    Returns:
-        bool: True if email sent successfully
-    """
+
+def _send_order_confirmation_email(order):
+    """Send order confirmation email immediately."""
     customer_email = order.customer_email
     if not customer_email:
         return False
 
-    # Prepare order items
     items = [
         {
             "product_name": item.product_name,
@@ -143,7 +139,6 @@ def send_order_confirmation_email(order):
         for item in order.items.all()
     ]
 
-    # Get shipping address
     shipping_address = getattr(order, "shipping_address", None)
     shipping_data = None
     if shipping_address:
@@ -157,7 +152,6 @@ def send_order_confirmation_email(order):
             "country": getattr(shipping_address, "country", "Bangladesh"),
         }
 
-    # Render email template
     html_message = render_to_string(
         "emails/order_confirmation.html",
         {
@@ -176,29 +170,27 @@ def send_order_confirmation_email(order):
     )
     plain_message = strip_tags(html_message)
 
-    # Send email
     send_mail(
         subject=f"Order Confirmation - {order.order_number}",
         message=plain_message,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[customer_email],
         html_message=html_message,
-        fail_silently=True,  # Don't fail order creation if email fails
+        fail_silently=True,
     )
+    return True
 
+
+def send_order_confirmation_email(order):
+    """Queue order confirmation email delivery in the background."""
+    from utils.tasks import send_order_confirmation_email_task
+
+    transaction.on_commit(lambda: send_order_confirmation_email_task.delay(order.id))
     return True
 
 
 def send_guest_order_tracking_otp(email):
-    """
-    Send OTP for guest order tracking.
-
-    Args:
-        email: Guest's email address
-
-    Returns:
-        bool: True if email sent successfully
-    """
+    """Queue OTP delivery for guest order tracking."""
     return send_verification_otp_email(
         email=email,
         user_name="Customer",
@@ -206,14 +198,8 @@ def send_guest_order_tracking_otp(email):
     )
 
 
-def send_welcome_email(email, user_name):
-    """
-    Send welcome email after successful email verification.
-
-    Args:
-        email: User's email address
-        user_name: User's display name
-    """
+def _send_welcome_email(email, user_name):
+    """Send welcome email immediately."""
     html_message = render_to_string(
         "emails/welcome.html",
         {"user_name": user_name},
@@ -228,20 +214,22 @@ def send_welcome_email(email, user_name):
         html_message=html_message,
         fail_silently=True,
     )
+    return True
 
 
-def send_order_status_update_email(order, new_status, note=""):
-    """
-    Send order status update email to customer.
+def send_welcome_email(email, user_name):
+    """Queue welcome email delivery in the background."""
+    from utils.tasks import send_welcome_email_task
 
-    Args:
-        order: Order instance
-        new_status: New status string
-        note: Optional note about the status change
-    """
+    transaction.on_commit(lambda: send_welcome_email_task.delay(email, user_name))
+    return True
+
+
+def _send_order_status_update_email(order, new_status, note=""):
+    """Send order status update email immediately."""
     customer_email = order.customer_email
     if not customer_email:
-        return
+        return False
 
     status_display_map = {
         "pending": "Pending",
@@ -253,36 +241,42 @@ def send_order_status_update_email(order, new_status, note=""):
         "refunded": "Refunded",
     }
 
+    status_display = status_display_map.get(new_status, new_status.title())
     html_message = render_to_string(
         "emails/order_status_update.html",
         {
             "customer_name": order.customer_name,
             "order_number": order.order_number,
             "new_status": new_status,
-            "new_status_display": status_display_map.get(new_status, new_status.title()),
+            "new_status_display": status_display,
             "note": note,
         },
     )
     plain_message = strip_tags(html_message)
 
     send_mail(
-        subject=f"Order Update: {order.order_number} - {status_display_map.get(new_status, new_status.title())}",
+        subject=f"Order Update: {order.order_number} - {status_display}",
         message=plain_message,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[customer_email],
         html_message=html_message,
         fail_silently=True,
     )
+    return True
 
 
-def send_password_reset_success_email(email, user_name):
-    """
-    Send confirmation email after successful password reset.
+def send_order_status_update_email(order, new_status, note=""):
+    """Queue order status update email delivery in the background."""
+    from utils.tasks import send_order_status_update_email_task
 
-    Args:
-        email: User's email address
-        user_name: User's display name
-    """
+    transaction.on_commit(
+        lambda: send_order_status_update_email_task.delay(order.id, new_status, note)
+    )
+    return True
+
+
+def _send_password_reset_success_email(email, user_name):
+    """Send password reset success email immediately."""
     html_message = render_to_string(
         "emails/password_reset_success.html",
         {"user_name": user_name},
@@ -297,3 +291,14 @@ def send_password_reset_success_email(email, user_name):
         html_message=html_message,
         fail_silently=True,
     )
+    return True
+
+
+def send_password_reset_success_email(email, user_name):
+    """Queue password reset success email delivery in the background."""
+    from utils.tasks import send_password_reset_success_email_task
+
+    transaction.on_commit(
+        lambda: send_password_reset_success_email_task.delay(email, user_name)
+    )
+    return True
