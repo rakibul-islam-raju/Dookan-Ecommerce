@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	Sheet,
 	SheetContent,
@@ -21,26 +23,32 @@ interface FilterDrawerProps {
 
 export function FilterDrawer({
 	trigger,
-	title = "Filters",
-	description = "Apply filters to refine your search",
+	title,
+	description,
 	children,
 	open,
 	onOpenChange,
 }: FilterDrawerProps) {
+	const t = useT();
+	const resolvedTitle = title ?? t("filterDrawer.title", "Filters");
+	const resolvedDescription =
+		description ??
+		t("filterDrawer.description", "Apply filters to refine your search");
+
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetTrigger asChild>
 				{trigger || (
 					<Button variant="outline" size="sm">
 						<Filter className="h-4 w-4 mr-2" />
-						Filters
+						<T id="filterDrawer.button" defaultMessage="Filters" />
 					</Button>
 				)}
 			</SheetTrigger>
 			<SheetContent className="w-full sm:max-w-md overflow-y-auto">
 				<SheetHeader>
-					<SheetTitle>{title}</SheetTitle>
-					<SheetDescription>{description}</SheetDescription>
+					<SheetTitle>{resolvedTitle}</SheetTitle>
+					<SheetDescription>{resolvedDescription}</SheetDescription>
 				</SheetHeader>
 
 				<div className="p-4 space-y-4">{children}</div>

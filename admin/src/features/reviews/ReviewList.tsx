@@ -3,6 +3,9 @@ import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -39,6 +42,8 @@ const initialParams: ReviewFilter = {
 };
 
 export function ReviewList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { params, handleChangeParams, resetParams } = useFilterParams({
 		initialParams,
 	});
@@ -65,9 +70,9 @@ export function ReviewList() {
 				id: review.id,
 				is_approved: true,
 			});
-			toast.success("Review approved");
+			toast.success(t("reviews.list.toast.approved", "Review approved"));
 		} catch {
-			toast.error("Failed to approve review");
+			toast.error(t("reviews.list.toast.approveFailed", "Failed to approve review"));
 		}
 	};
 
@@ -77,25 +82,26 @@ export function ReviewList() {
 				id: review.id,
 				is_approved: false,
 			});
-			toast.success("Review rejected");
+			toast.success(t("reviews.list.toast.rejected", "Review rejected"));
 		} catch {
-			toast.error("Failed to reject review");
+			toast.error(t("reviews.list.toast.rejectFailed", "Failed to reject review"));
 		}
 	};
 
 	const handleDelete = async (review: ReviewListItem) => {
-		if (!confirm("Are you sure you want to delete this review?")) return;
+		if (!confirm(t("reviews.list.deleteConfirm", "Are you sure you want to delete this review?")))
+			return;
 		try {
 			await deleteMutation.mutateAsync(review.id);
-			toast.success("Review deleted");
+			toast.success(t("reviews.list.toast.deleted", "Review deleted"));
 		} catch {
-			toast.error("Failed to delete review");
+			toast.error(t("reviews.list.toast.deleteFailed", "Failed to delete review"));
 		}
 	};
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
-		return new Intl.DateTimeFormat("en-US", {
+		return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-BD", {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
@@ -120,7 +126,7 @@ export function ReviewList() {
 	const columns: Column<ReviewListItem>[] = [
 		{
 			key: "product_name",
-			header: "Product",
+			header: t("reviews.list.table.product", "Product"),
 			render: (review) => (
 				<div className="font-medium max-w-[200px] truncate">
 					{review.product_name}
@@ -129,7 +135,7 @@ export function ReviewList() {
 		},
 		{
 			key: "user",
-			header: "Customer",
+			header: t("reviews.list.table.customer", "Customer"),
 			render: (review) => (
 				<span className="text-muted-foreground">
 					{review.user.first_name} {review.user.last_name}
@@ -138,12 +144,12 @@ export function ReviewList() {
 		},
 		{
 			key: "rating",
-			header: "Rating",
+			header: t("reviews.list.table.rating", "Rating"),
 			render: (review) => renderStars(review.rating),
 		},
 		{
 			key: "comment",
-			header: "Review",
+			header: t("reviews.list.table.review", "Review"),
 			render: (review) => (
 				<div className="max-w-[300px]">
 					{review.title && (
@@ -152,25 +158,27 @@ export function ReviewList() {
 						</div>
 					)}
 					<div className="text-muted-foreground text-sm truncate">
-						{review.comment || "-"}
+						{review.comment || t("reviews.list.table.empty", "-")}
 					</div>
 				</div>
 			),
 		},
 		{
 			key: "is_approved",
-			header: "Status",
+			header: t("reviews.list.table.status", "Status"),
 			render: (review) => (
 				<Badge
 					variant={review.is_approved ? "success" : "warning"}
 				>
-					{review.is_approved ? "Approved" : "Pending"}
+					{review.is_approved
+						? t("reviews.list.status.approved", "Approved")
+						: t("reviews.list.status.pending", "Pending")}
 				</Badge>
 			),
 		},
 		{
 			key: "created_at",
-			header: "Date",
+			header: t("reviews.list.table.date", "Date"),
 			render: (review) => (
 				<span className="text-muted-foreground">
 					{formatDate(review.created_at)}
@@ -192,7 +200,9 @@ export function ReviewList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="reviews.list.actions.label" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						{!review.is_approved ? (
 							<DropdownMenuItem
@@ -200,7 +210,7 @@ export function ReviewList() {
 								disabled={statusMutation.isPending}
 							>
 								<CheckCircle className="h-4 w-4 mr-2" />
-								Approve
+								<T id="reviews.list.actions.approve" defaultMessage="Approve" />
 							</DropdownMenuItem>
 						) : (
 							<DropdownMenuItem
@@ -208,7 +218,7 @@ export function ReviewList() {
 								disabled={statusMutation.isPending}
 							>
 								<XCircle className="h-4 w-4 mr-2" />
-								Reject
+								<T id="reviews.list.actions.reject" defaultMessage="Reject" />
 							</DropdownMenuItem>
 						)}
 						<DropdownMenuItem
@@ -217,7 +227,7 @@ export function ReviewList() {
 							disabled={deleteMutation.isPending}
 						>
 							<Trash2 className="h-4 w-4 mr-2" />
-							Delete
+							<T id="reviews.list.actions.delete" defaultMessage="Delete" />
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -251,10 +261,13 @@ export function ReviewList() {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
-						Reviews
+						<T id="reviews.list.title" defaultMessage="Reviews" />
 					</h1>
 					<p className="text-muted-foreground">
-						Moderate customer product reviews
+						<T
+							id="reviews.list.description"
+							defaultMessage="Moderate customer product reviews"
+						/>
 					</p>
 				</div>
 			</div>
@@ -264,12 +277,20 @@ export function ReviewList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search by product, customer, or review content..."
+					placeholder={t(
+						"reviews.list.searchPlaceholder",
+						"Search by product, customer, or review content...",
+					)}
 					className="flex-1"
 				/>
 				<FilterDrawer
 					open={isFilterOpen}
 					onOpenChange={setIsFilterOpen}
+					title={t("reviews.filter.title", "Filters")}
+					description={t(
+						"reviews.filter.description",
+						"Apply filters to refine the review list",
+					)}
 				>
 					<ReviewFilterForm
 						initialFilter={params}
@@ -284,7 +305,7 @@ export function ReviewList() {
 				data={reviews}
 				columns={columns}
 				isLoading={isFetching}
-				emptyMessage="No reviews found"
+				emptyMessage={t("reviews.list.empty", "No reviews found")}
 				pagination={{
 					currentPage,
 					totalPages,

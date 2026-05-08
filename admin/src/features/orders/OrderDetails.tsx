@@ -32,6 +32,9 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	getOrderById,
 	useCancelOrder,
@@ -114,16 +117,6 @@ const getPaymentStatusBadgeVariant = (
 	}
 };
 
-const formatDate = (dateString: string) => {
-	return new Date(dateString).toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	});
-};
-
 const formatPaymentMethod = (method: string) => {
 	switch (method) {
 		case "cod":
@@ -140,6 +133,8 @@ const formatPaymentMethod = (method: string) => {
 };
 
 export const OrderDetails = () => {
+	const t = useT();
+	const { locale } = useLocale();
 	const { id } = useParams();
 	const navigate = useNavigate();
 
@@ -167,6 +162,45 @@ export const OrderDetails = () => {
 		useUpdatePaymentStatus();
 	const { mutate: cancelOrder, isPending: isCancellingOrder } =
 		useCancelOrder();
+
+	const getStatusLabel = (status: IOrderStatus) =>
+		t(`orders.common.status.${status}`, status.charAt(0).toUpperCase() + status.slice(1));
+
+	const getPaymentStatusLabel = (status: IOrderPaymentStatus) =>
+		t(
+			`orders.common.payment.${status}`,
+			status.charAt(0).toUpperCase() + status.slice(1),
+		);
+
+	const formatCurrency = (value: string | number) =>
+		`৳${Number(value).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		})}`;
+
+	const formatDateLocalized = (dateString: string) =>
+		new Date(dateString).toLocaleDateString(locale === "bn" ? "bn-BD" : "en-BD", {
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+
+	const getPaymentMethodLabel = (method: string) => {
+		switch (method) {
+			case "cod":
+				return t("orders.common.paymentMethod.cod", "Cash on Delivery");
+			case "online":
+				return t("orders.common.paymentMethod.online", "Online Payment");
+			case "card":
+				return t("orders.common.paymentMethod.card", "Card Payment");
+			case "upi":
+				return t("orders.common.paymentMethod.upi", "UPI");
+			default:
+				return formatPaymentMethod(method);
+		}
+	};
 
 	const handleBack = () => {
 		navigate("/orders");
@@ -204,13 +238,20 @@ export const OrderDetails = () => {
 			},
 			{
 				onSuccess: () => {
-					toast.success("Order status updated successfully");
+					toast.success(
+						t(
+							"orders.details.toast.statusUpdated",
+							"Order status updated successfully",
+						),
+					);
 					setIsStatusDialogOpen(false);
 					setSelectedStatus("");
 					setStatusNote("");
 				},
 				onError: (error) => {
-					toast.error("Failed to update order status");
+					toast.error(
+						t("orders.details.toast.statusFailed", "Failed to update order status"),
+					);
 					console.error(error);
 				},
 			}
@@ -228,13 +269,23 @@ export const OrderDetails = () => {
 			},
 			{
 				onSuccess: () => {
-					toast.success("Payment status updated successfully");
+					toast.success(
+						t(
+							"orders.details.toast.paymentUpdated",
+							"Payment status updated successfully",
+						),
+					);
 					setIsPaymentStatusDialogOpen(false);
 					setSelectedPaymentStatus("");
 					setStatusNote("");
 				},
 				onError: (error) => {
-					toast.error("Failed to update payment status");
+					toast.error(
+						t(
+							"orders.details.toast.paymentFailed",
+							"Failed to update payment status",
+						),
+					);
 					console.error(error);
 				},
 			}
@@ -251,12 +302,16 @@ export const OrderDetails = () => {
 			},
 			{
 				onSuccess: () => {
-					toast.success("Order cancelled successfully");
+					toast.success(
+						t("orders.details.toast.cancelled", "Order cancelled successfully"),
+					);
 					setIsCancelDialogOpen(false);
 					setCancelNote("");
 				},
 				onError: (error) => {
-					toast.error("Failed to cancel order");
+					toast.error(
+						t("orders.details.toast.cancelFailed", "Failed to cancel order"),
+					);
 					console.error(error);
 				},
 			}
@@ -275,10 +330,12 @@ export const OrderDetails = () => {
 		return (
 			<div className="flex flex-col justify-center items-center h-full min-h-[400px] gap-4">
 				<Package className="h-12 w-12 text-muted-foreground" />
-				<p className="text-muted-foreground">Order not found</p>
+				<p className="text-muted-foreground">
+					<T id="orders.details.notFound" defaultMessage="Order not found" />
+				</p>
 				<Button onClick={handleBack} variant="outline" size="sm">
 					<ArrowLeft className="h-4 w-4 mr-2" />
-					Back to Orders
+					<T id="orders.details.back" defaultMessage="Back to Orders" />
 				</Button>
 			</div>
 		);
@@ -299,19 +356,21 @@ export const OrderDetails = () => {
 					<div>
 						<h1 className="text-2xl font-bold">Order #{order.order_number}</h1>
 						<p className="text-sm text-muted-foreground">
-							Placed on {formatDate(order.created_at)}
+							{t("orders.details.placedOn", "Placed on {date}", {
+								date: formatDateLocalized(order.created_at),
+							})}
 						</p>
 					</div>
 				</div>
 
 				<div className="flex items-center gap-2">
 					<Badge variant={getStatusBadgeVariant(order.status)}>
-						{order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+						{getStatusLabel(order.status)}
 					</Badge>
 					<Badge variant={getPaymentStatusBadgeVariant(order.payment_status)}>
-						Payment:{" "}
-						{order.payment_status.charAt(0).toUpperCase() +
-							order.payment_status.slice(1)}
+						{t("orders.details.paymentBadge", "Payment: {status}", {
+							status: getPaymentStatusLabel(order.payment_status),
+						})}
 					</Badge>
 
 					<DropdownMenu>
@@ -322,10 +381,16 @@ export const OrderDetails = () => {
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem onClick={handleOpenStatusDialog}>
-								Change Order Status
+								<T
+									id="orders.details.actions.changeOrderStatus"
+									defaultMessage="Change Order Status"
+								/>
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={handleOpenPaymentStatusDialog}>
-								Change Payment Status
+								<T
+									id="orders.details.actions.changePaymentStatus"
+									defaultMessage="Change Payment Status"
+								/>
 							</DropdownMenuItem>
 							{canCancel && (
 								<>
@@ -335,7 +400,10 @@ export const OrderDetails = () => {
 										onClick={handleOpenCancelDialog}
 									>
 										<XCircle className="h-4 w-4 mr-2" />
-										Cancel Order
+										<T
+											id="orders.details.actions.cancelOrder"
+											defaultMessage="Cancel Order"
+										/>
 									</DropdownMenuItem>
 								</>
 							)}
@@ -351,16 +419,26 @@ export const OrderDetails = () => {
 					{/* Order Items */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Order Items</CardTitle>
+							<CardTitle>
+								<T id="orders.details.items.title" defaultMessage="Order Items" />
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>Product</TableHead>
-										<TableHead className="text-center">Quantity</TableHead>
-										<TableHead className="text-right">Unit Price</TableHead>
-										<TableHead className="text-right">Total</TableHead>
+										<TableHead>
+											<T id="orders.details.items.product" defaultMessage="Product" />
+										</TableHead>
+										<TableHead className="text-center">
+											<T id="orders.details.items.quantity" defaultMessage="Quantity" />
+										</TableHead>
+										<TableHead className="text-right">
+											<T id="orders.details.items.unitPrice" defaultMessage="Unit Price" />
+										</TableHead>
+										<TableHead className="text-right">
+											<T id="orders.details.items.total" defaultMessage="Total" />
+										</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -382,7 +460,9 @@ export const OrderDetails = () => {
 													<div>
 														<p className="font-medium">{item.product_name}</p>
 														<p className="text-sm text-muted-foreground">
-															SKU: {item.product_sku}
+															{t("orders.details.items.sku", "SKU: {sku}", {
+																sku: item.product_sku,
+															})}
 														</p>
 													</div>
 												</div>
@@ -391,10 +471,10 @@ export const OrderDetails = () => {
 												{item.quantity}
 											</TableCell>
 											<TableCell className="text-right">
-												BDT {Number(item.unit_price).toFixed(2)}
+												{formatCurrency(item.unit_price)}
 											</TableCell>
 											<TableCell className="text-right font-medium">
-												BDT {Number(item.total_price).toFixed(2)}
+												{formatCurrency(item.total_price)}
 											</TableCell>
 										</TableRow>
 									))}
@@ -408,7 +488,10 @@ export const OrderDetails = () => {
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<MapPin className="h-5 w-5" />
-								Shipping Address
+								<T
+									id="orders.details.shipping.title"
+									defaultMessage="Shipping Address"
+								/>
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
@@ -442,14 +525,17 @@ export const OrderDetails = () => {
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
 									<FileText className="h-5 w-5" />
-									Notes
+									<T id="orders.details.notes.title" defaultMessage="Notes" />
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								{order.customer_note && (
 									<div>
 										<p className="text-sm text-muted-foreground mb-1.5">
-											Customer Note
+											<T
+												id="orders.details.notes.customer"
+												defaultMessage="Customer Note"
+											/>
 										</p>
 										<div className="px-3 py-2 bg-muted/50 rounded-md">
 											<p className="text-sm">{order.customer_note}</p>
@@ -459,7 +545,10 @@ export const OrderDetails = () => {
 								{order.admin_note && (
 									<div>
 										<p className="text-sm text-muted-foreground mb-1.5">
-											Admin Note
+											<T
+												id="orders.details.notes.admin"
+												defaultMessage="Admin Note"
+											/>
 										</p>
 										<div className="px-3 py-2 bg-muted/50 rounded-md">
 											<p className="text-sm">{order.admin_note}</p>
@@ -476,7 +565,10 @@ export const OrderDetails = () => {
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
 									<Clock className="h-5 w-5" />
-									Status History
+									<T
+										id="orders.details.history.title"
+										defaultMessage="Status History"
+									/>
 								</CardTitle>
 							</CardHeader>
 							<CardContent>
@@ -490,10 +582,10 @@ export const OrderDetails = () => {
 											<div className="flex-1">
 												<div className="flex items-center justify-between">
 													<p className="font-medium capitalize">
-														{history.status}
+														{getStatusLabel(history.status as IOrderStatus)}
 													</p>
 													<p className="text-sm text-muted-foreground">
-														{formatDate(history.created_at)}
+														{formatDateLocalized(history.created_at)}
 													</p>
 												</div>
 												{history.note && (
@@ -503,7 +595,9 @@ export const OrderDetails = () => {
 												)}
 												{history.created_by && (
 													<p className="text-xs text-muted-foreground mt-1">
-														By: {history.created_by.username}
+														{t("orders.details.history.by", "By: {name}", {
+															name: history.created_by.username,
+														})}
 													</p>
 												)}
 											</div>
@@ -520,7 +614,12 @@ export const OrderDetails = () => {
 					{/* Customer Information */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Customer Information</CardTitle>
+							<CardTitle>
+								<T
+									id="orders.details.customer.title"
+									defaultMessage="Customer Information"
+								/>
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="flex items-center gap-2">
@@ -545,28 +644,38 @@ export const OrderDetails = () => {
 					{/* Payment Information */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Payment Details</CardTitle>
+							<CardTitle>
+								<T
+									id="orders.details.payment.title"
+									defaultMessage="Payment Details"
+								/>
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Payment Method
+									<T
+										id="orders.details.payment.method"
+										defaultMessage="Payment Method"
+									/>
 								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
 									<p className="font-medium text-sm">
-										{formatPaymentMethod(order.payment_method)}
+										{getPaymentMethodLabel(order.payment_method)}
 									</p>
 								</div>
 							</div>
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Payment Status
+									<T
+										id="orders.details.payment.status"
+										defaultMessage="Payment Status"
+									/>
 								</p>
 								<Badge
 									variant={getPaymentStatusBadgeVariant(order.payment_status)}
 								>
-									{order.payment_status.charAt(0).toUpperCase() +
-										order.payment_status.slice(1)}
+									{getPaymentStatusLabel(order.payment_status)}
 								</Badge>
 							</div>
 						</CardContent>
@@ -575,36 +684,54 @@ export const OrderDetails = () => {
 					{/* Order Summary */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Order Summary</CardTitle>
+							<CardTitle>
+								<T id="orders.details.summary.title" defaultMessage="Order Summary" />
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
 							<div className="flex justify-between text-sm">
-								<span className="text-muted-foreground">Subtotal</span>
-								<span>BDT {Number(order.subtotal).toFixed(2)}</span>
+								<span className="text-muted-foreground">
+									<T id="orders.details.summary.subtotal" defaultMessage="Subtotal" />
+								</span>
+								<span>{formatCurrency(order.subtotal)}</span>
 							</div>
 							{Number(order.discount_amount) > 0 && (
 								<div className="flex justify-between text-sm">
-									<span className="text-muted-foreground">Discount</span>
+									<span className="text-muted-foreground">
+										<T
+											id="orders.details.summary.discount"
+											defaultMessage="Discount"
+										/>
+									</span>
 									<span className="text-green-600">
-										-BDT {Number(order.discount_amount).toFixed(2)}
+										-{formatCurrency(order.discount_amount)}
 									</span>
 								</div>
 							)}
 							{Number(order.tax_amount) > 0 && (
 								<div className="flex justify-between text-sm">
-									<span className="text-muted-foreground">Tax</span>
-									<span>BDT {Number(order.tax_amount).toFixed(2)}</span>
+									<span className="text-muted-foreground">
+										<T id="orders.details.summary.tax" defaultMessage="Tax" />
+									</span>
+									<span>{formatCurrency(order.tax_amount)}</span>
 								</div>
 							)}
 							<div className="flex justify-between text-sm">
-								<span className="text-muted-foreground">Shipping</span>
-								<span>BDT {Number(order.shipping_amount).toFixed(2)}</span>
+								<span className="text-muted-foreground">
+									<T
+										id="orders.details.summary.shipping"
+										defaultMessage="Shipping"
+									/>
+								</span>
+								<span>{formatCurrency(order.shipping_amount)}</span>
 							</div>
 							<div className="border-t pt-3 mt-3">
 								<div className="flex justify-between font-medium">
-									<span>Total</span>
+									<span>
+										<T id="orders.details.summary.total" defaultMessage="Total" />
+									</span>
 									<span className="text-lg">
-										BDT {Number(order.total_amount).toFixed(2)}
+										{formatCurrency(order.total_amount)}
 									</span>
 								</div>
 							</div>
@@ -614,48 +741,57 @@ export const OrderDetails = () => {
 					{/* Order Timeline */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Timeline</CardTitle>
+							<CardTitle>
+								<T id="orders.details.timeline.title" defaultMessage="Timeline" />
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
 							<div>
-								<p className="text-sm text-muted-foreground mb-1">Created</p>
+								<p className="text-sm text-muted-foreground mb-1">
+									<T id="orders.details.timeline.created" defaultMessage="Created" />
+								</p>
 								<p className="text-sm font-medium">
-									{formatDate(order.created_at)}
+									{formatDateLocalized(order.created_at)}
 								</p>
 							</div>
 							<div>
 								<p className="text-sm text-muted-foreground mb-1">
-									Last Updated
+									<T
+										id="orders.details.timeline.updated"
+										defaultMessage="Last Updated"
+									/>
 								</p>
 								<p className="text-sm font-medium">
-									{formatDate(order.updated_at)}
+									{formatDateLocalized(order.updated_at)}
 								</p>
 							</div>
 							{order.confirmed_at && (
 								<div>
 									<p className="text-sm text-muted-foreground mb-1">
-										Confirmed
+										{t("orders.common.status.confirmed", "Confirmed")}
 									</p>
 									<p className="text-sm font-medium">
-										{formatDate(order.confirmed_at)}
+										{formatDateLocalized(order.confirmed_at)}
 									</p>
 								</div>
 							)}
 							{order.shipped_at && (
 								<div>
-									<p className="text-sm text-muted-foreground mb-1">Shipped</p>
+									<p className="text-sm text-muted-foreground mb-1">
+										{t("orders.common.status.shipped", "Shipped")}
+									</p>
 									<p className="text-sm font-medium">
-										{formatDate(order.shipped_at)}
+										{formatDateLocalized(order.shipped_at)}
 									</p>
 								</div>
 							)}
 							{order.delivered_at && (
 								<div>
 									<p className="text-sm text-muted-foreground mb-1">
-										Delivered
+										{t("orders.common.status.delivered", "Delivered")}
 									</p>
 									<p className="text-sm font-medium">
-										{formatDate(order.delivered_at)}
+										{formatDateLocalized(order.delivered_at)}
 									</p>
 								</div>
 							)}
@@ -668,14 +804,28 @@ export const OrderDetails = () => {
 			<Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Change Order Status</DialogTitle>
+						<DialogTitle>
+							<T
+								id="orders.details.dialog.status.title"
+								defaultMessage="Change Order Status"
+							/>
+						</DialogTitle>
 						<DialogDescription>
-							Update the status of order #{order.order_number}
+							{t(
+								"orders.details.dialog.status.description",
+								"Update the status of order #{orderNumber}",
+								{ orderNumber: order.order_number },
+							)}
 						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4 pt-4">
 						<div className="space-y-2">
-							<Label htmlFor="status">New Status</Label>
+							<Label htmlFor="status">
+								<T
+									id="orders.details.dialog.status.newStatus"
+									defaultMessage="New Status"
+								/>
+							</Label>
 							<Select
 								value={selectedStatus}
 								onValueChange={(value) =>
@@ -683,22 +833,35 @@ export const OrderDetails = () => {
 								}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select status" />
+									<SelectValue
+										placeholder={t(
+											"orders.details.dialog.status.placeholder",
+											"Select status",
+										)}
+									/>
 								</SelectTrigger>
 								<SelectContent>
 									{ORDER_STATUSES.map((status) => (
 										<SelectItem key={status.value} value={status.value}>
-											{status.label}
+											{getStatusLabel(status.value)}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="note">Note (Optional)</Label>
+							<Label htmlFor="note">
+								<T
+									id="orders.details.dialog.status.note"
+									defaultMessage="Note (Optional)"
+								/>
+							</Label>
 							<Textarea
 								id="note"
-								placeholder="Add a note about this status change..."
+								placeholder={t(
+									"orders.details.dialog.status.notePlaceholder",
+									"Add a note about this status change...",
+								)}
 								value={statusNote}
 								onChange={(e) => setStatusNote(e.target.value)}
 								rows={3}
@@ -709,7 +872,7 @@ export const OrderDetails = () => {
 								variant="outline"
 								onClick={() => setIsStatusDialogOpen(false)}
 							>
-								Cancel
+								<T id="common.cancel" defaultMessage="Cancel" />
 							</Button>
 							<Button
 								onClick={handleUpdateStatus}
@@ -718,7 +881,10 @@ export const OrderDetails = () => {
 								{isUpdatingStatus && (
 									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
 								)}
-								Update Status
+								<T
+									id="orders.details.dialog.status.submit"
+									defaultMessage="Update Status"
+								/>
 							</Button>
 						</div>
 					</div>
@@ -732,14 +898,28 @@ export const OrderDetails = () => {
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Change Payment Status</DialogTitle>
+						<DialogTitle>
+							<T
+								id="orders.details.dialog.payment.title"
+								defaultMessage="Change Payment Status"
+							/>
+						</DialogTitle>
 						<DialogDescription>
-							Update the payment status of order #{order.order_number}
+							{t(
+								"orders.details.dialog.payment.description",
+								"Update the payment status of order #{orderNumber}",
+								{ orderNumber: order.order_number },
+							)}
 						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4 pt-4">
 						<div className="space-y-2">
-							<Label htmlFor="payment-status">New Payment Status</Label>
+							<Label htmlFor="payment-status">
+								<T
+									id="orders.details.dialog.payment.newStatus"
+									defaultMessage="New Payment Status"
+								/>
+							</Label>
 							<Select
 								value={selectedPaymentStatus}
 								onValueChange={(value) =>
@@ -747,22 +927,35 @@ export const OrderDetails = () => {
 								}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select payment status" />
+									<SelectValue
+										placeholder={t(
+											"orders.details.dialog.payment.placeholder",
+											"Select payment status",
+										)}
+									/>
 								</SelectTrigger>
 								<SelectContent>
 									{PAYMENT_STATUSES.map((status) => (
 										<SelectItem key={status.value} value={status.value}>
-											{status.label}
+											{getPaymentStatusLabel(status.value)}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="payment-note">Note (Optional)</Label>
+							<Label htmlFor="payment-note">
+								<T
+									id="orders.details.dialog.payment.note"
+									defaultMessage="Note (Optional)"
+								/>
+							</Label>
 							<Textarea
 								id="payment-note"
-								placeholder="Add a note about this payment status change..."
+								placeholder={t(
+									"orders.details.dialog.payment.notePlaceholder",
+									"Add a note about this payment status change...",
+								)}
 								value={statusNote}
 								onChange={(e) => setStatusNote(e.target.value)}
 								rows={3}
@@ -773,7 +966,7 @@ export const OrderDetails = () => {
 								variant="outline"
 								onClick={() => setIsPaymentStatusDialogOpen(false)}
 							>
-								Cancel
+								<T id="common.cancel" defaultMessage="Cancel" />
 							</Button>
 							<Button
 								onClick={handleUpdatePaymentStatus}
@@ -782,7 +975,10 @@ export const OrderDetails = () => {
 								{isUpdatingPaymentStatus && (
 									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
 								)}
-								Update Payment Status
+								<T
+									id="orders.details.dialog.payment.submit"
+									defaultMessage="Update Payment Status"
+								/>
 							</Button>
 						</div>
 					</div>
@@ -793,20 +989,34 @@ export const OrderDetails = () => {
 			<Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Cancel Order</DialogTitle>
+						<DialogTitle>
+							<T
+								id="orders.details.dialog.cancel.title"
+								defaultMessage="Cancel Order"
+							/>
+						</DialogTitle>
 						<DialogDescription>
-							Are you sure you want to cancel order #{order.order_number}? This
-							action cannot be undone.
+							{t(
+								"orders.details.dialog.cancel.description",
+								"Are you sure you want to cancel order #{orderNumber}? This action cannot be undone.",
+								{ orderNumber: order.order_number },
+							)}
 						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4 pt-4">
 						<div className="space-y-2">
 							<Label htmlFor="cancel-note">
-								Cancellation Reason (Optional)
+								<T
+									id="orders.details.dialog.cancel.reason"
+									defaultMessage="Cancellation Reason (Optional)"
+								/>
 							</Label>
 							<Textarea
 								id="cancel-note"
-								placeholder="Enter the reason for cancellation..."
+								placeholder={t(
+									"orders.details.dialog.cancel.reasonPlaceholder",
+									"Enter the reason for cancellation...",
+								)}
 								value={cancelNote}
 								onChange={(e) => setCancelNote(e.target.value)}
 								rows={3}
@@ -817,7 +1027,10 @@ export const OrderDetails = () => {
 								variant="outline"
 								onClick={() => setIsCancelDialogOpen(false)}
 							>
-								Keep Order
+								<T
+									id="orders.details.dialog.cancel.keep"
+									defaultMessage="Keep Order"
+								/>
 							</Button>
 							<Button
 								variant="destructive"
@@ -827,7 +1040,10 @@ export const OrderDetails = () => {
 								{isCancellingOrder && (
 									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
 								)}
-								Cancel Order
+								<T
+									id="orders.details.dialog.cancel.submit"
+									defaultMessage="Cancel Order"
+								/>
 							</Button>
 						</div>
 					</div>

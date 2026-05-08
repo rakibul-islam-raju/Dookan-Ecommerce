@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	useDeleteImage,
 	useUploadImages,
@@ -35,6 +37,7 @@ type ImageToUpload = {
 };
 
 export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
+	const t = useT();
 	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>([]);
 	const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 	const [imageToDelete, setImageToDelete] = useState<string | null>(null);
@@ -79,7 +82,7 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 		);
 
 		if (imageFiles.length === 0) {
-			toast.error("Please drop only image files");
+			toast.error(t("products.images.dropOnlyImages", "Please drop only image files"));
 			return;
 		}
 
@@ -181,12 +184,14 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 
 	const handleUploadImages = async () => {
 		if (imagesToUpload.length === 0) {
-			toast.error("Please select at least one image");
+			toast.error(
+				t("products.images.selectAtLeastOne", "Please select at least one image"),
+			);
 			return;
 		}
 
 		if (!product?.id) {
-			toast.error("Product ID is required");
+			toast.error(t("products.images.productIdRequired", "Product ID is required"));
 			return;
 		}
 
@@ -198,13 +203,17 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 			{ productId: product.id, images: imageData },
 			{
 				onSuccess: () => {
-					toast.success("Images uploaded successfully");
+					toast.success(
+						t("products.images.uploadSuccess", "Images uploaded successfully"),
+					);
 					// Clear selected files and their previews
 					imagesToUpload.forEach((item) => URL.revokeObjectURL(item.preview));
 					setImagesToUpload([]);
 				},
 				onError: (error) => {
-					toast.error("Failed to upload images");
+					toast.error(
+						t("products.images.uploadFailed", "Failed to upload images"),
+					);
 					console.error(error);
 				},
 			},
@@ -224,11 +233,13 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 
 		deleteImage(imageToDelete, {
 			onSuccess: () => {
-				toast.success("Image deleted successfully");
+				toast.success(
+					t("products.images.deleteSuccess", "Image deleted successfully"),
+				);
 				setImageToDelete(null);
 			},
 			onError: (error) => {
-				toast.error("Failed to delete image");
+				toast.error(t("products.images.deleteFailed", "Failed to delete image"));
 				console.error(error);
 				setImageToDelete(null);
 			},
@@ -258,7 +269,9 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 	return (
 		<Card>
 			<CardHeader className="flex flex-row items-center justify-between">
-				<CardTitle>Product Media</CardTitle>
+				<CardTitle>
+					<T id="products.images.title" defaultMessage="Product Media" />
+				</CardTitle>
 				<Button
 					size="sm"
 					variant="outline"
@@ -266,7 +279,7 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 					disabled={isUploadingImages}
 				>
 					<ImagePlus className="h-4 w-4 mr-2" />
-					Add Images
+					<T id="products.images.add" defaultMessage="Add Images" />
 				</Button>
 			</CardHeader>
 			<CardContent className="space-y-4">
@@ -285,7 +298,11 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 					<div className="space-y-3">
 						<div className="flex items-center justify-between">
 							<p className="text-sm font-medium">
-								Selected Images ({imagesToUpload.length})
+								{t(
+									"products.images.selected",
+									"Selected Images ({count})",
+									{ count: imagesToUpload.length },
+								)}
 							</p>
 							<Button
 								size="sm"
@@ -295,12 +312,12 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 								{isUploadingImages ? (
 									<>
 										<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-										Uploading...
+										{t("products.images.uploading", "Uploading...")}
 									</>
 								) : (
 									<>
 										<Upload className="h-4 w-4 mr-2" />
-										Upload Images
+										{t("products.images.upload", "Upload Images")}
 									</>
 								)}
 							</Button>
@@ -334,7 +351,10 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 												className="absolute -top-1 -right-1 text-[10px] px-1.5 py-0"
 												variant="default"
 											>
-												Primary
+												<T
+													id="products.images.primary"
+													defaultMessage="Primary"
+												/>
 											</Badge>
 										)}
 									</div>
@@ -344,7 +364,10 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 										{/* Alt Text */}
 										<div className="space-y-1">
 											<Label htmlFor={`alt-${index}`} className="text-xs">
-												Alt Text
+												<T
+													id="products.images.altText"
+													defaultMessage="Alt Text"
+												/>
 											</Label>
 											<Input
 												id={`alt-${index}`}
@@ -352,7 +375,10 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 												onChange={(e) =>
 													handleUpdateAltText(index, e.target.value)
 												}
-												placeholder="Enter image description"
+												placeholder={t(
+													"products.images.altTextPlaceholder",
+													"Enter image description",
+												)}
 												className="text-sm"
 											/>
 										</div>
@@ -361,7 +387,7 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 										<div className="flex items-end gap-3">
 											<div className="space-y-1 w-24">
 												<Label htmlFor={`order-${index}`} className="text-xs">
-													Order
+													<T id="products.images.order" defaultMessage="Order" />
 												</Label>
 												<Input
 													id={`order-${index}`}
@@ -385,7 +411,10 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 													htmlFor={`primary-${index}`}
 													className="text-xs cursor-pointer"
 												>
-													Primary
+													<T
+														id="products.images.primary"
+														defaultMessage="Primary"
+													/>
 												</Label>
 											</div>
 										</div>
@@ -409,11 +438,18 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 				{/* Existing Images */}
 				<div className="space-y-3">
 					<div className="flex items-center justify-between">
-						<h3 className="text-sm font-medium">Uploaded Images</h3>
+						<h3 className="text-sm font-medium">
+							<T
+								id="products.images.uploaded"
+								defaultMessage="Uploaded Images"
+							/>
+						</h3>
 						{product?.images && product.images.length > 0 && (
 							<span className="text-xs text-muted-foreground">
 								{product.images.length}{" "}
-								{product.images.length === 1 ? "image" : "images"}
+								{product.images.length === 1
+									? t("products.images.image", "image")
+									: t("products.images.images", "images")}
 							</span>
 						)}
 					</div>
@@ -437,7 +473,10 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 											className="absolute top-2 left-2 text-[10px] px-2 py-0.5 shadow-md"
 											variant="default"
 										>
-											Primary
+											<T
+												id="products.images.primary"
+												defaultMessage="Primary"
+											/>
 										</Badge>
 									)}
 
@@ -455,7 +494,7 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 												className="h-8 text-xs"
 												onClick={() => handleViewImage(image)}
 											>
-												View
+												<T id="products.images.view" defaultMessage="View" />
 											</Button>
 											<Button
 												size="sm"
@@ -467,7 +506,7 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 												{isDeletingImage && imageToDelete === image.id ? (
 													<Loader2 className="h-3 w-3 animate-spin" />
 												) : (
-													"Delete"
+													t("products.images.delete", "Delete")
 												)}
 											</Button>
 										</div>
@@ -498,12 +537,20 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 								/>
 							</div>
 							<p className="text-sm font-medium text-foreground mb-1">
-								{isDraggingOver ? "Drop images here" : "No images yet"}
+								{isDraggingOver
+									? t("products.images.dropHere", "Drop images here")
+									: t("products.images.empty", "No images yet")}
 							</p>
 							<p className="text-xs text-muted-foreground mb-4">
 								{isDraggingOver
-									? "Release to upload multiple images"
-									: "Drag & drop images here, or click to browse"}
+									? t(
+											"products.images.releaseToUpload",
+											"Release to upload multiple images",
+										)
+									: t(
+											"products.images.dragHint",
+											"Drag & drop images here, or click to browse",
+										)}
 							</p>
 							<Button
 								size="sm"
@@ -511,7 +558,10 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 								onClick={handleClickUpload}
 							>
 								<ImagePlus className="h-4 w-4 mr-2" />
-								Upload Images
+								<T
+									id="products.images.upload"
+									defaultMessage="Upload Images"
+								/>
 							</Button>
 						</div>
 					)}
@@ -520,10 +570,17 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 				{/* Confirmation Dialog */}
 				<AppConfirmDialog
 					open={!!imageToDelete}
-					title="Delete Image"
-					description="Are you sure you want to delete this image? This action cannot be undone."
-					confirmButtonText={isDeletingImage ? "Deleting..." : "Delete"}
-					cancelButtonText="Cancel"
+					title={t("products.images.deleteTitle", "Delete Image")}
+					description={t(
+						"products.images.deleteDescription",
+						"Are you sure you want to delete this image? This action cannot be undone.",
+					)}
+					confirmButtonText={
+						isDeletingImage
+							? t("products.images.deleting", "Deleting...")
+							: t("products.images.delete", "Delete")
+					}
+					cancelButtonText={t("common.cancel", "Cancel")}
 					confirmButtonVariant="destructive"
 					onConfirm={handleConfirmDelete}
 					onCancel={handleCancelDelete}
@@ -533,7 +590,12 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 				<Dialog open={!!previewImage} onOpenChange={handleClosePreview}>
 					<DialogContent className="max-w-4xl">
 						<DialogHeader>
-							<DialogTitle>Image Preview</DialogTitle>
+							<DialogTitle>
+								<T
+									id="products.images.previewTitle"
+									defaultMessage="Image Preview"
+								/>
+							</DialogTitle>
 						</DialogHeader>
 						{previewImage && (
 							<div className="space-y-4">
@@ -546,22 +608,36 @@ export const ProductImages: React.FC<ProductImagesProps> = ({ product }) => {
 								</div>
 								<div className="space-y-2 p-4 bg-muted rounded-lg">
 									<div className="flex items-center gap-2">
-										<span className="text-sm font-medium">Alt Text:</span>
+										<span className="text-sm font-medium">
+											<T
+												id="products.images.altTextLabel"
+												defaultMessage="Alt Text:"
+											/>
+										</span>
 										<span className="text-sm text-muted-foreground">
-											{previewImage.alt_text || "No alt text"}
+											{previewImage.alt_text ||
+												t("products.images.noAltText", "No alt text")}
 										</span>
 									</div>
 									<div className="flex items-center gap-4">
 										<div className="flex items-center gap-2">
 											<span className="text-sm font-medium">
-												Display Order:
+												<T
+													id="products.images.displayOrder"
+													defaultMessage="Display Order:"
+												/>
 											</span>
 											<Badge variant="outline">
 												#{previewImage.display_order}
 											</Badge>
 										</div>
 										{previewImage.is_primary && (
-											<Badge variant="default">Primary Image</Badge>
+											<Badge variant="default">
+												<T
+													id="products.images.primaryImage"
+													defaultMessage="Primary Image"
+												/>
+											</Badge>
 										)}
 									</div>
 								</div>

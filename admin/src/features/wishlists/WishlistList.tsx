@@ -1,6 +1,9 @@
 import { AppTable, type Column } from "@/components/common/AppTable";
 import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { pagination } from "@/config";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilterParams } from "@/hooks/useFilterParams";
@@ -17,6 +20,8 @@ const initialParams: WishlistFilter = {
 };
 
 export function WishlistList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { params, handleChangeParams, resetParams } = useFilterParams({
 		initialParams,
 	});
@@ -36,17 +41,23 @@ export function WishlistList() {
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
-		return new Intl.DateTimeFormat("en-US", {
+		return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-BD", {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
 		}).format(date);
 	};
 
+	const formatCurrency = (value: string | number) =>
+		`৳${Number(value).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		})}`;
+
 	const columns: Column<WishlistItem>[] = [
 		{
 			key: "product",
-			header: "Product",
+			header: t("wishlists.list.table.product", "Product"),
 			render: (item) => (
 				<Link
 					to={`/products/${item.product.id}`}
@@ -58,25 +69,25 @@ export function WishlistList() {
 		},
 		{
 			key: "category",
-			header: "Category",
+			header: t("wishlists.list.table.category", "Category"),
 			render: (item) => (
 				<span className="text-muted-foreground">
-					{item.product.category?.name ?? "—"}
+					{item.product.category?.name ?? t("wishlists.list.table.empty", "—")}
 				</span>
 			),
 		},
 		{
 			key: "price",
-			header: "Price",
+			header: t("wishlists.list.table.price", "Price"),
 			render: (item) => (
 				<span className="text-muted-foreground">
-					৳ {item.product.base_price}
+					{formatCurrency(item.product.base_price)}
 				</span>
 			),
 		},
 		{
 			key: "customer",
-			header: "Customer",
+			header: t("wishlists.list.table.customer", "Customer"),
 			render: (item) => (
 				<Link
 					to={`/customers/${item.user.id}`}
@@ -91,7 +102,7 @@ export function WishlistList() {
 		},
 		{
 			key: "created_at",
-			header: "Added On",
+			header: t("wishlists.list.table.addedOn", "Added On"),
 			render: (item) => (
 				<span className="text-muted-foreground">
 					{formatDate(item.created_at)}
@@ -121,9 +132,24 @@ export function WishlistList() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Wishlists</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="wishlists.list.title" defaultMessage="Wishlists" />
+					</h1>
 					<p className="text-muted-foreground">
-						{data ? `${data.count} item${data.count !== 1 ? "s" : ""} wishlisted across all customers` : "All customers' wishlisted products"}
+						{data
+							? t(
+									"wishlists.list.countDescription",
+									"{count} item(s) wishlisted across all customers",
+									{
+										count: data.count.toLocaleString(
+											locale === "bn" ? "bn-BD" : "en-IN",
+										),
+									},
+								)
+							: t(
+									"wishlists.list.description",
+									"All customers' wishlisted products",
+								)}
 					</p>
 				</div>
 			</div>
@@ -133,12 +159,20 @@ export function WishlistList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search by product name or customer email..."
+					placeholder={t(
+						"wishlists.list.searchPlaceholder",
+						"Search by product name or customer email...",
+					)}
 					className="flex-1"
 				/>
 				<FilterDrawer
 					open={isFilterOpen}
 					onOpenChange={setIsFilterOpen}
+					title={t("wishlists.filter.title", "Filters")}
+					description={t(
+						"wishlists.filter.description",
+						"Apply filters to refine the wishlist list",
+					)}
 				>
 					<WishlistFilterForm
 						initialFilter={params}
@@ -153,7 +187,7 @@ export function WishlistList() {
 				data={items}
 				columns={columns}
 				isLoading={isFetching}
-				emptyMessage="No wishlist items found"
+				emptyMessage={t("wishlists.list.empty", "No wishlist items found")}
 				pagination={{
 					currentPage,
 					totalPages,

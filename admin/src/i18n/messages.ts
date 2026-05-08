@@ -373,6 +373,110 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 		"expenses.reports.table.amount": "Amount (৳)",
 		"expenses.reports.table.percent": "% of Total",
 		"expenses.reports.table.total": "Total",
+		"sales.title": "Sales",
+		"sales.description": "Manage sales and promotional discounts",
+		"sales.create": "Create Sale",
+		"sales.loading": "Loading sales...",
+		"sales.error": "Error loading sales",
+		"sales.empty": "No sales found. Create your first sale!",
+		"sales.deleteConfirm": 'Are you sure you want to delete sale "{name}"?',
+		"sales.toast.deleteSuccess": "Sale deleted successfully",
+		"sales.toast.deleteFailed": "Failed to delete sale",
+		"sales.table.name": "Sale Name",
+		"sales.table.discount": "Discount",
+		"sales.table.appliesTo": "Applies To",
+		"sales.table.validity": "Valid Period",
+		"sales.table.stacking": "Coupon Stacking",
+		"sales.table.status": "Status",
+		"sales.appliesTo.allProducts": "All products",
+		"sales.appliesTo.specificCategories": "Specific categories",
+		"sales.appliesTo.specificProducts": "Specific products",
+		"sales.appliesTo.categoriesCount":
+			"{count, plural, one {# category} other {# categories}}",
+		"sales.appliesTo.productsCount":
+			"{count, plural, one {# product} other {# products}}",
+		"sales.stacking.allowed": "Allowed",
+		"sales.stacking.blocked": "Blocked",
+		"sales.status.active": "Active",
+		"sales.status.inactive": "Inactive",
+		"sales.status.live": "Live",
+		"sales.status.scheduled": "Scheduled",
+		"sales.actions.label": "Actions",
+		"sales.actions.edit": "Edit",
+		"sales.actions.delete": "Delete",
+		"sales.modal.editTitle": "Edit Sale",
+		"sales.modal.createTitle": "Create New Sale",
+		"sales.modal.editDescription": "Update the sale details below.",
+		"sales.modal.createDescription":
+			"Create a new sale or promotion for your store.",
+		"sales.form.validation.nameRequired": "Sale name is required",
+		"sales.form.validation.nameMax":
+			"Sale name must not exceed 200 characters",
+		"sales.form.validation.descriptionMax":
+			"Description must not exceed 1000 characters",
+		"sales.form.validation.discountPositive":
+			"Discount value must be positive",
+		"sales.form.validation.validFrom": "Start date is required",
+		"sales.form.validation.validUntil": "End date is required",
+		"sales.form.name": "Sale Name",
+		"sales.form.namePlaceholder": "e.g., Summer Sale, Eid Special",
+		"sales.form.discountType": "Discount Type",
+		"sales.form.discountType.percentage": "Percentage (%)",
+		"sales.form.discountType.fixedAmount": "Fixed Amount (৳)",
+		"sales.form.discountValue": "Discount Value",
+		"sales.form.discountValuePlaceholderPercentage": "e.g., 20",
+		"sales.form.discountValuePlaceholderFixed": "e.g., 100",
+		"sales.form.discountValueHelpPercentage": "Percentage off (0-100)",
+		"sales.form.discountValueHelpFixed": "Fixed amount in ৳",
+		"sales.form.appliesTo": "Applies To",
+		"sales.form.appliesTo.allProducts": "All Products",
+		"sales.form.appliesTo.specificCategories": "Specific Categories",
+		"sales.form.appliesTo.specificProducts": "Specific Products",
+		"sales.form.categories": "Categories",
+		"sales.form.products": "Products",
+		"sales.form.noCategories": "No categories found",
+		"sales.form.noProducts": "No products found",
+		"sales.form.validFrom": "Valid From",
+		"sales.form.validUntil": "Valid Until",
+		"sales.form.description": "Description",
+		"sales.form.descriptionPlaceholder":
+			"e.g., 20% off on all organic products",
+		"sales.form.allowCouponStacking":
+			"Allow coupon codes to be used with this sale",
+		"sales.form.active": "Active",
+		"sales.form.update": "Update Sale",
+		"sales.form.create": "Create Sale",
+		"sales.form.toast.updateSuccess": "Sale updated successfully",
+		"sales.form.toast.createSuccess": "Sale created successfully",
+		"variantTypes.list.title": "Variant Types",
+		"variantTypes.list.description":
+			"Define reusable variant types (Size, Color, Weight, etc.) and their options",
+		"variantTypes.list.add": "Add Variant Type",
+		"variantTypes.list.empty": "No variant types defined yet.",
+		"variantTypes.list.emptyDescription":
+			"Create variant types like Size, Color, or Weight to use with product variants.",
+		"variantTypes.list.deleteConfirm":
+			'Delete "{name}" and all its options? This may affect existing product variants.',
+		"variantTypes.list.optionCount":
+			"{count, plural, one {# option} other {# options}}",
+		"variantTypes.list.noOptions": "No options defined",
+		"variantTypes.list.toast.deleteSuccess": "Variant type deleted",
+		"variantTypes.list.toast.deleteFailed":
+			"Failed to delete. It may be in use by product variants.",
+		"variantTypes.form.editTitle": "Edit Variant Type",
+		"variantTypes.form.createTitle": "Create Variant Type",
+		"variantTypes.form.name": "Name",
+		"variantTypes.form.namePlaceholder": "e.g., Size, Color, Weight",
+		"variantTypes.form.options": "Options",
+		"variantTypes.form.optionPlaceholder": "Type an option and press Enter",
+		"variantTypes.form.addOption": "Add",
+		"variantTypes.form.update": "Update",
+		"variantTypes.form.create": "Create",
+		"variantTypes.form.toast.updateSuccess": "Variant type updated",
+		"variantTypes.form.toast.updateFailed": "Failed to update variant type",
+		"variantTypes.form.toast.nameRequired": "Variant type name is required",
+		"variantTypes.form.toast.createSuccess": "Variant type created",
+		"variantTypes.form.toast.createFailed": "Failed to create variant type",
 		"inventory.common.empty": "—",
 		"inventory.actions.label": "Actions",
 		"inventory.actions.viewDetails": "View Details",
@@ -779,6 +883,56 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 			"Update the category details below. Changes will be saved immediately.",
 		"categories.modal.createDescription":
 			"Add a new category to organize your products. Fill in the details below.",
+		"categories.form.validation.nameRequired": "Category name is required",
+		"categories.form.validation.nameMin":
+			"Category name must be at least 2 characters",
+		"categories.form.validation.nameMax":
+			"Category name must not exceed 100 characters",
+		"categories.form.validation.slugRequired": "Slug is required",
+		"categories.form.validation.slugMin":
+			"Slug must be at least 2 characters",
+		"categories.form.validation.slugMax":
+			"Slug must not exceed 100 characters",
+		"categories.form.validation.slugPattern":
+			"Slug must be lowercase letters, numbers, and hyphens only",
+		"categories.form.validation.descriptionMax":
+			"Description must not exceed 500 characters",
+		"categories.form.validation.orderInteger":
+			"Order must be a whole number",
+		"categories.form.validation.orderMin": "Order must be 0 or greater",
+		"categories.form.name": "Category Name",
+		"categories.form.namePlaceholder":
+			"e.g., Electronics, Clothing, Home & Garden",
+		"categories.form.nameHelp": "The display name of the category",
+		"categories.form.slug": "Slug",
+		"categories.form.slugPlaceholder":
+			"e.g., electronics, clothing, home-garden",
+		"categories.form.slugHelp":
+			"The URL-friendly version of the category name",
+		"categories.form.description": "Description",
+		"categories.form.descriptionPlaceholder":
+			"e.g., Electronics, Clothing, Home & Garden",
+		"categories.form.descriptionHelp":
+			"Short description about this category",
+		"categories.form.parent": "Parent Category",
+		"categories.form.parentPlaceholder": "None (Top-level category)",
+		"categories.form.parentHelp":
+			"Select a parent to make this a subcategory",
+		"categories.form.image": "Category Image",
+		"categories.form.imagePreview": "Category preview",
+		"categories.form.imageHelpEdit":
+			"Leave empty to keep the current image",
+		"categories.form.imageHelpCreate": "Optional image for the category",
+		"categories.form.displayOrder": "Order",
+		"categories.form.displayOrderPlaceholder": "e.g., 1",
+		"categories.form.displayOrderHelp": "The order of the category",
+		"categories.form.isActive": "Is Active",
+		"categories.form.update": "Update Category",
+		"categories.form.create": "Create Category",
+		"categories.form.toast.updateSuccess":
+			"Category updated successfully",
+		"categories.form.toast.createSuccess":
+			"Category created successfully",
 		"customers.list.title": "Customers",
 		"customers.list.description":
 			"Manage your customers and their accounts",
@@ -896,6 +1050,48 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 		"coupons.modal.editDescription": "Update the coupon details below.",
 		"coupons.modal.createDescription":
 			"Create a new discount coupon for your customers.",
+		"coupons.form.validation.codeRequired": "Coupon code is required",
+		"coupons.form.validation.codeMax":
+			"Code must not exceed 50 characters",
+		"coupons.form.validation.descriptionMax":
+			"Description must not exceed 500 characters",
+		"coupons.form.validation.discountPositive":
+			"Discount value must be positive",
+		"coupons.form.validation.nonNegative": "Value must be 0 or greater",
+		"coupons.form.validation.positive": "Must be positive",
+		"coupons.form.validation.validFrom": "Start date is required",
+		"coupons.form.validation.validUntil": "End date is required",
+		"coupons.form.code": "Coupon Code",
+		"coupons.form.codePlaceholder": "e.g., SAVE20",
+		"coupons.form.codeHelp": "Unique code customers will enter",
+		"coupons.form.discountType": "Discount Type",
+		"coupons.form.discountType.percentage": "Percentage (%)",
+		"coupons.form.discountType.fixedAmount": "Fixed Amount (৳)",
+		"coupons.form.discountValue": "Discount Value",
+		"coupons.form.discountValuePlaceholder": "e.g., 20",
+		"coupons.form.discountValueHelpPercentage": "Percentage off (0-100)",
+		"coupons.form.discountValueHelpFixed": "Fixed amount in ৳",
+		"coupons.form.minOrderAmount": "Min Order Amount",
+		"coupons.form.minOrderAmountPlaceholder": "e.g., 500",
+		"coupons.form.minOrderAmountHelp": "Minimum subtotal to use coupon",
+		"coupons.form.maxDiscount": "Max Discount",
+		"coupons.form.maxDiscountPlaceholder": "e.g., 200",
+		"coupons.form.maxDiscountHelp": "Cap on discount (for %)",
+		"coupons.form.totalUses": "Total Uses",
+		"coupons.form.unlimited": "Unlimited",
+		"coupons.form.totalUsesHelp": "Max total uses",
+		"coupons.form.perUser": "Per User",
+		"coupons.form.perUserHelp": "Max uses per user",
+		"coupons.form.validFrom": "Valid From",
+		"coupons.form.validUntil": "Valid Until",
+		"coupons.form.description": "Description",
+		"coupons.form.descriptionPlaceholder":
+			"e.g., 20% off on all orders above ৳500",
+		"coupons.form.active": "Active",
+		"coupons.form.update": "Update Coupon",
+		"coupons.form.create": "Create Coupon",
+		"coupons.form.toast.updateSuccess": "Coupon updated successfully",
+		"coupons.form.toast.createSuccess": "Coupon created successfully",
 		"dashboard.error": "Failed to load dashboard metrics.",
 		"dashboard.change.noChange": "No change",
 		"dashboard.change.fromLastMonth": "{value}% from last month",
@@ -1034,6 +1230,10 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 		"layout.nav.inventory": "ইনভেন্টরি",
 		"layout.nav.expenses": "খরচ",
 		"common.cancel": "বাতিল",
+		"filterDrawer.button": "ফিল্টার",
+		"filterDrawer.title": "ফিল্টার",
+		"filterDrawer.description":
+			"আপনার অনুসন্ধান আরও নির্দিষ্ট করতে ফিল্টার প্রয়োগ করুন",
 		"roles.title": "রোল",
 		"roles.description": "রোল এবং তাদের অনুমতি পরিচালনা করুন",
 		"roles.create": "রোল তৈরি করুন",
@@ -1743,6 +1943,56 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 			"নিচের ক্যাটাগরির তথ্য হালনাগাদ করুন। পরিবর্তনগুলো সঙ্গে সঙ্গে সংরক্ষিত হবে।",
 		"categories.modal.createDescription":
 			"আপনার পণ্য সাজাতে একটি নতুন ক্যাটাগরি যোগ করুন। নিচের তথ্য পূরণ করুন।",
+		"categories.form.validation.nameRequired": "ক্যাটাগরির নাম আবশ্যক",
+		"categories.form.validation.nameMin":
+			"ক্যাটাগরির নাম কমপক্ষে ২ অক্ষরের হতে হবে",
+		"categories.form.validation.nameMax":
+			"ক্যাটাগরির নাম ১০০ অক্ষরের বেশি হতে পারবে না",
+		"categories.form.validation.slugRequired": "স্লাগ আবশ্যক",
+		"categories.form.validation.slugMin":
+			"স্লাগ কমপক্ষে ২ অক্ষরের হতে হবে",
+		"categories.form.validation.slugMax":
+			"স্লাগ ১০০ অক্ষরের বেশি হতে পারবে না",
+		"categories.form.validation.slugPattern":
+			"স্লাগে শুধু ছোট হাতের অক্ষর, সংখ্যা এবং হাইফেন থাকতে পারবে",
+		"categories.form.validation.descriptionMax":
+			"বিবরণ ৫০০ অক্ষরের বেশি হতে পারবে না",
+		"categories.form.validation.orderInteger":
+			"ক্রম অবশ্যই পূর্ণ সংখ্যা হতে হবে",
+		"categories.form.validation.orderMin": "ক্রম ০ বা তার বেশি হতে হবে",
+		"categories.form.name": "ক্যাটাগরির নাম",
+		"categories.form.namePlaceholder":
+			"যেমন, Electronics, Clothing, Home & Garden",
+		"categories.form.nameHelp": "ক্যাটাগরির প্রদর্শিত নাম",
+		"categories.form.slug": "স্লাগ",
+		"categories.form.slugPlaceholder":
+			"যেমন, electronics, clothing, home-garden",
+		"categories.form.slugHelp":
+			"ক্যাটাগরির URL-বন্ধুত্বপূর্ণ নাম",
+		"categories.form.description": "বিবরণ",
+		"categories.form.descriptionPlaceholder":
+			"যেমন, Electronics, Clothing, Home & Garden",
+		"categories.form.descriptionHelp":
+			"এই ক্যাটাগরি সম্পর্কে সংক্ষিপ্ত বিবরণ",
+		"categories.form.parent": "প্যারেন্ট ক্যাটাগরি",
+		"categories.form.parentPlaceholder": "কোনোটি নয় (টপ-লেভেল ক্যাটাগরি)",
+		"categories.form.parentHelp":
+			"এটিকে সাবক্যাটাগরি করতে একটি প্যারেন্ট নির্বাচন করুন",
+		"categories.form.image": "ক্যাটাগরির ছবি",
+		"categories.form.imagePreview": "ক্যাটাগরির প্রিভিউ",
+		"categories.form.imageHelpEdit":
+			"বর্তমান ছবি রাখতে এটি খালি রাখুন",
+		"categories.form.imageHelpCreate": "ক্যাটাগরির জন্য ঐচ্ছিক ছবি",
+		"categories.form.displayOrder": "ক্রম",
+		"categories.form.displayOrderPlaceholder": "যেমন, 1",
+		"categories.form.displayOrderHelp": "ক্যাটাগরির ক্রম",
+		"categories.form.isActive": "সক্রিয়",
+		"categories.form.update": "ক্যাটাগরি আপডেট করুন",
+		"categories.form.create": "ক্যাটাগরি তৈরি করুন",
+		"categories.form.toast.updateSuccess":
+			"ক্যাটাগরি সফলভাবে আপডেট হয়েছে",
+		"categories.form.toast.createSuccess":
+			"ক্যাটাগরি সফলভাবে তৈরি হয়েছে",
 		"customers.list.title": "গ্রাহক",
 		"customers.list.description":
 			"আপনার গ্রাহক এবং তাদের অ্যাকাউন্ট পরিচালনা করুন",
@@ -1861,6 +2111,965 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 			"নিচের কুপনের তথ্য হালনাগাদ করুন।",
 		"coupons.modal.createDescription":
 			"আপনার গ্রাহকদের জন্য একটি নতুন ডিসকাউন্ট কুপন তৈরি করুন।",
+		"coupons.form.validation.codeRequired": "কুপন কোড আবশ্যক",
+		"coupons.form.validation.codeMax":
+			"কোড ৫০ অক্ষরের বেশি হতে পারবে না",
+		"coupons.form.validation.descriptionMax":
+			"বিবরণ ৫০০ অক্ষরের বেশি হতে পারবে না",
+		"coupons.form.validation.discountPositive":
+			"ডিসকাউন্টের মান শূন্যের বেশি হতে হবে",
+		"coupons.form.validation.nonNegative": "মান ০ বা তার বেশি হতে হবে",
+		"coupons.form.validation.positive": "মান অবশ্যই ধনাত্মক হতে হবে",
+		"coupons.form.validation.validFrom": "শুরুর তারিখ আবশ্যক",
+		"coupons.form.validation.validUntil": "শেষের তারিখ আবশ্যক",
+		"coupons.form.code": "কুপন কোড",
+		"coupons.form.codePlaceholder": "যেমন, SAVE20",
+		"coupons.form.codeHelp": "গ্রাহকরা যে ইউনিক কোডটি ব্যবহার করবে",
+		"coupons.form.discountType": "ডিসকাউন্টের ধরন",
+		"coupons.form.discountType.percentage": "শতাংশ (%)",
+		"coupons.form.discountType.fixedAmount": "নির্দিষ্ট পরিমাণ (৳)",
+		"coupons.form.discountValue": "ডিসকাউন্টের মান",
+		"coupons.form.discountValuePlaceholder": "যেমন, 20",
+		"coupons.form.discountValueHelpPercentage": "শতাংশ হিসেবে ছাড় (0-100)",
+		"coupons.form.discountValueHelpFixed": "টাকায় নির্দিষ্ট ছাড়",
+		"coupons.form.minOrderAmount": "ন্যূনতম অর্ডার মূল্য",
+		"coupons.form.minOrderAmountPlaceholder": "যেমন, 500",
+		"coupons.form.minOrderAmountHelp":
+			"কুপন ব্যবহার করতে ন্যূনতম সাবটোটাল",
+		"coupons.form.maxDiscount": "সর্বোচ্চ ডিসকাউন্ট",
+		"coupons.form.maxDiscountPlaceholder": "যেমন, 200",
+		"coupons.form.maxDiscountHelp": "ডিসকাউন্টের সর্বোচ্চ সীমা (শতাংশের জন্য)",
+		"coupons.form.totalUses": "মোট ব্যবহার",
+		"coupons.form.unlimited": "সীমাহীন",
+		"coupons.form.totalUsesHelp": "সর্বোচ্চ মোট ব্যবহার সংখ্যা",
+		"coupons.form.perUser": "প্রতি ব্যবহারকারী",
+		"coupons.form.perUserHelp":
+			"প্রতি ব্যবহারকারীর সর্বোচ্চ ব্যবহার সংখ্যা",
+		"coupons.form.validFrom": "শুরু হবে",
+		"coupons.form.validUntil": "শেষ হবে",
+		"coupons.form.description": "বিবরণ",
+		"coupons.form.descriptionPlaceholder":
+			"যেমন, ৳500 এর বেশি সব অর্ডারে 20% ছাড়",
+		"coupons.form.active": "সক্রিয়",
+		"coupons.form.update": "কুপন আপডেট করুন",
+		"coupons.form.create": "কুপন তৈরি করুন",
+		"coupons.form.toast.updateSuccess":
+			"কুপন সফলভাবে আপডেট হয়েছে",
+		"coupons.form.toast.createSuccess":
+			"কুপন সফলভাবে তৈরি হয়েছে",
+		"orders.common.status.pending": "পেন্ডিং",
+		"orders.common.status.confirmed": "নিশ্চিত",
+		"orders.common.status.processing": "প্রসেসিং",
+		"orders.common.status.shipped": "শিপড",
+		"orders.common.status.delivered": "ডেলিভারড",
+		"orders.common.status.cancelled": "বাতিল",
+		"orders.common.status.returned": "ফেরত",
+		"orders.common.payment.pending": "পেন্ডিং",
+		"orders.common.payment.paid": "পরিশোধিত",
+		"orders.common.payment.failed": "ব্যর্থ",
+		"orders.common.payment.refunded": "রিফান্ডেড",
+		"orders.common.paymentMethod.cod": "ক্যাশ অন ডেলিভারি",
+		"orders.common.paymentMethod.online": "অনলাইন পেমেন্ট",
+		"orders.common.paymentMethod.card": "কার্ড পেমেন্ট",
+		"orders.common.paymentMethod.upi": "ইউপিআই",
+		"orders.common.deliveryType.insideDhaka": "ঢাকার ভিতরে",
+		"orders.common.deliveryType.outsideDhaka": "ঢাকার বাইরে",
+		"orders.create.title": "অর্ডার তৈরি করুন",
+		"orders.create.description":
+			"গ্রাহকের পক্ষ থেকে ম্যানুয়ালি একটি নতুন অর্ডার করুন",
+		"orders.create.cardTitle": "অর্ডারের বিস্তারিত",
+		"orders.create.cardDescription":
+			"নিচের অর্ডারের তথ্য পূরণ করুন। প্রয়োজনীয় ফিল্ডগুলো তারকা (*) দিয়ে চিহ্নিত।",
+		"orders.list.title": "অর্ডারসমূহ",
+		"orders.list.description":
+			"গ্রাহকের অর্ডার পরিচালনা করুন এবং ডেলিভারি ট্র্যাক করুন",
+		"orders.list.add": "অর্ডার তৈরি করুন",
+		"orders.list.searchPlaceholder":
+			"অর্ডার নম্বর বা গ্রাহকের নাম দিয়ে খুঁজুন...",
+		"orders.list.empty": "কোনো অর্ডার পাওয়া যায়নি",
+		"orders.list.guestBadge": "গেস্ট",
+		"orders.list.table.order": "অর্ডার",
+		"orders.list.table.customer": "গ্রাহক",
+		"orders.list.table.guest": "গেস্ট",
+		"orders.list.table.items": "আইটেম",
+		"orders.list.table.total": "মোট",
+		"orders.list.table.status": "স্ট্যাটাস",
+		"orders.list.table.payment": "পেমেন্ট",
+		"orders.list.table.date": "তারিখ",
+		"orders.list.actions.label": "অ্যাকশন",
+		"orders.list.actions.view": "বিস্তারিত দেখুন",
+		"orders.filter.title": "ফিল্টার",
+		"orders.filter.description":
+			"অর্ডার তালিকা আরও নির্দিষ্ট করতে ফিল্টার প্রয়োগ করুন",
+		"orders.filter.status": "অর্ডারের স্ট্যাটাস",
+		"orders.filter.paymentStatus": "পেমেন্ট স্ট্যাটাস",
+		"orders.filter.reset": "রিসেট",
+		"orders.filter.apply": "ফিল্টার প্রয়োগ করুন",
+		"orders.form.validation.customerName": "গ্রাহকের নাম আবশ্যক",
+		"orders.form.validation.email": "সঠিক ইমেইল লিখুন",
+		"orders.form.validation.product": "পণ্য নির্বাচন করুন",
+		"orders.form.validation.variant": "ভ্যারিয়েন্ট নির্বাচন করুন",
+		"orders.form.validation.quantity": "সর্বনিম্ন ১",
+		"orders.form.validation.items": "অন্তত একটি আইটেম যোগ করুন",
+		"orders.form.validation.fullName": "পূর্ণ নাম আবশ্যক",
+		"orders.form.validation.mobileNumber": "মোবাইল নম্বর আবশ্যক",
+		"orders.form.validation.address": "ঠিকানা আবশ্যক",
+		"orders.form.validation.city": "শহর আবশ্যক",
+		"orders.form.validation.state": "স্টেট / জেলা আবশ্যক",
+		"orders.form.validation.postalCode": "পোস্টাল কোড আবশ্যক",
+		"orders.form.customer.title": "গ্রাহকের তথ্য",
+		"orders.form.customer.description":
+			"গ্রাহকের তথ্য লিখুন। গেস্ট অর্ডারের জন্য মোবাইল নম্বর ব্যবহার করুন।",
+		"orders.form.customer.name": "গ্রাহকের নাম",
+		"orders.form.customer.namePlaceholder": "যেমন, জন ডো",
+		"orders.form.customer.email": "ইমেইল",
+		"orders.form.customer.emailPlaceholder": "যেমন, customer@example.com",
+		"orders.form.customer.emailHelp": "ঐচ্ছিক। গেস্ট অর্ডারের জন্য ফাঁকা রাখতে পারেন।",
+		"orders.form.customer.mobile": "মোবাইল নম্বর",
+		"orders.form.customer.mobilePlaceholder": "যেমন, 01700000000",
+		"orders.form.customer.mobileHelp":
+			"অ্যাকাউন্টবিহীন গেস্ট অর্ডারের জন্য প্রয়োজন।",
+		"orders.form.items.title": "অর্ডার আইটেম",
+		"orders.form.items.description":
+			"এই অর্ডারের জন্য পণ্য, ভ্যারিয়েন্ট এবং পরিমাণ যোগ করুন।",
+		"orders.form.items.product": "পণ্য",
+		"orders.form.items.variant": "ভ্যারিয়েন্ট",
+		"orders.form.items.quantity": "পরিমাণ",
+		"orders.form.items.selectProduct": "পণ্য নির্বাচন করুন...",
+		"orders.form.items.searchProduct": "নাম বা SKU দিয়ে খুঁজুন...",
+		"orders.form.items.noProducts": "কোনো পণ্য পাওয়া যায়নি",
+		"orders.form.items.skuLine": "SKU: {sku} · {price}",
+		"orders.form.items.selectProductFirst": "আগে পণ্য নির্বাচন করুন...",
+		"orders.form.items.loadingVariants": "লোড হচ্ছে...",
+		"orders.form.items.selectVariant": "ভ্যারিয়েন্ট নির্বাচন করুন...",
+		"orders.form.items.searchVariant": "নাম বা SKU দিয়ে খুঁজুন...",
+		"orders.form.items.noVariants": "কোনো ভ্যারিয়েন্ট পাওয়া যায়নি",
+		"orders.form.items.outOfStock": "স্টক শেষ",
+		"orders.form.items.variantLine": "{sku} · {price}{stockState}",
+		"orders.form.items.remove": "আইটেম সরান",
+		"orders.form.items.add": "আইটেম যোগ করুন",
+		"orders.form.shipping.title": "শিপিং ঠিকানা",
+		"orders.form.shipping.description": "এই অর্ডারের ডেলিভারি ঠিকানা।",
+		"orders.form.shipping.fullName": "পূর্ণ নাম",
+		"orders.form.shipping.fullNamePlaceholder": "যেমন, জন ডো",
+		"orders.form.shipping.mobile": "মোবাইল নম্বর",
+		"orders.form.shipping.mobilePlaceholder": "যেমন, 01700000000",
+		"orders.form.shipping.addressLine1": "ঠিকানা লাইন ১",
+		"orders.form.shipping.addressLine1Placeholder":
+			"বাড়ি / ফ্ল্যাট নম্বর, রাস্তার নাম",
+		"orders.form.shipping.addressLine2": "ঠিকানা লাইন ২",
+		"orders.form.shipping.addressLine2Placeholder":
+			"অ্যাপার্টমেন্ট, স্যুট, ল্যান্ডমার্ক (ঐচ্ছিক)",
+		"orders.form.shipping.city": "শহর",
+		"orders.form.shipping.cityPlaceholder": "যেমন, ঢাকা",
+		"orders.form.shipping.state": "স্টেট / জেলা",
+		"orders.form.shipping.statePlaceholder": "যেমন, ঢাকা বিভাগ",
+		"orders.form.shipping.postalCode": "পোস্টাল কোড",
+		"orders.form.shipping.postalCodePlaceholder": "যেমন, 1207",
+		"orders.form.shipping.country": "দেশ",
+		"orders.form.shipping.countryPlaceholder": "বাংলাদেশ",
+		"orders.form.payment.title": "পেমেন্ট ও ডেলিভারি",
+		"orders.form.payment.description":
+			"পেমেন্ট পদ্ধতি এবং ডেলিভারি জোন নির্বাচন করুন।",
+		"orders.form.payment.method": "পেমেন্ট পদ্ধতি",
+		"orders.form.payment.methodPlaceholder": "পেমেন্ট পদ্ধতি নির্বাচন করুন",
+		"orders.form.payment.deliveryType": "ডেলিভারি ধরন",
+		"orders.form.payment.deliveryTypePlaceholder":
+			"ডেলিভারি ধরন নির্বাচন করুন",
+		"orders.form.note.title": "গ্রাহকের নোট",
+		"orders.form.note.description":
+			"গ্রাহকের ঐচ্ছিক বার্তা বা বিশেষ নির্দেশনা।",
+		"orders.form.note.label": "নোট",
+		"orders.form.note.placeholder":
+			"এই অর্ডারের জন্য কোনো বিশেষ নির্দেশনা থাকলে লিখুন...",
+		"orders.form.cancel": "বাতিল",
+		"orders.form.submit": "অর্ডার তৈরি করুন",
+		"orders.form.toast.createSuccess": "অর্ডার সফলভাবে তৈরি হয়েছে",
+		"orders.form.toast.createFailed":
+			"অর্ডার তৈরি করা যায়নি। ফর্মটি যাচাই করে আবার চেষ্টা করুন।",
+		"orders.details.notFound": "অর্ডার পাওয়া যায়নি",
+		"orders.details.back": "অর্ডার তালিকায় ফিরে যান",
+		"orders.details.placedOn": "{date} তারিখে করা হয়েছে",
+		"orders.details.paymentBadge": "পেমেন্ট: {status}",
+		"orders.details.actions.changeOrderStatus": "অর্ডারের স্ট্যাটাস পরিবর্তন করুন",
+		"orders.details.actions.changePaymentStatus":
+			"পেমেন্ট স্ট্যাটাস পরিবর্তন করুন",
+		"orders.details.actions.cancelOrder": "অর্ডার বাতিল করুন",
+		"orders.details.items.title": "অর্ডার আইটেম",
+		"orders.details.items.product": "পণ্য",
+		"orders.details.items.quantity": "পরিমাণ",
+		"orders.details.items.unitPrice": "প্রতি ইউনিট মূল্য",
+		"orders.details.items.total": "মোট",
+		"orders.details.items.sku": "SKU: {sku}",
+		"orders.details.shipping.title": "শিপিং ঠিকানা",
+		"orders.details.notes.title": "নোটসমূহ",
+		"orders.details.notes.customer": "গ্রাহকের নোট",
+		"orders.details.notes.admin": "অ্যাডমিন নোট",
+		"orders.details.history.title": "স্ট্যাটাস হিস্ট্রি",
+		"orders.details.history.by": "দ্বারা: {name}",
+		"orders.details.customer.title": "গ্রাহকের তথ্য",
+		"orders.details.payment.title": "পেমেন্টের বিস্তারিত",
+		"orders.details.payment.method": "পেমেন্ট পদ্ধতি",
+		"orders.details.payment.status": "পেমেন্ট স্ট্যাটাস",
+		"orders.details.summary.title": "অর্ডার সারাংশ",
+		"orders.details.summary.subtotal": "সাবটোটাল",
+		"orders.details.summary.discount": "ডিসকাউন্ট",
+		"orders.details.summary.tax": "ট্যাক্স",
+		"orders.details.summary.shipping": "শিপিং",
+		"orders.details.summary.total": "মোট",
+		"orders.details.timeline.title": "টাইমলাইন",
+		"orders.details.timeline.created": "তৈরি হয়েছে",
+		"orders.details.timeline.updated": "সর্বশেষ হালনাগাদ",
+		"orders.details.dialog.status.title": "অর্ডারের স্ট্যাটাস পরিবর্তন করুন",
+		"orders.details.dialog.status.description":
+			"অর্ডার #{orderNumber}-এর স্ট্যাটাস আপডেট করুন",
+		"orders.details.dialog.status.newStatus": "নতুন স্ট্যাটাস",
+		"orders.details.dialog.status.placeholder": "স্ট্যাটাস নির্বাচন করুন",
+		"orders.details.dialog.status.note": "নোট (ঐচ্ছিক)",
+		"orders.details.dialog.status.notePlaceholder":
+			"এই স্ট্যাটাস পরিবর্তন সম্পর্কে একটি নোট লিখুন...",
+		"orders.details.dialog.status.submit": "স্ট্যাটাস আপডেট করুন",
+		"orders.details.dialog.payment.title":
+			"পেমেন্ট স্ট্যাটাস পরিবর্তন করুন",
+		"orders.details.dialog.payment.description":
+			"অর্ডার #{orderNumber}-এর পেমেন্ট স্ট্যাটাস আপডেট করুন",
+		"orders.details.dialog.payment.newStatus": "নতুন পেমেন্ট স্ট্যাটাস",
+		"orders.details.dialog.payment.placeholder":
+			"পেমেন্ট স্ট্যাটাস নির্বাচন করুন",
+		"orders.details.dialog.payment.note": "নোট (ঐচ্ছিক)",
+		"orders.details.dialog.payment.notePlaceholder":
+			"এই পেমেন্ট স্ট্যাটাস পরিবর্তন সম্পর্কে একটি নোট লিখুন...",
+		"orders.details.dialog.payment.submit":
+			"পেমেন্ট স্ট্যাটাস আপডেট করুন",
+		"orders.details.dialog.cancel.title": "অর্ডার বাতিল করুন",
+		"orders.details.dialog.cancel.description":
+			"আপনি কি নিশ্চিত যে অর্ডার #{orderNumber} বাতিল করতে চান? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।",
+		"orders.details.dialog.cancel.reason": "বাতিলের কারণ (ঐচ্ছিক)",
+		"orders.details.dialog.cancel.reasonPlaceholder":
+			"বাতিলের কারণ লিখুন...",
+		"orders.details.dialog.cancel.keep": "অর্ডার রাখুন",
+		"orders.details.dialog.cancel.submit": "অর্ডার বাতিল করুন",
+		"orders.details.toast.statusUpdated":
+			"অর্ডারের স্ট্যাটাস সফলভাবে আপডেট হয়েছে",
+		"orders.details.toast.statusFailed":
+			"অর্ডারের স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে",
+		"orders.details.toast.paymentUpdated":
+			"পেমেন্ট স্ট্যাটাস সফলভাবে আপডেট হয়েছে",
+		"orders.details.toast.paymentFailed":
+			"পেমেন্ট স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে",
+		"orders.details.toast.cancelled": "অর্ডার সফলভাবে বাতিল হয়েছে",
+		"orders.details.toast.cancelFailed": "অর্ডার বাতিল করতে ব্যর্থ হয়েছে",
+		"products.common.status.active": "সক্রিয়",
+		"products.common.status.inactive": "নিষ্ক্রিয়",
+		"products.common.status.featured": "ফিচার্ড",
+		"products.common.status.notFeatured": "ফিচার্ড নয়",
+		"products.common.status.digital": "ডিজিটাল",
+		"products.common.status.physical": "ফিজিক্যাল",
+		"products.common.status.inStock": "স্টকে আছে",
+		"products.common.status.outOfStock": "স্টক শেষ",
+		"products.common.status.published": "প্রকাশিত",
+		"products.create.title": "পণ্য তৈরি করুন",
+		"products.create.description": "আপনার ইনভেন্টরিতে একটি নতুন পণ্য যোগ করুন",
+		"products.create.cardTitle": "পণ্যের বিস্তারিত",
+		"products.create.cardDescription":
+			"নিচের পণ্যের তথ্য পূরণ করুন। প্রয়োজনীয় ফিল্ডগুলো তারকা চিহ্নিত।",
+		"products.edit.title": "পণ্য সম্পাদনা করুন",
+		"products.edit.description":
+			"নিচের পণ্যের তথ্য সম্পাদনা করুন। প্রয়োজনীয় ফিল্ডগুলো তারকা চিহ্নিত।",
+		"products.edit.cardTitle": "পণ্যের বিস্তারিত",
+		"products.edit.cardDescription":
+			"নিচের পণ্যের তথ্য পূরণ করুন। প্রয়োজনীয় ফিল্ডগুলো তারকা চিহ্নিত।",
+		"products.list.title": "পণ্যসমূহ",
+		"products.list.description": "আপনার পণ্যের ইনভেন্টরি পরিচালনা করুন",
+		"products.list.add": "পণ্য যোগ করুন",
+		"products.list.searchPlaceholder":
+			"নাম, SKU বা ক্যাটাগরি দিয়ে পণ্য খুঁজুন...",
+		"products.list.empty": "কোনো পণ্য পাওয়া যায়নি",
+		"products.list.table.name": "পণ্যের নাম",
+		"products.list.table.sku": "SKU",
+		"products.list.table.category": "ক্যাটাগরি",
+		"products.list.table.price": "মূল্য",
+		"products.list.table.status": "স্ট্যাটাস",
+		"products.list.selectAll": "এই পাতার সব পণ্য নির্বাচন করুন",
+		"products.list.selectOne": "{name} নির্বাচন করুন",
+		"products.list.selectedCount": "{count} টি পণ্য নির্বাচন করা হয়েছে",
+		"products.list.bulk.description":
+			"বাল্ক স্ট্যাটাস আপডেট দিতে পণ্য নির্বাচন করুন",
+		"products.list.bulk.actions": "বাল্ক অ্যাকশন",
+		"products.list.bulk.markActive": "সক্রিয় করুন",
+		"products.list.bulk.markInactive": "নিষ্ক্রিয় করুন",
+		"products.list.bulk.activateSuccess":
+			"নির্বাচিত পণ্যগুলো সক্রিয় করা হয়েছে",
+		"products.list.bulk.deactivateSuccess":
+			"নির্বাচিত পণ্যগুলো নিষ্ক্রিয় করা হয়েছে",
+		"products.list.bulk.updateFailed":
+			"নির্বাচিত পণ্যগুলো আপডেট করতে ব্যর্থ হয়েছে",
+		"products.filter.title": "ফিল্টার",
+		"products.filter.description":
+			"পণ্যের তালিকা আরও নির্দিষ্ট করতে ফিল্টার প্রয়োগ করুন",
+		"products.filter.status": "স্ট্যাটাস",
+		"products.filter.featured": "ফিচার্ড",
+		"products.filter.inStock": "স্টকে আছে",
+		"products.filter.category": "ক্যাটাগরি",
+		"products.filter.categoryPlaceholder": "একটি ক্যাটাগরি নির্বাচন করুন",
+		"products.filter.minPrice": "সর্বনিম্ন মূল্য",
+		"products.filter.maxPrice": "সর্বোচ্চ মূল্য",
+		"products.filter.minPricePlaceholder": "সর্বনিম্ন মূল্য লিখুন",
+		"products.filter.maxPricePlaceholder": "সর্বোচ্চ মূল্য লিখুন",
+		"products.filter.reset": "রিসেট",
+		"products.filter.apply": "ফিল্টার প্রয়োগ করুন",
+		"products.form.validation.name": "নাম আবশ্যক",
+		"products.form.validation.slug": "স্লাগ আবশ্যক",
+		"products.form.validation.sku": "SKU আবশ্যক",
+		"products.form.validation.price": "মূল্য আবশ্যক",
+		"products.form.validation.category": "ক্যাটাগরি আবশ্যক",
+		"products.form.validation.basePrice": "বেস মূল্য আবশ্যক",
+		"products.form.validation.basePriceHigher":
+			"বেস মূল্য কস্ট মূল্যের চেয়ে বেশি হতে হবে",
+		"products.form.validation.shortDescriptionMax":
+			"সংক্ষিপ্ত বিবরণ সর্বোচ্চ ৩০০ অক্ষরের হতে পারবে",
+		"products.form.validation.variantNameOrOptions":
+			"ভ্যারিয়েন্ট অপশন নির্বাচন করুন অথবা একটি ভ্যারিয়েন্ট নাম লিখুন",
+		"products.form.validation.variantRequired":
+			"অন্তত একটি ভ্যারিয়েন্ট আবশ্যক",
+		"products.form.info.title": "পণ্যের তথ্য",
+		"products.form.info.description":
+			"আপনার পণ্যের মূল তথ্য লিখুন।",
+		"products.form.info.name": "নাম",
+		"products.form.info.namePlaceholder": "যেমন, Product Name",
+		"products.form.info.nameHelp": "স্টোরফ্রন্টে যেভাবে দেখানো হবে সেই নাম।",
+		"products.form.info.slug": "স্লাগ",
+		"products.form.info.slugPlaceholder": "যেমন, product-name",
+		"products.form.info.slugHelp":
+			"নামের URL-বান্ধব সংস্করণ। পণ্যের পাতার জন্য ইউনিক পরিচয়।",
+		"products.form.info.shortDescription": "সংক্ষিপ্ত বিবরণ",
+		"products.form.info.descriptionLabel": "বিবরণ",
+		"products.form.info.descriptionPlaceholder": "যেমন, পণ্যের বিবরণ",
+		"products.form.pricing.title": "মূল্য নির্ধারণ",
+		"products.form.pricing.description": "আপনার পণ্যের মূল্য পরিচালনা করুন।",
+		"products.form.pricing.costPrice": "কস্ট মূল্য",
+		"products.form.pricing.costPricePlaceholder": "যেমন, 100",
+		"products.form.pricing.costPriceHelp":
+			"এই আইটেমের অভ্যন্তরীণ খরচ। গ্রাহকরা এটি দেখতে পাবে না।",
+		"products.form.pricing.basePrice": "বেস মূল্য (MRP)",
+		"products.form.pricing.basePricePlaceholder": "যেমন, 250",
+		"products.form.pricing.basePriceHelp":
+			"মূল / MRP মূল্য। ভ্যারিয়েন্টের মূল্য এটি অতিক্রম করতে পারে।",
+		"products.form.pricing.saleHelp":
+			"এই পণ্যে সেল ডিসকাউন্ট দিতে চাইলে",
+		"products.form.variants.title": "ভ্যারিয়েন্টসমূহ",
+		"products.form.variants.description":
+			"প্রতিটি পণ্যের জন্য অন্তত একটি বিক্রয়যোগ্য ভ্যারিয়েন্ট দরকার। প্রয়োজনে পুনঃব্যবহারযোগ্য অপশন বেছে নিন, তারপর প্রতিটি সারির জন্য SKU, মূল্য ও স্টক সেট করুন।",
+		"products.form.variants.digitalNote":
+			"ডিজিটাল পণ্যের ক্ষেত্রে স্টক ফিল্ডগুলো লুকানো থাকে।",
+		"products.form.variants.columns.name": "ভ্যারিয়েন্টের নাম",
+		"products.form.variants.columns.sku": "SKU",
+		"products.form.variants.columns.price": "মূল্য",
+		"products.form.variants.columns.stock": "স্টক",
+		"products.form.variants.columns.lowStock": "লো স্টক",
+		"products.form.variants.emptyTypes":
+			"এখনও কোনো পুনঃব্যবহারযোগ্য ভ্যারিয়েন্ট টাইপ কনফিগার করা হয়নি। চাইলে নাম লিখে ম্যানুয়ালি ভ্যারিয়েন্ট তৈরি করতে পারেন।",
+		"products.form.variants.namePlaceholder":
+			"অপশন থেকে অটো, অথবা কাস্টম নাম লিখুন",
+		"products.form.variants.skuPlaceholder": "যেমন, PRD-001-500",
+		"products.form.variants.pricePlaceholder": "0.00",
+		"products.form.variants.remove": "ভ্যারিয়েন্ট সরান",
+		"products.form.variants.optionsTitle": "ভ্যারিয়েন্ট অপশন",
+		"products.form.variants.optionsDescription":
+			"এই ভ্যারিয়েন্টের জন্য প্রতিটি ভ্যারিয়েন্ট টাইপ থেকে সর্বোচ্চ একটি অপশন নির্বাচন করুন।",
+		"products.form.variants.add": "ভ্যারিয়েন্ট যোগ করুন",
+		"products.form.specs.title": "স্পেসিফিকেশন",
+		"products.form.specs.description": "ইউনিট এবং প্যাকেজিং তথ্য।",
+		"products.form.specs.productSku": "পণ্যের SKU",
+		"products.form.specs.productSkuPlaceholder": "যেমন, SKU123",
+		"products.form.specs.productSkuHelp":
+			"পণ্যের ইউনিক আইডেন্টিফায়ার (ভ্যারিয়েন্টের নয়)।",
+		"products.form.specs.unit": "ইউনিট",
+		"products.form.specs.unitPlaceholder": "একটি ইউনিট নির্বাচন করুন",
+		"products.form.specs.unitHelp":
+			"এই পণ্যের পরিমাপের একক (যেমন, kg, piece, pack)।",
+		"products.form.specs.unitValue": "ইউনিট ভ্যালু",
+		"products.form.specs.unitValueHelp":
+			"নির্বাচিত ইউনিটের সংখ্যাগত মান (যেমন 500g এর জন্য '500')।",
+		"products.form.specs.weight": "ওজন (গ্রামে)",
+		"products.form.specs.weightHelp":
+			"পণ্যের ওজন গ্রামে। শিপিং খরচ নির্ধারণে ব্যবহৃত হয়।",
+		"products.form.organization.title": "অর্গানাইজেশন",
+		"products.form.organization.description":
+			"ক্যাটাগরি, ধরন এবং স্ট্যাটাস।",
+		"products.form.organization.category": "ক্যাটাগরি",
+		"products.form.organization.categoryPlaceholder":
+			"একটি ক্যাটাগরি নির্বাচন করুন",
+		"products.form.organization.digital":
+			"ডিজিটাল পণ্য (স্টক ট্র্যাকিং নেই - যেমন, ইবুক, গিফট কার্ড)",
+		"products.form.organization.active": "সক্রিয় পণ্য",
+		"products.form.organization.featured": "ফিচার্ড পণ্য",
+		"products.form.seo.title": "এসইও",
+		"products.form.seo.description": "সার্চ ইঞ্জিন অপটিমাইজেশন।",
+		"products.form.seo.metaTitle": "মেটা টাইটেল",
+		"products.form.seo.metaTitleHelp":
+			"সার্চ ইঞ্জিনের জন্য টাইটেল ট্যাগ। ক্লিক-থ্রু রেটের জন্য অপ্টিমাইজ করুন।",
+		"products.form.seo.metaDescription": "মেটা বিবরণ",
+		"products.form.seo.metaDescriptionHelp":
+			"সার্চ ইঞ্জিনের জন্য মেটা ডিসক্রিপশন। পণ্যের পেজটি সংক্ষেপে তুলে ধরুন।",
+		"products.form.cancel": "বাতিল",
+		"products.form.saveAndCreateAnother": "সেভ করে আরেকটি তৈরি করুন",
+		"products.form.submitCreate": "পণ্য তৈরি করুন",
+		"products.form.submitUpdate": "পণ্য আপডেট করুন",
+		"products.form.toast.createSuccess": "পণ্য সফলভাবে তৈরি হয়েছে",
+		"products.form.toast.createFailed": "পণ্য তৈরি করতে ব্যর্থ হয়েছে",
+		"products.form.toast.updateSuccess": "পণ্য সফলভাবে আপডেট হয়েছে",
+		"products.form.toast.updateFailed": "পণ্য আপডেট করতে ব্যর্থ হয়েছে",
+		"products.details.notFound": "পণ্য পাওয়া যায়নি",
+		"products.details.back": "পণ্যের তালিকায় ফিরে যান",
+		"products.details.publish": "পণ্য প্রকাশ করুন",
+		"products.details.actions.edit": "পণ্য সম্পাদনা করুন",
+		"products.details.actions.delete": "পণ্য মুছুন",
+		"products.details.general.title": "সাধারণ তথ্য",
+		"products.details.general.name": "পণ্যের নাম",
+		"products.details.general.shortDescription": "সংক্ষিপ্ত বিবরণ",
+		"products.details.general.description": "বিবরণ",
+		"products.details.seo.title": "এসইও বিস্তারিত",
+		"products.details.seo.metaTitle": "মেটা টাইটেল",
+		"products.details.seo.metaDescription": "মেটা বিবরণ",
+		"products.details.details.title": "পণ্যের বিস্তারিত",
+		"products.details.details.category": "পণ্যের ক্যাটাগরি",
+		"products.details.details.unit": "ইউনিট",
+		"products.details.details.totalStock": "মোট স্টক",
+		"products.details.details.notApplicable": "প্রযোজ্য নয় (ডিজিটাল)",
+		"products.details.pricing.title": "মূল্য",
+		"products.details.pricing.costPrice": "কস্ট মূল্য",
+		"products.details.pricing.basePrice": "বেস মূল্য (MRP)",
+		"products.details.pricing.salePrice": "সেল মূল্য",
+		"products.details.pricing.noSale": "কোনো সক্রিয় সেল নেই",
+		"products.details.publishDialog.title": "পণ্য প্রকাশ করুন",
+		"products.details.publishDialog.description":
+			"আপনি কি নিশ্চিত যে এই পণ্যটি প্রকাশ করতে চান?",
+		"products.details.publishDialog.confirm": "প্রকাশ করুন",
+		"products.details.toast.publishSuccess": "পণ্য সফলভাবে প্রকাশিত হয়েছে",
+		"products.details.toast.publishFailed": "পণ্য প্রকাশ করতে ব্যর্থ হয়েছে",
+		"products.images.title": "পণ্যের মিডিয়া",
+		"products.images.add": "ছবি যোগ করুন",
+		"products.images.selected": "নির্বাচিত ছবি ({count})",
+		"products.images.upload": "ছবি আপলোড করুন",
+		"products.images.uploading": "আপলোড হচ্ছে...",
+		"products.images.uploaded": "আপলোড করা ছবি",
+		"products.images.image": "ছবি",
+		"products.images.images": "ছবি",
+		"products.images.primary": "প্রাইমারি",
+		"products.images.altText": "অল্ট টেক্সট",
+		"products.images.altTextLabel": "অল্ট টেক্সট:",
+		"products.images.altTextPlaceholder": "ছবির বর্ণনা লিখুন",
+		"products.images.order": "ক্রম",
+		"products.images.view": "দেখুন",
+		"products.images.delete": "মুছুন",
+		"products.images.deleteTitle": "ছবি মুছুন",
+		"products.images.deleteDescription":
+			"আপনি কি নিশ্চিত যে এই ছবিটি মুছতে চান? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।",
+		"products.images.deleting": "মুছা হচ্ছে...",
+		"products.images.previewTitle": "ছবির প্রিভিউ",
+		"products.images.noAltText": "কোনো অল্ট টেক্সট নেই",
+		"products.images.displayOrder": "ডিসপ্লে ক্রম:",
+		"products.images.primaryImage": "প্রাইমারি ছবি",
+		"products.images.empty": "এখনও কোনো ছবি নেই",
+		"products.images.dropHere": "এখানে ছবি ছাড়ুন",
+		"products.images.dragHint":
+			"এখানে ছবি ড্র্যাগ ও ড্রপ করুন, অথবা ব্রাউজ করতে ক্লিক করুন",
+		"products.images.releaseToUpload":
+			"একাধিক ছবি আপলোড করতে ছেড়ে দিন",
+		"products.images.dropOnlyImages":
+			"শুধু ইমেজ ফাইল ড্রপ করুন",
+		"products.images.selectAtLeastOne":
+			"অন্তত একটি ছবি নির্বাচন করুন",
+		"products.images.productIdRequired": "পণ্যের আইডি আবশ্যক",
+		"products.images.uploadSuccess": "ছবি সফলভাবে আপলোড হয়েছে",
+		"products.images.uploadFailed": "ছবি আপলোড করতে ব্যর্থ হয়েছে",
+		"products.images.deleteSuccess": "ছবি সফলভাবে মুছে ফেলা হয়েছে",
+		"products.images.deleteFailed": "ছবি মুছতে ব্যর্থ হয়েছে",
+		"products.variants.description":
+			"সাইজ, রং, ওজন এবং অন্যান্য ভ্যারিয়েন্ট অপশন পরিচালনা করুন",
+		"products.variants.add": "ভ্যারিয়েন্ট যোগ করুন",
+		"products.variants.empty": "এই পণ্যের জন্য কোনো ভ্যারিয়েন্ট কনফিগার করা নেই।",
+		"products.variants.emptyDescription":
+			"বিভিন্ন সাইজ, রং বা ওজন অফার করতে ভ্যারিয়েন্ট যোগ করুন।",
+		"products.variants.table.name": "নাম",
+		"products.variants.table.sku": "SKU",
+		"products.variants.table.options": "অপশন",
+		"products.variants.table.price": "মূল্য",
+		"products.variants.table.stock": "স্টক",
+		"products.variants.table.status": "স্ট্যাটাস",
+		"products.variants.table.actions": "অ্যাকশন",
+		"products.variants.deleteConfirm": "এই ভ্যারিয়েন্টটি মুছবেন?",
+		"products.variants.deleteSuccess": "ভ্যারিয়েন্ট মুছে ফেলা হয়েছে",
+		"products.variants.deleteFailed": "ভ্যারিয়েন্ট মুছতে ব্যর্থ হয়েছে",
+		"products.variants.validation.nameOrOptions":
+			"ভ্যারিয়েন্ট অপশন নির্বাচন করুন অথবা একটি ভ্যারিয়েন্ট নাম লিখুন।",
+		"products.variants.createSuccess": "ভ্যারিয়েন্ট তৈরি হয়েছে",
+		"products.variants.createFailed": "ভ্যারিয়েন্ট তৈরি করতে ব্যর্থ হয়েছে",
+		"products.variants.updateSuccess": "ভ্যারিয়েন্ট আপডেট হয়েছে",
+		"products.variants.updateFailed": "ভ্যারিয়েন্ট আপডেট করতে ব্যর্থ হয়েছে",
+		"products.variants.dialog.addTitle": "ভ্যারিয়েন্ট যোগ করুন",
+		"products.variants.dialog.editTitle": "ভ্যারিয়েন্ট সম্পাদনা করুন",
+		"products.variants.dialog.namePlaceholder":
+			"অপশন থেকে স্বয়ংক্রিয়ভাবে তৈরি হবে",
+		"products.variants.dialog.optionsHelp":
+			"প্রতিটি ভ্যারিয়েন্ট টাইপ থেকে সর্বোচ্চ একটি অপশন নির্বাচন করুন। নাম ফাঁকা রাখলে নির্বাচিত অপশন থেকে স্বয়ংক্রিয়ভাবে নাম তৈরি হবে।",
+		"products.variants.dialog.update": "আপডেট",
+		"products.variants.dialog.create": "তৈরি করুন",
+		"products.orders.title": "পণ্যের অর্ডারসমূহ",
+		"products.orders.empty": "এই পণ্যের জন্য কোনো অর্ডার পাওয়া যায়নি",
+		"products.orders.table.orderNumber": "অর্ডার নম্বর",
+		"products.orders.table.customer": "গ্রাহক",
+		"products.orders.table.status": "স্ট্যাটাস",
+		"products.orders.table.date": "তারিখ",
+		"products.orders.table.amount": "পরিমাণ",
+		"products.orders.table.items": "আইটেম",
+		"products.orders.actions.view": "অর্ডারের বিস্তারিত দেখুন",
+		"products.orders.actions.changeStatus": "স্ট্যাটাস পরিবর্তন করুন",
+		"products.orders.actions.cancel": "অর্ডার বাতিল করুন",
+		"products.orders.dialog.status.title":
+			"অর্ডারের স্ট্যাটাস পরিবর্তন করুন",
+		"products.orders.dialog.status.description":
+			"অর্ডার #{orderNumber}-এর স্ট্যাটাস আপডেট করুন",
+		"products.orders.dialog.status.newStatus": "নতুন স্ট্যাটাস",
+		"products.orders.dialog.status.placeholder": "স্ট্যাটাস নির্বাচন করুন",
+		"products.orders.dialog.status.note": "নোট (ঐচ্ছিক)",
+		"products.orders.dialog.status.notePlaceholder":
+			"এই স্ট্যাটাস পরিবর্তন সম্পর্কে একটি নোট লিখুন...",
+		"products.orders.dialog.status.submit": "স্ট্যাটাস আপডেট করুন",
+		"products.orders.dialog.cancel.title": "অর্ডার বাতিল করুন",
+		"products.orders.dialog.cancel.description":
+			"আপনি কি নিশ্চিত যে অর্ডার #{orderNumber} বাতিল করতে চান? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।",
+		"products.orders.dialog.cancel.reason": "বাতিলের কারণ (ঐচ্ছিক)",
+		"products.orders.dialog.cancel.reasonPlaceholder":
+			"বাতিলের কারণ লিখুন...",
+		"products.orders.dialog.cancel.keep": "অর্ডার রাখুন",
+		"products.orders.dialog.cancel.submit": "অর্ডার বাতিল করুন",
+		"products.orders.toast.statusUpdated":
+			"অর্ডারের স্ট্যাটাস সফলভাবে আপডেট হয়েছে",
+		"products.orders.toast.statusFailed":
+			"অর্ডারের স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে",
+		"products.orders.toast.cancelled": "অর্ডার সফলভাবে বাতিল হয়েছে",
+		"products.orders.toast.cancelFailed":
+			"অর্ডার বাতিল করতে ব্যর্থ হয়েছে",
+		"reviews.list.title": "রিভিউসমূহ",
+		"reviews.list.description": "গ্রাহকের পণ্যের রিভিউ মডারেট করুন",
+		"reviews.list.searchPlaceholder":
+			"পণ্য, গ্রাহক বা রিভিউয়ের লেখা দিয়ে খুঁজুন...",
+		"reviews.list.empty": "কোনো রিভিউ পাওয়া যায়নি",
+		"reviews.list.deleteConfirm":
+			"আপনি কি নিশ্চিত যে এই রিভিউটি মুছতে চান?",
+		"reviews.list.table.product": "পণ্য",
+		"reviews.list.table.customer": "গ্রাহক",
+		"reviews.list.table.rating": "রেটিং",
+		"reviews.list.table.review": "রিভিউ",
+		"reviews.list.table.status": "স্ট্যাটাস",
+		"reviews.list.table.date": "তারিখ",
+		"reviews.list.table.empty": "-",
+		"reviews.list.status.approved": "অনুমোদিত",
+		"reviews.list.status.pending": "পেন্ডিং",
+		"reviews.list.actions.label": "অ্যাকশন",
+		"reviews.list.actions.approve": "অনুমোদন করুন",
+		"reviews.list.actions.reject": "রিজেক্ট করুন",
+		"reviews.list.actions.delete": "মুছুন",
+		"reviews.list.toast.approved": "রিভিউ অনুমোদিত হয়েছে",
+		"reviews.list.toast.approveFailed": "রিভিউ অনুমোদন করতে ব্যর্থ হয়েছে",
+		"reviews.list.toast.rejected": "রিভিউ রিজেক্ট করা হয়েছে",
+		"reviews.list.toast.rejectFailed": "রিভিউ রিজেক্ট করতে ব্যর্থ হয়েছে",
+		"reviews.list.toast.deleted": "রিভিউ মুছে ফেলা হয়েছে",
+		"reviews.list.toast.deleteFailed": "রিভিউ মুছতে ব্যর্থ হয়েছে",
+		"reviews.filter.title": "ফিল্টার",
+		"reviews.filter.description":
+			"রিভিউ তালিকা আরও নির্দিষ্ট করতে ফিল্টার প্রয়োগ করুন",
+		"reviews.filter.approvalStatus": "অনুমোদনের স্ট্যাটাস",
+		"reviews.filter.rating": "রেটিং",
+		"reviews.filter.stars5": "৫ স্টার",
+		"reviews.filter.stars4": "৪ স্টার",
+		"reviews.filter.stars3": "৩ স্টার",
+		"reviews.filter.stars2": "২ স্টার",
+		"reviews.filter.stars1": "১ স্টার",
+		"reviews.filter.reset": "রিসেট",
+		"reviews.filter.apply": "ফিল্টার প্রয়োগ করুন",
+		"variantTypes.list.title": "ভ্যারিয়েন্ট টাইপসমূহ",
+		"variantTypes.list.description":
+			"পুনঃব্যবহারযোগ্য ভ্যারিয়েন্ট টাইপ (সাইজ, কালার, ওজন ইত্যাদি) এবং তাদের অপশন নির্ধারণ করুন",
+		"variantTypes.list.add": "ভ্যারিয়েন্ট টাইপ যোগ করুন",
+		"variantTypes.list.empty": "এখনও কোনো ভ্যারিয়েন্ট টাইপ নির্ধারণ করা হয়নি।",
+		"variantTypes.list.emptyDescription":
+			"পণ্যের ভ্যারিয়েন্টে ব্যবহার করার জন্য সাইজ, কালার বা ওজনের মতো টাইপ তৈরি করুন।",
+		"variantTypes.list.deleteConfirm":
+			'"{name}" এবং এর সব অপশন মুছে ফেলবেন? এতে বিদ্যমান পণ্যের ভ্যারিয়েন্ট প্রভাবিত হতে পারে।',
+		"variantTypes.list.optionCount": "{count} টি অপশন",
+		"variantTypes.list.noOptions": "কোনো অপশন নির্ধারণ করা হয়নি",
+		"variantTypes.list.toast.deleteSuccess":
+			"ভ্যারিয়েন্ট টাইপ মুছে ফেলা হয়েছে",
+		"variantTypes.list.toast.deleteFailed":
+			"মুছতে ব্যর্থ হয়েছে। এটি হয়তো পণ্যের ভ্যারিয়েন্টে ব্যবহৃত হচ্ছে।",
+		"variantTypes.form.editTitle": "ভ্যারিয়েন্ট টাইপ সম্পাদনা করুন",
+		"variantTypes.form.createTitle": "ভ্যারিয়েন্ট টাইপ তৈরি করুন",
+		"variantTypes.form.name": "নাম",
+		"variantTypes.form.namePlaceholder": "যেমন, Size, Color, Weight",
+		"variantTypes.form.options": "অপশনসমূহ",
+		"variantTypes.form.optionPlaceholder":
+			"একটি অপশন লিখে Enter চাপুন",
+		"variantTypes.form.addOption": "যোগ করুন",
+		"variantTypes.form.update": "আপডেট",
+		"variantTypes.form.create": "তৈরি করুন",
+		"variantTypes.form.toast.updateSuccess":
+			"ভ্যারিয়েন্ট টাইপ আপডেট হয়েছে",
+		"variantTypes.form.toast.updateFailed":
+			"ভ্যারিয়েন্ট টাইপ আপডেট করতে ব্যর্থ হয়েছে",
+		"variantTypes.form.toast.nameRequired":
+			"ভ্যারিয়েন্ট টাইপের নাম আবশ্যক",
+		"variantTypes.form.toast.createSuccess":
+			"ভ্যারিয়েন্ট টাইপ তৈরি হয়েছে",
+		"variantTypes.form.toast.createFailed":
+			"ভ্যারিয়েন্ট টাইপ তৈরি করতে ব্যর্থ হয়েছে",
+		"wishlists.list.title": "উইশলিস্টসমূহ",
+		"wishlists.list.description": "সব গ্রাহকের উইশলিস্টে থাকা পণ্যসমূহ",
+		"wishlists.list.countDescription":
+			"সব গ্রাহক মিলিয়ে {count} টি আইটেম উইশলিস্টে রয়েছে",
+		"wishlists.list.searchPlaceholder":
+			"পণ্যের নাম বা গ্রাহকের ইমেইল দিয়ে খুঁজুন...",
+		"wishlists.list.empty": "কোনো উইশলিস্ট আইটেম পাওয়া যায়নি",
+		"wishlists.list.table.product": "পণ্য",
+		"wishlists.list.table.category": "ক্যাটাগরি",
+		"wishlists.list.table.price": "মূল্য",
+		"wishlists.list.table.customer": "গ্রাহক",
+		"wishlists.list.table.addedOn": "যোগের তারিখ",
+		"wishlists.list.table.empty": "—",
+		"wishlists.filter.title": "ফিল্টার",
+		"wishlists.filter.description":
+			"উইশলিস্ট তালিকা আরও নির্দিষ্ট করতে ফিল্টার প্রয়োগ করুন",
+		"wishlists.filter.addedFrom": "শুরুর তারিখ",
+		"wishlists.filter.addedTo": "শেষের তারিখ",
+		"wishlists.filter.reset": "রিসেট",
+		"wishlists.filter.apply": "ফিল্টার প্রয়োগ করুন",
+		"sales.title": "সেলসমূহ",
+		"sales.description": "সেল ও প্রোমোশনাল ডিসকাউন্ট পরিচালনা করুন",
+		"sales.create": "সেল তৈরি করুন",
+		"sales.loading": "সেল লোড হচ্ছে...",
+		"sales.error": "সেল লোড করতে সমস্যা হয়েছে",
+		"sales.empty": "কোনো সেল পাওয়া যায়নি। আপনার প্রথম সেল তৈরি করুন!",
+		"sales.deleteConfirm": 'আপনি কি "{name}" সেলটি মুছে ফেলতে চান?',
+		"sales.toast.deleteSuccess": "সেল সফলভাবে মুছে ফেলা হয়েছে",
+		"sales.toast.deleteFailed": "সেল মুছতে ব্যর্থ হয়েছে",
+		"sales.table.name": "সেলের নাম",
+		"sales.table.discount": "ডিসকাউন্ট",
+		"sales.table.appliesTo": "প্রযোজ্য",
+		"sales.table.validity": "কার্যকারিতার সময়",
+		"sales.table.stacking": "কুপন স্ট্যাকিং",
+		"sales.table.status": "স্ট্যাটাস",
+		"sales.appliesTo.allProducts": "সব পণ্য",
+		"sales.appliesTo.specificCategories": "নির্দিষ্ট ক্যাটাগরি",
+		"sales.appliesTo.specificProducts": "নির্দিষ্ট পণ্য",
+		"sales.appliesTo.categoriesCount":
+			"{count, plural, one {# টি ক্যাটাগরি} other {# টি ক্যাটাগরি}}",
+		"sales.appliesTo.productsCount":
+			"{count, plural, one {# টি পণ্য} other {# টি পণ্য}}",
+		"sales.stacking.allowed": "অনুমোদিত",
+		"sales.stacking.blocked": "ব্লকড",
+		"sales.status.active": "সক্রিয়",
+		"sales.status.inactive": "নিষ্ক্রিয়",
+		"sales.status.live": "লাইভ",
+		"sales.status.scheduled": "নির্ধারিত",
+		"sales.actions.label": "অ্যাকশন",
+		"sales.actions.edit": "সম্পাদনা",
+		"sales.actions.delete": "মুছুন",
+		"sales.modal.editTitle": "সেল সম্পাদনা করুন",
+		"sales.modal.createTitle": "নতুন সেল তৈরি করুন",
+		"sales.modal.editDescription": "নিচের সেলের তথ্য আপডেট করুন।",
+		"sales.modal.createDescription":
+			"আপনার স্টোরের জন্য একটি নতুন সেল বা প্রোমোশন তৈরি করুন।",
+		"sales.form.validation.nameRequired": "সেলের নাম আবশ্যক",
+		"sales.form.validation.nameMax":
+			"সেলের নাম ২০০ অক্ষরের বেশি হতে পারবে না",
+		"sales.form.validation.descriptionMax":
+			"বিবরণ ১০০০ অক্ষরের বেশি হতে পারবে না",
+		"sales.form.validation.discountPositive":
+			"ডিসকাউন্টের মান শূন্যের বেশি হতে হবে",
+		"sales.form.validation.validFrom": "শুরুর তারিখ আবশ্যক",
+		"sales.form.validation.validUntil": "শেষের তারিখ আবশ্যক",
+		"sales.form.name": "সেলের নাম",
+		"sales.form.namePlaceholder": "যেমন, Summer Sale, Eid Special",
+		"sales.form.discountType": "ডিসকাউন্টের ধরন",
+		"sales.form.discountType.percentage": "শতাংশ (%)",
+		"sales.form.discountType.fixedAmount": "নির্দিষ্ট পরিমাণ (৳)",
+		"sales.form.discountValue": "ডিসকাউন্টের মান",
+		"sales.form.discountValuePlaceholderPercentage": "যেমন, 20",
+		"sales.form.discountValuePlaceholderFixed": "যেমন, 100",
+		"sales.form.discountValueHelpPercentage": "শতাংশ হিসেবে ছাড় (0-100)",
+		"sales.form.discountValueHelpFixed": "টাকায় নির্দিষ্ট ছাড়",
+		"sales.form.appliesTo": "প্রযোজ্য",
+		"sales.form.appliesTo.allProducts": "সব পণ্য",
+		"sales.form.appliesTo.specificCategories": "নির্দিষ্ট ক্যাটাগরি",
+		"sales.form.appliesTo.specificProducts": "নির্দিষ্ট পণ্য",
+		"sales.form.categories": "ক্যাটাগরি",
+		"sales.form.products": "পণ্য",
+		"sales.form.noCategories": "কোনো ক্যাটাগরি পাওয়া যায়নি",
+		"sales.form.noProducts": "কোনো পণ্য পাওয়া যায়নি",
+		"sales.form.validFrom": "শুরুর সময়",
+		"sales.form.validUntil": "শেষের সময়",
+		"sales.form.description": "বিবরণ",
+		"sales.form.descriptionPlaceholder":
+			"যেমন, সব অর্গানিক পণ্যে ২০% ছাড়",
+		"sales.form.allowCouponStacking":
+			"এই সেলের সঙ্গে কুপন কোড ব্যবহার করার অনুমতি দিন",
+		"sales.form.active": "সক্রিয়",
+		"sales.form.update": "সেল আপডেট করুন",
+		"sales.form.create": "সেল তৈরি করুন",
+		"sales.form.toast.updateSuccess": "সেল সফলভাবে আপডেট হয়েছে",
+		"sales.form.toast.createSuccess": "সেল সফলভাবে তৈরি হয়েছে",
+		"store.common.empty": "-",
+		"store.common.preview": "প্রিভিউ",
+		"store.common.actions": "অ্যাকশন",
+		"store.common.edit": "সম্পাদনা",
+		"store.common.delete": "মুছুন",
+		"store.common.start": "শুরু",
+		"store.common.end": "শেষ",
+		"store.common.startDate": "শুরুর তারিখ",
+		"store.common.endDate": "শেষের তারিখ",
+		"store.common.displayOrder": "ডিসপ্লে অর্ডার",
+		"store.common.displayOrderPlaceholder": "যেমন, 1",
+		"store.common.isActive": "সক্রিয়",
+		"store.common.status.label": "স্ট্যাটাস",
+		"store.common.status.active": "সক্রিয়",
+		"store.common.status.inactive": "নিষ্ক্রিয়",
+		"store.common.filter.reset": "রিসেট",
+		"store.common.filter.apply": "ফিল্টার প্রয়োগ করুন",
+		"store.banners.title": "ব্যানারসমূহ",
+		"store.banners.description": "আপনার প্রোমোশনাল ব্যানারগুলো পরিচালনা করুন",
+		"store.banners.add": "ব্যানার যোগ করুন",
+		"store.banners.searchPlaceholder": "শিরোনাম দিয়ে ব্যানার খুঁজুন...",
+		"store.banners.loading": "ব্যানার লোড হচ্ছে...",
+		"store.banners.error": "ব্যানার লোড করতে সমস্যা হয়েছে",
+		"store.banners.empty": "কোনো ব্যানার পাওয়া যায়নি",
+		"store.banners.deleteConfirm":
+			'আপনি কি নিশ্চিত যে "{title}" মুছতে চান?',
+		"store.banners.table.image": "ছবি",
+		"store.banners.table.title": "শিরোনাম",
+		"store.banners.table.schedule": "সময়সূচি",
+		"store.banners.table.order": "ক্রম",
+		"store.banners.table.status": "স্ট্যাটাস",
+		"store.banners.toast.deleteSuccess": "ব্যানার সফলভাবে মুছে ফেলা হয়েছে",
+		"store.banners.toast.deleteFailed": "ব্যানার মুছতে ব্যর্থ হয়েছে",
+		"store.banners.filter.title": "ফিল্টার",
+		"store.banners.filter.description":
+			"আপনার ব্যানার তালিকা আরও নির্দিষ্ট করতে ফিল্টার প্রয়োগ করুন",
+		"store.banners.modal.editTitle": "ব্যানার সম্পাদনা করুন",
+		"store.banners.modal.createTitle": "নতুন ব্যানার তৈরি করুন",
+		"store.banners.modal.editDescription":
+			"নিচের ব্যানারের তথ্য আপডেট করুন। পরিবর্তনগুলো সঙ্গে সঙ্গে সংরক্ষিত হবে।",
+		"store.banners.modal.createDescription":
+			"অফার বা ক্যাম্পেইন দেখানোর জন্য একটি নতুন ব্যানার যোগ করুন। নিচের তথ্য পূরণ করুন।",
+		"store.banners.form.validation.title": "শিরোনাম আবশ্যক",
+		"store.banners.form.validation.titleMax":
+			"শিরোনাম ২০০ অক্ষরের বেশি হতে পারবে না",
+		"store.banners.form.validation.descriptionMax":
+			"বিবরণ ১০০০ অক্ষরের বেশি হতে পারবে না",
+		"store.banners.form.validation.orderInteger":
+			"ক্রম অবশ্যই পূর্ণসংখ্যা হতে হবে",
+		"store.banners.form.validation.orderMin":
+			"ক্রম ০ বা তার বেশি হতে হবে",
+		"store.banners.form.title": "শিরোনাম",
+		"store.banners.form.titlePlaceholder":
+			"যেমন, Summer Sale, New Arrivals",
+		"store.banners.form.titleDescription": "ব্যানারের শিরোনাম",
+		"store.banners.form.description": "বিবরণ",
+		"store.banners.form.descriptionPlaceholder":
+			"যেমন, সব পণ্যে ৫০% পর্যন্ত ছাড়",
+		"store.banners.form.descriptionHelp": "ব্যানার সম্পর্কে অতিরিক্ত তথ্য",
+		"store.banners.form.image": "ব্যানার ছবি",
+		"store.banners.form.imageHelpEdit":
+			"বর্তমান ছবি রাখতে চাইলে ফাঁকা রাখুন",
+		"store.banners.form.imageHelpCreate":
+			"ব্যানারের জন্য একটি ছবি আপলোড করুন",
+		"store.banners.form.startDateHelp": "কখন ব্যানারটি দেখা যাবে",
+		"store.banners.form.endDateHelp": "কখন ব্যানারটির মেয়াদ শেষ হবে",
+		"store.banners.form.displayOrderHelp":
+			"কম সংখ্যার ব্যানার আগে দেখানো হবে",
+		"store.banners.form.update": "ব্যানার আপডেট করুন",
+		"store.banners.form.create": "ব্যানার তৈরি করুন",
+		"store.banners.form.toast.updateSuccess":
+			"ব্যানার সফলভাবে আপডেট হয়েছে",
+		"store.banners.form.toast.imageRequired":
+			"ব্যানারের জন্য একটি ছবি নির্বাচন করুন",
+		"store.banners.form.toast.createSuccess":
+			"ব্যানার সফলভাবে তৈরি হয়েছে",
+		"store.announcements.title": "ঘোষণাসমূহ",
+		"store.announcements.description": "আপনার স্টোরের ঘোষণাগুলো পরিচালনা করুন",
+		"store.announcements.add": "ঘোষণা যোগ করুন",
+		"store.announcements.searchPlaceholder":
+			"শিরোনাম দিয়ে ঘোষণা খুঁজুন...",
+		"store.announcements.loading": "ঘোষণা লোড হচ্ছে...",
+		"store.announcements.error": "ঘোষণা লোড করতে সমস্যা হয়েছে",
+		"store.announcements.empty": "কোনো ঘোষণা পাওয়া যায়নি",
+		"store.announcements.deleteConfirm":
+			'আপনি কি নিশ্চিত যে "{title}" মুছতে চান?',
+		"store.announcements.table.title": "শিরোনাম",
+		"store.announcements.table.description": "বিবরণ",
+		"store.announcements.table.schedule": "সময়সূচি",
+		"store.announcements.table.status": "স্ট্যাটাস",
+		"store.announcements.toast.deleteSuccess":
+			"ঘোষণা সফলভাবে মুছে ফেলা হয়েছে",
+		"store.announcements.toast.deleteFailed":
+			"ঘোষণা মুছতে ব্যর্থ হয়েছে",
+		"store.announcements.filter.title": "ফিল্টার",
+		"store.announcements.filter.description":
+			"আপনার ঘোষণা তালিকা আরও নির্দিষ্ট করতে ফিল্টার প্রয়োগ করুন",
+		"store.announcements.modal.editTitle": "ঘোষণা সম্পাদনা করুন",
+		"store.announcements.modal.createTitle": "নতুন ঘোষণা তৈরি করুন",
+		"store.announcements.modal.editDescription":
+			"নিচের ঘোষণার তথ্য আপডেট করুন। পরিবর্তনগুলো সঙ্গে সঙ্গে সংরক্ষিত হবে।",
+		"store.announcements.modal.createDescription":
+			"আপনার স্টোরে দেখানোর জন্য একটি নতুন ঘোষণা যোগ করুন। নিচের তথ্য পূরণ করুন।",
+		"store.announcements.form.validation.title": "শিরোনাম আবশ্যক",
+		"store.announcements.form.validation.titleMax":
+			"শিরোনাম ১০০ অক্ষরের বেশি হতে পারবে না",
+		"store.announcements.form.validation.description": "বিবরণ আবশ্যক",
+		"store.announcements.form.validation.descriptionMax":
+			"বিবরণ ২০০০ অক্ষরের বেশি হতে পারবে না",
+		"store.announcements.form.validation.startDate":
+			"শুরুর তারিখ আবশ্যক",
+		"store.announcements.form.validation.endDate": "শেষের তারিখ আবশ্যক",
+		"store.announcements.form.validation.endAfterStart":
+			"শেষের তারিখ শুরুর তারিখের পরে হতে হবে",
+		"store.announcements.form.title": "শিরোনাম",
+		"store.announcements.form.titlePlaceholder":
+			"যেমন, Store Closure Notice, Holiday Hours",
+		"store.announcements.form.titleHelp": "ঘোষণার শিরোনাম",
+		"store.announcements.form.description": "বিবরণ",
+		"store.announcements.form.descriptionPlaceholder":
+			"যেমন, আমরা ২৫ ডিসেম্বর বন্ধ থাকব...",
+		"store.announcements.form.descriptionHelp": "ঘোষণার সম্পূর্ণ বার্তা",
+		"store.announcements.form.startDateHelp":
+			"কখন ঘোষণাটি দেখা যাবে",
+		"store.announcements.form.endDateHelp":
+			"কখন ঘোষণাটির মেয়াদ শেষ হবে",
+		"store.announcements.form.update": "ঘোষণা আপডেট করুন",
+		"store.announcements.form.create": "ঘোষণা তৈরি করুন",
+		"store.announcements.form.toast.updateSuccess":
+			"ঘোষণা সফলভাবে আপডেট হয়েছে",
+		"store.announcements.form.toast.createSuccess":
+			"ঘোষণা সফলভাবে তৈরি হয়েছে",
+		"store.siteConfig.title": "সাইট সেটিংস",
+		"store.siteConfig.description":
+			"আপনার স্টোরের সাধারণ সেটিংস পরিচালনা করুন",
+		"store.siteConfig.toast.updateSuccess":
+			"সাইট কনফিগারেশন সফলভাবে আপডেট হয়েছে",
+		"store.siteConfig.validation.taglineMax":
+			"ট্যাগলাইন ২০০ অক্ষরের বেশি হতে পারবে না",
+		"store.siteConfig.validation.addressMax":
+			"ঠিকানা ৫০০ অক্ষরের বেশি হতে পারবে না",
+		"store.siteConfig.validation.phoneMax":
+			"ফোন নম্বর ২০ অক্ষরের বেশি হতে পারবে না",
+		"store.siteConfig.validation.email": "অবৈধ ইমেইল ঠিকানা",
+		"store.siteConfig.validation.url": "অবৈধ URL",
+		"store.siteConfig.validation.chargeMin":
+			"চার্জ ঋণাত্মক হতে পারবে না",
+		"store.siteConfig.validation.thresholdMin":
+			"থ্রেশহোল্ড ঋণাত্মক হতে পারবে না",
+		"store.siteConfig.validation.taxMin":
+			"ট্যাক্স রেট ঋণাত্মক হতে পারবে না",
+		"store.siteConfig.validation.taxMax":
+			"ট্যাক্স রেট ১০০% এর বেশি হতে পারবে না",
+		"store.siteConfig.validation.pixelIdMax":
+			"পিক্সেল আইডি ৩২ অক্ষরের বেশি হতে পারবে না",
+		"store.siteConfig.validation.testEventMax":
+			"টেস্ট ইভেন্ট কোড ১০০ অক্ষরের বেশি হতে পারবে না",
+		"store.siteConfig.validation.currencyMax":
+			"কারেন্সি কোড ১০ অক্ষরের বেশি হতে পারবে না",
+		"store.siteConfig.tabs.general": "সাধারণ",
+		"store.siteConfig.tabs.contact": "যোগাযোগ ও সোশ্যাল",
+		"store.siteConfig.tabs.shipping": "শিপিং ও ট্যাক্স",
+		"store.siteConfig.tabs.branding": "ব্র্যান্ডিং",
+		"store.siteConfig.tabs.meta": "মেটা ট্র্যাকিং",
+		"store.siteConfig.general.title": "স্টোর পরিচিতি",
+		"store.siteConfig.general.description":
+			"স্টোরফ্রন্টে গ্রাহকদের দেখানো মৌলিক তথ্য।",
+		"store.siteConfig.contact.title": "যোগাযোগের তথ্য",
+		"store.siteConfig.contact.description":
+			"গ্রাহকরা কীভাবে সরাসরি আপনার স্টোরের সাথে যোগাযোগ করতে পারবে।",
+		"store.siteConfig.social.title": "সোশ্যাল মিডিয়া",
+		"store.siteConfig.social.description":
+			"আপনার সোশ্যাল মিডিয়া পেইজগুলোর লিঙ্ক। কোনো ফিল্ড ফাঁকা রাখলে স্টোরফ্রন্টে তার আইকন লুকানো থাকবে।",
+		"store.siteConfig.shipping.chargesTitle": "ডেলিভারি চার্জ",
+		"store.siteConfig.shipping.chargesDescription":
+			"গ্রাহকের অবস্থানের ওপর ভিত্তি করে চেকআউটে নির্ধারিত ফ্ল্যাট ডেলিভারি ফি। অর্ডার দেওয়ার সময় গ্রাহকরা এই পরিমাণ দেখবে।",
+		"store.siteConfig.shipping.freeTitle": "ফ্রি শিপিং",
+		"store.siteConfig.shipping.freeDescription":
+			"গ্রাহকের অর্ডারের সাবটোটাল নিচের সীমা পূরণ করলে ডেলিভারি ফি স্বয়ংক্রিয়ভাবে মওকুফ হবে।",
+		"store.siteConfig.shipping.taxTitle": "ট্যাক্স",
+		"store.siteConfig.shipping.taxDescription":
+			"চেকআউটে অর্ডারের উপর প্রযোজ্য ট্যাক্স রেট কনফিগার করুন।",
+		"store.siteConfig.meta.title": "মেটা পিক্সেল ক্রেডেনশিয়াল",
+		"store.siteConfig.meta.description":
+			"আপনার মেটা পিক্সেল এবং কনভার্সনস API ক্রেডেনশিয়াল কনফিগার করুন। ভেন্ডর সেটিংস থেকে ট্র্যাকিং চালু বা বন্ধ করুন।",
+		"store.siteConfig.branding.title": "স্টোর লোগো",
+		"store.siteConfig.branding.description":
+			"আপনার লোগো সাইট হেডার, ইমেইল এবং ইনভয়েসে দেখানো হয়। বর্তমানটি পরিবর্তন করতে নতুন ছবি আপলোড করুন।",
+		"store.siteConfig.branding.currentLogo": "বর্তমান লোগো",
+		"store.siteConfig.branding.replaceLogo": "লোগো পরিবর্তন করুন",
+		"store.siteConfig.branding.uploadLogo": "লোগো আপলোড করুন",
+		"store.siteConfig.branding.logoHelp":
+			"প্রস্তাবিত: বর্গাকার ছবি, ২০০×২০০ px বা তার বেশি (PNG বা SVG ভালো)। বর্তমান লোগো রাখতে চাইলে ফাঁকা রাখুন।",
+		"store.siteConfig.fields.tagline": "ট্যাগলাইন",
+		"store.siteConfig.fields.taglinePlaceholder":
+			"যেমন, Fresh Organic Products Delivered to Your Door",
+		"store.siteConfig.fields.taglineHelp":
+			"একটি ছোট বাক্য যা আপনার স্টোরের মূল মান বোঝায়। সাইট হেডার এবং SEO মেটা ট্যাগে দেখানো হয়।",
+		"store.siteConfig.fields.address": "প্রতিষ্ঠানের ঠিকানা",
+		"store.siteConfig.fields.addressPlaceholder":
+			"যেমন, 123 Main St, Dhaka 1216, Bangladesh",
+		"store.siteConfig.fields.addressHelp":
+			"আপনার স্টোরের ঠিকানা। ফুটার এবং কন্টাক্ট পেইজে দেখানো হয়।",
+		"store.siteConfig.fields.phone": "ফোন নম্বর",
+		"store.siteConfig.fields.phonePlaceholder":
+			"যেমন, +880 1700 000000",
+		"store.siteConfig.fields.phoneHelp":
+			"প্রধান যোগাযোগ নম্বর। ফুটার এবং কন্টাক্ট পেইজে দেখানো হয়।",
+		"store.siteConfig.fields.email": "ইমেইল ঠিকানা",
+		"store.siteConfig.fields.emailPlaceholder":
+			"যেমন, support@yourstore.com",
+		"store.siteConfig.fields.emailHelp":
+			"গ্রাহকমুখী সাপোর্ট ইমেইল।",
+		"store.siteConfig.fields.facebook": "ফেসবুক পেইজ URL",
+		"store.siteConfig.fields.facebookHelp":
+			"আপনার ফেসবুক বিজনেস পেইজের পূর্ণ URL।",
+		"store.siteConfig.fields.instagram": "ইনস্টাগ্রাম প্রোফাইল URL",
+		"store.siteConfig.fields.instagramHelp":
+			"আপনার ইনস্টাগ্রাম প্রোফাইলের পূর্ণ URL।",
+		"store.siteConfig.fields.youtube": "ইউটিউব চ্যানেল URL",
+		"store.siteConfig.fields.youtubeHelp":
+			"আপনার ইউটিউব চ্যানেলের পূর্ণ URL।",
+		"store.siteConfig.fields.insideDhaka": "ঢাকার ভিতরে (৳)",
+		"store.siteConfig.fields.insideDhakaHelp":
+			"ঢাকা শহরের ভেতরে শিপ করা অর্ডারের ডেলিভারি ফি।",
+		"store.siteConfig.fields.outsideDhaka": "ঢাকার বাইরে (৳)",
+		"store.siteConfig.fields.outsideDhakaHelp":
+			"ঢাকার বাইরে শিপ করা অর্ডারের ডেলিভারি ফি।",
+		"store.siteConfig.fields.freeShippingThreshold":
+			"ফ্রি শিপিংয়ের জন্য ন্যূনতম অর্ডার পরিমাণ (৳)",
+		"store.siteConfig.fields.freeShippingThresholdHelp":
+			"যেসব গ্রাহকের সাবটোটাল এই পরিমাণ বা তার বেশি, তারা ডেলিভারির জন্য ৳0 দেবে। সম্পূর্ণ বন্ধ করতে 0 দিন।",
+		"store.siteConfig.fields.taxRate": "ট্যাক্স রেট (%)",
+		"store.siteConfig.fields.taxRateHelp":
+			"ডিসকাউন্টের পরে অর্ডারের সাবটোটালে প্রযোজ্য শতকরা ট্যাক্স (যেমন 5% VAT এর জন্য 5 দিন)। ট্যাক্স-মুক্ত অর্ডারের জন্য 0 দিন।",
+		"store.siteConfig.fields.pixelId": "পিক্সেল আইডি",
+		"store.siteConfig.fields.pixelIdHelp":
+			"আপনার মেটা পিক্সেল আইডি। Events Manager এর Data Sources-এ পাওয়া যায়।",
+		"store.siteConfig.fields.accessToken": "অ্যাক্সেস টোকেন",
+		"store.siteConfig.fields.accessTokenPlaceholder":
+			"বর্তমান টোকেন রাখতে চাইলে ফাঁকা রাখুন",
+		"store.siteConfig.fields.accessTokenHelp":
+			"Conversions API অ্যাক্সেস টোকেন। বর্তমান টোকেন অপরিবর্তিত রাখতে ফাঁকা রাখুন।",
+		"store.siteConfig.fields.testEventCode": "টেস্ট ইভেন্ট কোড",
+		"store.siteConfig.fields.testEventCodeHelp":
+			"ঐচ্ছিক। টেস্টিং চলাকালে Test Events ট্যাবে ইভেন্ট যাচাই করতে ব্যবহার করুন।",
+		"store.siteConfig.fields.defaultCurrency": "ডিফল্ট কারেন্সি",
+		"store.siteConfig.fields.defaultCurrencyHelp":
+			"পারচেজ ইভেন্টের জন্য ISO কারেন্সি কোড (যেমন BDT, USD)।",
+		"store.siteConfig.save": "পরিবর্তন সংরক্ষণ করুন",
 		"dashboard.error": "ড্যাশবোর্ড মেট্রিকস লোড করতে ব্যর্থ হয়েছে।",
 		"dashboard.change.noChange": "কোনো পরিবর্তন নেই",
 		"dashboard.change.fromLastMonth": "গত মাস থেকে {value}%",

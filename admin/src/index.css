@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -42,6 +43,18 @@
 }
 
 :root {
+  --font-sans:
+    "Inter",
+    "Segoe UI",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  --font-bangla:
+    "Hind Siliguri",
+    "Noto Sans Bengali",
+    "SolaimanLipi",
+    "Kalpurush",
+    sans-serif;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -111,10 +124,27 @@
 }
 
 @layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+
+  html:lang(bn) {
+    font-family: var(--font-bangla);
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: inherit;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 }

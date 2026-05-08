@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { UNIT_OPTIONS } from "@/constants/selectOptions";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { getCategories, type CategoryFilter } from "@/lib/api/category";
 import {
@@ -33,6 +34,8 @@ import slugify from "slugify";
 import { toast } from "sonner";
 import { z } from "zod";
 
+type TranslateFn = ReturnType<typeof useT>;
+
 const initialCategoryParams: CategoryFilter = {
 	limit: 100,
 	offset: 0,
@@ -40,67 +43,98 @@ const initialCategoryParams: CategoryFilter = {
 	is_active: true,
 };
 
-const variantRowSchema = z
-	.object({
-		name: z.string().optional(),
-		sku: z.string().min(1, "SKU is required"),
-		base_price: z.coerce.number().min(0.01, "Price required"),
-		cost_price: z.coerce.number().optional(),
-		stock_quantity: z.coerce.number().min(0).optional(),
-		low_stock_threshold: z.coerce.number().min(0).optional(),
-		weight: z.coerce.number().optional(),
-		display_order: z.coerce.number().optional(),
-		option_ids: z.array(z.string()).optional().default([]),
-	})
-	.superRefine((data, ctx) => {
-		const hasName = !!data.name?.trim();
-		const hasOptions = (data.option_ids?.length ?? 0) > 0;
+const createVariantRowSchema = (t: TranslateFn) =>
+	z
+		.object({
+			name: z.string().optional(),
+			sku: z.string().min(1, t("products.form.validation.sku", "SKU is required")),
+			base_price: z.coerce
+				.number()
+				.min(0.01, t("products.form.validation.price", "Price required")),
+			cost_price: z.coerce.number().optional(),
+			stock_quantity: z.coerce.number().min(0).optional(),
+			low_stock_threshold: z.coerce.number().min(0).optional(),
+			weight: z.coerce.number().optional(),
+			display_order: z.coerce.number().optional(),
+			option_ids: z.array(z.string()).optional().default([]),
+		})
+		.superRefine((data, ctx) => {
+			const hasName = !!data.name?.trim();
+			const hasOptions = (data.option_ids?.length ?? 0) > 0;
 
-		if (!hasName && !hasOptions) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["name"],
-				message: "Select variant options or enter a variant name",
-			});
-		}
-	});
+			if (!hasName && !hasOptions) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ["name"],
+					message: t(
+						"products.form.validation.variantNameOrOptions",
+						"Select variant options or enter a variant name",
+					),
+				});
+			}
+		});
 
-const productSchema = z
-	.object({
-		name: z.string().min(1, "Name is required"),
-		slug: z.string().min(1, "Slug is required"),
-		sku: z.string().min(1, "SKU is required"),
-		description: z.string().optional().nullable(),
-		short_description: z
-			.string()
-			.max(300, "Short description must be at most 300 characters")
-			.optional()
-			.nullable(),
-		category: z.string().min(1, "Category is required"),
-		base_price: z.coerce.number().min(0.01, "Base price is required"),
-		cost_price: z.coerce.number().optional(),
-		is_digital: z.boolean().default(false),
-		weight: z.coerce.number().optional(),
-		unit: z.enum(["kg", "g", "l", "ml", "piece", "pack"]),
-		unit_value: z.string().optional(),
-		meta_title: z.string().optional().nullable(),
-		meta_description: z.string().optional().nullable(),
-		is_featured: z.boolean().default(false),
-		is_active: z.boolean().default(true),
-		variants: z.array(variantRowSchema).min(1, "At least one variant is required"),
-	})
-	.refine(
-		(data) => {
-			if (!data.cost_price) return true;
-			return data.base_price > data.cost_price;
-		},
-		{
-			path: ["base_price"],
-			message: "Base price must be greater than cost price",
-		}
-	);
+const createProductSchema = (t: TranslateFn) =>
+	z
+		.object({
+			name: z.string().min(1, t("products.form.validation.name", "Name is required")),
+			slug: z.string().min(1, t("products.form.validation.slug", "Slug is required")),
+			sku: z.string().min(1, t("products.form.validation.sku", "SKU is required")),
+			description: z.string().optional().nullable(),
+			short_description: z
+				.string()
+				.max(
+					300,
+					t(
+						"products.form.validation.shortDescriptionMax",
+						"Short description must be at most 300 characters",
+					),
+				)
+				.optional()
+				.nullable(),
+			category: z
+				.string()
+				.min(1, t("products.form.validation.category", "Category is required")),
+			base_price: z.coerce
+				.number()
+				.min(
+					0.01,
+					t("products.form.validation.basePrice", "Base price is required"),
+				),
+			cost_price: z.coerce.number().optional(),
+			is_digital: z.boolean().default(false),
+			weight: z.coerce.number().optional(),
+			unit: z.enum(["kg", "g", "l", "ml", "piece", "pack"]),
+			unit_value: z.string().optional(),
+			meta_title: z.string().optional().nullable(),
+			meta_description: z.string().optional().nullable(),
+			is_featured: z.boolean().default(false),
+			is_active: z.boolean().default(true),
+			variants: z
+				.array(createVariantRowSchema(t))
+				.min(
+					1,
+					t(
+						"products.form.validation.variantRequired",
+						"At least one variant is required",
+					),
+				),
+		})
+		.refine(
+			(data) => {
+				if (!data.cost_price) return true;
+				return data.base_price > data.cost_price;
+			},
+			{
+				path: ["base_price"],
+				message: t(
+					"products.form.validation.basePriceHigher",
+					"Base price must be greater than cost price",
+				),
+			},
+		);
 
-type ProductFormData = z.infer<typeof productSchema>;
+type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
 
 const defaultVariant = {
 	name: "",
@@ -166,10 +200,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 	mode,
 	handleClose,
 }) => {
+	const t = useT();
 	const isEditMode = mode === "edit";
 	const navigate = useNavigate();
 
-	const form = useZodForm(productSchema, {
+	const form = useZodForm(createProductSchema(t), {
 		defaultValues: isEditMode
 			? {
 				...product,
@@ -235,7 +270,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Product updated successfully");
+						toast.success(
+							t("products.form.toast.updateSuccess", "Product updated successfully"),
+						);
 						if (createAnother) {
 							navigate("/products/create");
 						} else {
@@ -243,7 +280,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 						}
 					},
 					onError: (error) => {
-						toast.error("Failed to update product");
+						toast.error(
+							t("products.form.toast.updateFailed", "Failed to update product"),
+						);
 						console.error(error);
 					},
 				}
@@ -252,7 +291,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 			createProduct(requestData, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Product created successfully");
+					toast.success(
+						t("products.form.toast.createSuccess", "Product created successfully"),
+					);
 					if (createAnother) {
 						form.reset(productDefaultValues);
 					} else {
@@ -261,7 +302,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 					}
 				},
 				onError: () => {
-					toast.error("Failed to create product");
+					toast.error(
+						t("products.form.toast.createFailed", "Failed to create product"),
+					);
 				},
 			});
 		}
@@ -307,31 +350,46 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 		>
 			<Card>
 				<CardHeader>
-					<CardTitle>Product Information</CardTitle>
+					<CardTitle>{t("products.form.info.title", "Product Information")}</CardTitle>
 					<CardDescription>
-						Enter the core details of your product.
+						{t(
+							"products.form.info.description",
+							"Enter the core details of your product.",
+						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<TextField
 						name="name"
-						label="Name"
+						label={t("products.form.info.name", "Name")}
 						required
-						placeholder="e.g., Product Name"
-						helpText="Product name as displayed on the storefront."
+						placeholder={t("products.form.info.namePlaceholder", "e.g., Product Name")}
+						helpText={t(
+							"products.form.info.nameHelp",
+							"Product name as displayed on the storefront.",
+						)}
 					/>
 					<TextField
 						name="slug"
-						label="Slug"
+						label={t("products.form.info.slug", "Slug")}
 						required
-						placeholder="e.g., product-name"
-						helpText="URL-friendly version of the name. Unique identifier for the product page."
+						placeholder={t("products.form.info.slugPlaceholder", "e.g., product-name")}
+						helpText={t(
+							"products.form.info.slugHelp",
+							"URL-friendly version of the name. Unique identifier for the product page.",
+						)}
 					/>
-					<TextareaField name="short_description" label="Short Description" />
+					<TextareaField
+						name="short_description"
+						label={t("products.form.info.shortDescription", "Short Description")}
+					/>
 					<TextareaField
 						name="description"
-						label="Description"
-						placeholder="e.g., Description of the product"
+						label={t("products.form.info.descriptionLabel", "Description")}
+						placeholder={t(
+							"products.form.info.descriptionPlaceholder",
+							"e.g., Description of the product",
+						)}
 						rows={10}
 					/>
 				</CardContent>
@@ -339,29 +397,40 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Pricing</CardTitle>
-					<CardDescription>Manage your product pricing.</CardDescription>
+					<CardTitle>{t("products.form.pricing.title", "Pricing")}</CardTitle>
+					<CardDescription>
+						{t("products.form.pricing.description", "Manage your product pricing.")}
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField
 							name="cost_price"
-							label="Cost Price"
+							label={t("products.form.pricing.costPrice", "Cost Price")}
 							type="number"
-							placeholder="e.g., 100"
-							helpText="Your internal cost for this item. Not visible to customers."
+							placeholder={t("products.form.pricing.costPricePlaceholder", "e.g., 100")}
+							helpText={t(
+								"products.form.pricing.costPriceHelp",
+								"Your internal cost for this item. Not visible to customers.",
+							)}
 						/>
 						<TextField
 							name="base_price"
-							label="Base Price (MRP)"
+							label={t("products.form.pricing.basePrice", "Base Price (MRP)")}
 							type="number"
-							placeholder="e.g., 250"
-							helpText="The original/MRP price. Variant prices override this per-variant."
+							placeholder={t("products.form.pricing.basePricePlaceholder", "e.g., 250")}
+							helpText={t(
+								"products.form.pricing.basePriceHelp",
+								"The original/MRP price. Variant prices override this per-variant.",
+							)}
 							required
 						/>
 					</div>
 					<p className="text-xs text-muted-foreground">
-						To offer a sale discount on this product, create a sale in the{" "}
+						{t(
+							"products.form.pricing.saleHelp",
+							"To offer a sale discount on this product, create a sale in the",
+						)}{" "}
 						<a href="/sales" className="underline text-primary">Sales</a> section.
 					</p>
 				</CardContent>
@@ -371,28 +440,37 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 			{!isEditMode && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Variants</CardTitle>
+						<CardTitle>{t("products.form.variants.title", "Variants")}</CardTitle>
 						<CardDescription>
-							Every product requires at least one sellable variant. Select reusable
-							variant options where applicable, then set SKU, price, and stock for each row.
-							{isDigital && " Stock fields are hidden for digital products."}
+							{t(
+								"products.form.variants.description",
+								"Every product requires at least one sellable variant. Select reusable variant options where applicable, then set SKU, price, and stock for each row.",
+							)}
+							{isDigital
+								? ` ${t(
+										"products.form.variants.digitalNote",
+										"Stock fields are hidden for digital products.",
+									)}`
+								: ""}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						{/* Column headers */}
 						<div className={`hidden md:grid gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide px-1 ${isDigital ? "grid-cols-[1fr_1fr_1fr_32px]" : "grid-cols-[1fr_1fr_1fr_80px_80px_32px]"}`}>
-							<span>Variant Name</span>
-							<span>SKU <span className="text-red-500">*</span></span>
-							<span>Price <span className="text-red-500">*</span></span>
-							{!isDigital && <span>Stock</span>}
-							{!isDigital && <span>Low Stock</span>}
+							<span>{t("products.form.variants.columns.name", "Variant Name")}</span>
+							<span>{t("products.form.variants.columns.sku", "SKU")} <span className="text-red-500">*</span></span>
+							<span>{t("products.form.variants.columns.price", "Price")} <span className="text-red-500">*</span></span>
+							{!isDigital && <span>{t("products.form.variants.columns.stock", "Stock")}</span>}
+							{!isDigital && <span>{t("products.form.variants.columns.lowStock", "Low Stock")}</span>}
 							<span />
 						</div>
 
 						{variantTypes.length === 0 && (
 							<p className="text-sm text-muted-foreground">
-								No reusable variant types are configured yet. You can still create
-								variants manually by entering a variant name.
+								{t(
+									"products.form.variants.emptyTypes",
+									"No reusable variant types are configured yet. You can still create variants manually by entering a variant name.",
+								)}
 							</p>
 						)}
 
@@ -404,9 +482,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 								<div className={`grid gap-2 items-start ${isDigital ? "grid-cols-1 md:grid-cols-[1fr_1fr_1fr_32px]" : "grid-cols-1 md:grid-cols-[1fr_1fr_1fr_80px_80px_32px]"}`}>
 									{/* Name */}
 									<div>
-										<Label className="md:hidden text-xs mb-1 block">Name</Label>
+										<Label className="md:hidden text-xs mb-1 block">
+											{t("products.form.info.name", "Name")}
+										</Label>
 										<Input
-											placeholder="Auto from options, or enter custom name"
+											placeholder={t(
+												"products.form.variants.namePlaceholder",
+												"Auto from options, or enter custom name",
+											)}
 											{...form.register(`variants.${index}.name`)}
 											className={variantErrors?.[index]?.name ? "border-red-500" : ""}
 										/>
@@ -417,9 +500,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
 									{/* SKU */}
 									<div>
-										<Label className="md:hidden text-xs mb-1 block">SKU *</Label>
+										<Label className="md:hidden text-xs mb-1 block">
+											{t("products.form.variants.columns.sku", "SKU")} *
+										</Label>
 										<Input
-											placeholder="e.g., PRD-001-500"
+											placeholder={t(
+												"products.form.variants.skuPlaceholder",
+												"e.g., PRD-001-500",
+											)}
 											{...form.register(`variants.${index}.sku`)}
 											className={variantErrors?.[index]?.sku ? "border-red-500" : ""}
 										/>
@@ -430,12 +518,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
 									{/* Price */}
 									<div>
-										<Label className="md:hidden text-xs mb-1 block">Price *</Label>
+										<Label className="md:hidden text-xs mb-1 block">
+											{t("products.form.variants.columns.price", "Price")} *
+										</Label>
 										<Input
 											type="number"
 											min={0.01}
 											step={0.01}
-											placeholder="0.00"
+											placeholder={t("products.form.variants.pricePlaceholder", "0.00")}
 											{...form.register(`variants.${index}.base_price`)}
 											className={variantErrors?.[index]?.base_price ? "border-red-500" : ""}
 										/>
@@ -447,7 +537,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 									{/* Stock — hidden for digital */}
 									{!isDigital && (
 										<div>
-											<Label className="md:hidden text-xs mb-1 block">Stock</Label>
+											<Label className="md:hidden text-xs mb-1 block">
+												{t("products.form.variants.columns.stock", "Stock")}
+											</Label>
 											<Input
 												type="number"
 												min={0}
@@ -460,7 +552,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 									{/* Low Stock — hidden for digital */}
 									{!isDigital && (
 										<div>
-											<Label className="md:hidden text-xs mb-1 block">Low Stock</Label>
+											<Label className="md:hidden text-xs mb-1 block">
+												{t("products.form.variants.columns.lowStock", "Low Stock")}
+											</Label>
 											<Input
 												type="number"
 												min={0}
@@ -478,7 +572,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 										className="h-9 w-9 text-muted-foreground hover:text-destructive mt-0 md:mt-0"
 										onClick={() => remove(index)}
 										disabled={variantFields.length === 1}
-										title="Remove variant"
+										title={t("products.form.variants.remove", "Remove variant")}
 									>
 										<Trash2 className="h-4 w-4" />
 									</Button>
@@ -488,10 +582,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 									<div className="space-y-3 rounded-md border bg-muted/20 p-3">
 										<div className="flex items-center justify-between gap-3">
 											<div>
-												<p className="text-sm font-medium">Variant Options</p>
+												<p className="text-sm font-medium">
+													{t("products.form.variants.optionsTitle", "Variant Options")}
+												</p>
 												<p className="text-xs text-muted-foreground">
-													Choose up to one option from each variant type for this
-													variant.
+													{t(
+														"products.form.variants.optionsDescription",
+														"Choose up to one option from each variant type for this variant.",
+													)}
 												</p>
 											</div>
 										</div>
@@ -551,7 +649,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 							className="w-full mt-1"
 						>
 							<Plus className="h-4 w-4 mr-2" />
-							Add Variant
+							{t("products.form.variants.add", "Add Variant")}
 						</Button>
 					</CardContent>
 				</Card>
@@ -559,38 +657,51 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Specifications</CardTitle>
+					<CardTitle>{t("products.form.specs.title", "Specifications")}</CardTitle>
 					<CardDescription>
-						Unit and packaging information.
+						{t("products.form.specs.description", "Unit and packaging information.")}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						<TextField
 							name="sku"
-							label="Product SKU"
+							label={t("products.form.specs.productSku", "Product SKU")}
 							required
-							placeholder="e.g., SKU123"
-							helpText="Unique identifier for the product (not a variant)."
+							placeholder={t("products.form.specs.productSkuPlaceholder", "e.g., SKU123")}
+							helpText={t(
+								"products.form.specs.productSkuHelp",
+								"Unique identifier for the product (not a variant).",
+							)}
 						/>
 						<SelectField
 							name="unit"
-							label="Unit"
+							label={t("products.form.specs.unit", "Unit")}
 							required
 							options={UNIT_OPTIONS}
-							helpText="Measurement unit for this product (e.g., kg, piece, pack)."
+							placeholder={t("products.form.specs.unitPlaceholder", "Select a unit")}
+							helpText={t(
+								"products.form.specs.unitHelp",
+								"Measurement unit for this product (e.g., kg, piece, pack).",
+							)}
 						/>
 						<TextField
 							name="unit_value"
-							label="Unit Value"
+							label={t("products.form.specs.unitValue", "Unit Value")}
 							type="number"
 							required
-							helpText="The numeric value for the selected unit (e.g., '500' for 500g)."
+							helpText={t(
+								"products.form.specs.unitValueHelp",
+								"The numeric value for the selected unit (e.g., '500' for 500g).",
+							)}
 						/>
 						<TextField
 							name="weight"
-							label="Weight (in grams)"
-							helpText="Product weight in grams. Used for shipping cost calculations."
+							label={t("products.form.specs.weight", "Weight (in grams)")}
+							helpText={t(
+								"products.form.specs.weightHelp",
+								"Product weight in grams. Used for shipping cost calculations.",
+							)}
 						/>
 					</div>
 				</CardContent>
@@ -598,15 +709,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Organization</CardTitle>
-					<CardDescription>Category, type, and status.</CardDescription>
+					<CardTitle>{t("products.form.organization.title", "Organization")}</CardTitle>
+					<CardDescription>
+						{t("products.form.organization.description", "Category, type, and status.")}
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 gap-4">
 						<SelectField
 							name="category"
-							label="Category"
+							label={t("products.form.organization.category", "Category")}
 							required
+							placeholder={t(
+								"products.form.organization.categoryPlaceholder",
+								"Select a category",
+							)}
 							options={
 								categories?.results.map((category) => ({
 									label: category.name,
@@ -617,12 +734,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 						<div className="space-y-2 pt-2">
 							<CheckboxField
 								name="is_digital"
-								label="Digital Product (no stock tracking — e.g., ebook, gift card)"
+								label={t(
+									"products.form.organization.digital",
+									"Digital Product (no stock tracking - e.g., ebook, gift card)",
+								)}
 							/>
 							{isEditMode && (
-								<CheckboxField name="is_active" label="Active Product" />
+								<CheckboxField
+									name="is_active"
+									label={t("products.form.organization.active", "Active Product")}
+								/>
 							)}
-							<CheckboxField name="is_featured" label="Featured Product" />
+							<CheckboxField
+								name="is_featured"
+								label={t("products.form.organization.featured", "Featured Product")}
+							/>
 						</div>
 					</div>
 				</CardContent>
@@ -630,26 +756,34 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
 			<Card>
 				<CardHeader>
-					<CardTitle>SEO</CardTitle>
-					<CardDescription>Search Engine Optimization.</CardDescription>
+					<CardTitle>{t("products.form.seo.title", "SEO")}</CardTitle>
+					<CardDescription>
+						{t("products.form.seo.description", "Search Engine Optimization.")}
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<TextField
 						name="meta_title"
-						label="Meta Title"
-						helpText="Title tag for search engines. Optimized for click-through rates."
+						label={t("products.form.seo.metaTitle", "Meta Title")}
+						helpText={t(
+							"products.form.seo.metaTitleHelp",
+							"Title tag for search engines. Optimized for click-through rates.",
+						)}
 					/>
 					<TextareaField
 						name="meta_description"
-						label="Meta Description"
-						helpText="Description meta tag for search engines. Summarize the product page."
+						label={t("products.form.seo.metaDescription", "Meta Description")}
+						helpText={t(
+							"products.form.seo.metaDescriptionHelp",
+							"Description meta tag for search engines. Summarize the product page.",
+						)}
 					/>
 				</CardContent>
 			</Card>
 
 			<div className="flex justify-between gap-2 p-4 border rounded-lg shadow-sm">
 				<Button type="button" variant="outline" onClick={handleCancel}>
-					Cancel
+					{t("products.form.cancel", "Cancel")}
 				</Button>
 				<div className="flex justify-end gap-2">
 					{!isEditMode && (
@@ -659,11 +793,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 							onClick={handleSaveAndCreateAnother}
 							isLoading={isPending}
 						>
-							Save & Create Another
+							{t("products.form.saveAndCreateAnother", "Save & Create Another")}
 						</LoadingButton>
 					)}
 					<LoadingButton type="submit" isLoading={isPending}>
-						{isEditMode ? "Update Product" : "Create Product"}
+						{isEditMode
+							? t("products.form.submitUpdate", "Update Product")
+							: t("products.form.submitCreate", "Create Product")}
 					</LoadingButton>
 				</div>
 			</div>

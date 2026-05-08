@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	getVariantTypes,
 	useCreateVariantType,
@@ -47,15 +49,19 @@ export function VariantTypeList() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Variant Types</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="variantTypes.list.title" defaultMessage="Variant Types" />
+					</h1>
 					<p className="text-muted-foreground">
-						Define reusable variant types (Size, Color, Weight, etc.) and their
-						options
+						<T
+							id="variantTypes.list.description"
+							defaultMessage="Define reusable variant types (Size, Color, Weight, etc.) and their options"
+						/>
 					</p>
 				</div>
 				<Button onClick={handleAdd}>
 					<Plus className="h-4 w-4 mr-2" />
-					Add Variant Type
+					<T id="variantTypes.list.add" defaultMessage="Add Variant Type" />
 				</Button>
 			</div>
 
@@ -66,10 +72,17 @@ export function VariantTypeList() {
 			) : variantTypes.length === 0 ? (
 				<Card>
 					<CardContent className="py-12 text-center text-muted-foreground">
-						<p>No variant types defined yet.</p>
+						<p>
+							<T
+								id="variantTypes.list.empty"
+								defaultMessage="No variant types defined yet."
+							/>
+						</p>
 						<p className="text-sm mt-1">
-							Create variant types like Size, Color, or Weight to use with
-							product variants.
+							<T
+								id="variantTypes.list.emptyDescription"
+								defaultMessage="Create variant types like Size, Color, or Weight to use with product variants."
+							/>
 						</p>
 					</CardContent>
 				</Card>
@@ -104,19 +117,32 @@ function VariantTypeCard({
 	variantType: VariantType;
 	onEdit: (vt: VariantType) => void;
 }) {
+	const t = useT();
 	const { mutate: deleteType, isPending: isDeleting } = useDeleteVariantType();
 
 	const handleDelete = () => {
 		if (
 			!confirm(
-				`Delete "${variantType.name}" and all its options? This may affect existing product variants.`,
+				t(
+					"variantTypes.list.deleteConfirm",
+					'Delete "{name}" and all its options? This may affect existing product variants.',
+					{ name: variantType.name },
+				),
 			)
 		)
 			return;
 		deleteType(variantType.id, {
-			onSuccess: () => toast.success("Variant type deleted"),
+			onSuccess: () =>
+				toast.success(
+					t("variantTypes.list.toast.deleteSuccess", "Variant type deleted"),
+				),
 			onError: () =>
-				toast.error("Failed to delete. It may be in use by product variants."),
+				toast.error(
+					t(
+						"variantTypes.list.toast.deleteFailed",
+						"Failed to delete. It may be in use by product variants.",
+					),
+				),
 		});
 	};
 
@@ -146,8 +172,11 @@ function VariantTypeCard({
 					</div>
 				</div>
 				<CardDescription>
-					{variantType.options.length} option
-					{variantType.options.length !== 1 ? "s" : ""}
+					{t(
+						"variantTypes.list.optionCount",
+						"{count} option(s)",
+						{ count: variantType.options.length },
+					)}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -158,7 +187,12 @@ function VariantTypeCard({
 						</Badge>
 					))}
 					{variantType.options.length === 0 && (
-						<p className="text-sm text-muted-foreground">No options defined</p>
+						<p className="text-sm text-muted-foreground">
+							<T
+								id="variantTypes.list.noOptions"
+								defaultMessage="No options defined"
+							/>
+						</p>
 					)}
 				</div>
 			</CardContent>
@@ -181,6 +215,7 @@ function VariantTypeFormDialog({
 	onOpenChange,
 	variantType,
 }: VariantTypeFormDialogProps) {
+	const t = useT();
 	const isEdit = !!variantType;
 	const { mutate: createType, isPending: isCreating } = useCreateVariantType();
 	const { mutate: updateType, isPending: isUpdating } = useUpdateVariantType();
@@ -221,26 +256,50 @@ function VariantTypeFormDialog({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		const payload = { name, options };
+		const trimmedName = name.trim();
+		if (!trimmedName) {
+			toast.error(
+				t("variantTypes.form.toast.nameRequired", "Variant type name is required"),
+			);
+			return;
+		}
+
+		const payload = { name: trimmedName, options };
 
 		if (isEdit && variantType) {
 			updateType(
 				{ id: variantType.id, data: payload },
 				{
 					onSuccess: () => {
-						toast.success("Variant type updated");
+						toast.success(
+							t("variantTypes.form.toast.updateSuccess", "Variant type updated"),
+						);
 						onOpenChange(false);
 					},
-					onError: () => toast.error("Failed to update variant type"),
+					onError: () =>
+						toast.error(
+							t(
+								"variantTypes.form.toast.updateFailed",
+								"Failed to update variant type",
+							),
+						),
 				},
 			);
 		} else {
 			createType(payload, {
 				onSuccess: () => {
-					toast.success("Variant type created");
+					toast.success(
+						t("variantTypes.form.toast.createSuccess", "Variant type created"),
+					);
 					onOpenChange(false);
 				},
-				onError: () => toast.error("Failed to create variant type"),
+				onError: () =>
+					toast.error(
+						t(
+							"variantTypes.form.toast.createFailed",
+							"Failed to create variant type",
+						),
+					),
 			});
 		}
 	};
@@ -250,32 +309,51 @@ function VariantTypeFormDialog({
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						{isEdit ? "Edit Variant Type" : "Create Variant Type"}
+						{isEdit ? (
+							<T
+								id="variantTypes.form.editTitle"
+								defaultMessage="Edit Variant Type"
+							/>
+						) : (
+							<T
+								id="variantTypes.form.createTitle"
+								defaultMessage="Create Variant Type"
+							/>
+						)}
 					</DialogTitle>
 				</DialogHeader>
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
-						<Label htmlFor="vt-name">Name *</Label>
+						<Label htmlFor="vt-name">
+							{t("variantTypes.form.name", "Name")} *
+						</Label>
 						<Input
 							id="vt-name"
 							value={name}
 							onChange={(e) => setName(e.target.value)}
-							placeholder="e.g., Size, Color, Weight"
-							required
+							placeholder={t(
+								"variantTypes.form.namePlaceholder",
+								"e.g., Size, Color, Weight",
+							)}
 						/>
 					</div>
 
 					<div className="space-y-2">
-						<Label>Options</Label>
+						<Label>
+							<T id="variantTypes.form.options" defaultMessage="Options" />
+						</Label>
 						<div className="flex gap-2">
 							<Input
 								value={newOption}
 								onChange={(e) => setNewOption(e.target.value)}
 								onKeyDown={handleKeyDown}
-								placeholder="Type an option and press Enter"
+								placeholder={t(
+									"variantTypes.form.optionPlaceholder",
+									"Type an option and press Enter",
+								)}
 							/>
 							<Button type="button" variant="outline" onClick={addOption}>
-								Add
+								<T id="variantTypes.form.addOption" defaultMessage="Add" />
 							</Button>
 						</div>
 						{options.length > 0 && (
@@ -302,11 +380,15 @@ function VariantTypeFormDialog({
 							variant="outline"
 							onClick={() => onOpenChange(false)}
 						>
-							Cancel
+							<T id="common.cancel" defaultMessage="Cancel" />
 						</Button>
 						<Button type="submit" disabled={isPending || !name.trim()}>
 							{isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-							{isEdit ? "Update" : "Create"}
+							{isEdit ? (
+								<T id="variantTypes.form.update" defaultMessage="Update" />
+							) : (
+								<T id="variantTypes.form.create" defaultMessage="Create" />
+							)}
 						</Button>
 					</DialogFooter>
 				</form>

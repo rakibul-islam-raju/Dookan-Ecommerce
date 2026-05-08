@@ -1,6 +1,7 @@
 import { DateField } from "@/components/ui/@form/DateField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { useT } from "@/i18n/use-t";
 import type { WishlistFilter } from "@/@types/Wishlist";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -16,6 +17,7 @@ export const WishlistFilterForm = ({
 	onFilter,
 	onReset,
 }: WishlistFilterFormProps) => {
+	const t = useT();
 	const form = useForm<WishlistFilter>({
 		defaultValues: initialFilter,
 	});
@@ -40,11 +42,11 @@ export const WishlistFilterForm = ({
 					<div className="w-full space-y-6">
 						<DateField<WishlistFilter>
 							name="date_from"
-							label="Added From"
+							label={t("wishlists.filter.addedFrom", "Added From")}
 						/>
 						<DateField<WishlistFilter>
 							name="date_to"
-							label="Added To"
+							label={t("wishlists.filter.addedTo", "Added To")}
 						/>
 					</div>
 
@@ -54,9 +56,11 @@ export const WishlistFilterForm = ({
 							onClick={handleResetFilter}
 							variant="outline"
 						>
-							Reset
+							{t("wishlists.filter.reset", "Reset")}
 						</Button>
-						<Button type="submit">Apply Filters</Button>
+						<Button type="submit">
+							{t("wishlists.filter.apply", "Apply Filters")}
+						</Button>
 					</div>
 				</div>
 			</form>

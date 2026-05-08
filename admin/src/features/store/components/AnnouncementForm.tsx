@@ -4,6 +4,8 @@ import { TextField } from "@/components/ui/@form/TextField";
 import { TextareaField } from "@/components/ui/@form/TextareaField";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
 	useCreateAnnouncement,
@@ -14,34 +16,74 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const announcementSchema = z
-	.object({
-		title: z
-			.string()
-			.min(1, "Title is required")
-			.max(100, "Title must not exceed 100 characters"),
-		description: z
-			.string()
-			.min(1, "Description is required")
-			.max(2000, "Description must not exceed 2000 characters"),
-		start_date: z.string().min(1, "Start date is required"),
-		end_date: z.string().min(1, "End date is required"),
-		is_active: z.boolean().default(true),
-	})
-	.refine(
-		(data) => {
-			if (data.start_date && data.end_date) {
-				return new Date(data.start_date) < new Date(data.end_date);
-			}
-			return true;
-		},
-		{
-			message: "End date must be after start date",
-			path: ["end_date"],
-		}
-	);
+type TranslateFn = ReturnType<typeof useT>;
 
-type AnnouncementFormData = z.infer<typeof announcementSchema>;
+const createAnnouncementSchema = (t: TranslateFn) =>
+	z
+		.object({
+			title: z
+				.string()
+				.min(1, t("store.announcements.form.validation.title", "Title is required"))
+				.max(
+					100,
+					t(
+						"store.announcements.form.validation.titleMax",
+						"Title must not exceed 100 characters",
+					),
+				),
+			description: z
+				.string()
+				.min(
+					1,
+					t(
+						"store.announcements.form.validation.description",
+						"Description is required",
+					),
+				)
+				.max(
+					2000,
+					t(
+						"store.announcements.form.validation.descriptionMax",
+						"Description must not exceed 2000 characters",
+					),
+				),
+			start_date: z
+				.string()
+				.min(
+					1,
+					t(
+						"store.announcements.form.validation.startDate",
+						"Start date is required",
+					),
+				),
+			end_date: z
+				.string()
+				.min(
+					1,
+					t(
+						"store.announcements.form.validation.endDate",
+						"End date is required",
+					),
+				),
+			is_active: z.boolean().default(true),
+		})
+		.refine(
+			(data) => {
+				if (data.start_date && data.end_date) {
+					return new Date(data.start_date) < new Date(data.end_date);
+				}
+				return true;
+			},
+			{
+				message: t(
+					"store.announcements.form.validation.endAfterStart",
+					"End date must be after start date",
+				),
+				path: ["end_date"],
+			},
+		);
+
+type AnnouncementFormData = z.infer<ReturnType<typeof createAnnouncementSchema>>;
 
 interface AnnouncementFormProps {
 	handleClose: () => void;
@@ -54,6 +96,7 @@ export const AnnouncementForm = ({
 	announcement,
 	mode,
 }: AnnouncementFormProps) => {
+	const t = useT();
 	const { mutate: createAnnouncement, isPending: isCreating } =
 		useCreateAnnouncement();
 	const { mutate: updateAnnouncement, isPending: isUpdating } =
@@ -62,7 +105,7 @@ export const AnnouncementForm = ({
 	const isEditMode = mode === "edit";
 	const isPending = isCreating || isUpdating;
 
-	const form = useZodForm(announcementSchema, {
+	const form = useZodForm(createAnnouncementSchema(t), {
 		defaultValues: {
 			title: "",
 			description: "",
@@ -93,7 +136,12 @@ export const AnnouncementForm = ({
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Announcement updated successfully");
+						toast.success(
+							t(
+								"store.announcements.form.toast.updateSuccess",
+								"Announcement updated successfully",
+							),
+						);
 					},
 				}
 			);
@@ -101,7 +149,12 @@ export const AnnouncementForm = ({
 			createAnnouncement(formattedData, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Announcement created successfully");
+					toast.success(
+						t(
+							"store.announcements.form.toast.createSuccess",
+							"Announcement created successfully",
+						),
+					);
 				},
 			});
 		}
@@ -126,37 +179,58 @@ export const AnnouncementForm = ({
 			<div className="grid gap-4 py-4">
 				<TextField
 					name="title"
-					label="Title"
-					placeholder="e.g., Store Closure Notice, Holiday Hours"
+					label={t("store.announcements.form.title", "Title")}
+					placeholder={t(
+						"store.announcements.form.titlePlaceholder",
+						"e.g., Store Closure Notice, Holiday Hours",
+					)}
 					required
-					description="The announcement headline"
+					description={t(
+						"store.announcements.form.titleHelp",
+						"The announcement headline",
+					)}
 				/>
 				<TextareaField
 					name="description"
-					label="Description"
-					placeholder="e.g., We will be closed on December 25th..."
+					label={t("store.announcements.form.description", "Description")}
+					placeholder={t(
+						"store.announcements.form.descriptionPlaceholder",
+						"e.g., We will be closed on December 25th...",
+					)}
 					required
-					description="The full announcement message"
+					description={t(
+						"store.announcements.form.descriptionHelp",
+						"The full announcement message",
+					)}
 				/>
 
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="start_date"
-						label="Start Date"
+						label={t("store.common.startDate", "Start Date")}
 						type="datetime-local"
 						required
-						description="When the announcement becomes visible"
+						description={t(
+							"store.announcements.form.startDateHelp",
+							"When the announcement becomes visible",
+						)}
 					/>
 					<TextField
 						name="end_date"
-						label="End Date"
+						label={t("store.common.endDate", "End Date")}
 						type="datetime-local"
 						required
-						description="When the announcement expires"
+						description={t(
+							"store.announcements.form.endDateHelp",
+							"When the announcement expires",
+						)}
 					/>
 				</div>
 
-				<CheckboxField name="is_active" label="Is Active" />
+				<CheckboxField
+					name="is_active"
+					label={t("store.common.isActive", "Is Active")}
+				/>
 			</div>
 
 			<div className="flex justify-end gap-2">
@@ -166,10 +240,20 @@ export const AnnouncementForm = ({
 					onClick={handleCancel}
 					disabled={isPending}
 				>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Announcement" : "Create Announcement"}
+					{isEditMode ? (
+						<T
+							id="store.announcements.form.update"
+							defaultMessage="Update Announcement"
+						/>
+					) : (
+						<T
+							id="store.announcements.form.create"
+							defaultMessage="Create Announcement"
+						/>
+					)}
 				</LoadingButton>
 			</div>
 		</BaseForm>

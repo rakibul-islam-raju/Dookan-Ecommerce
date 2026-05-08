@@ -3,6 +3,7 @@ import { SelectField } from "@/components/ui/@form/SelectField";
 import { TextField } from "@/components/ui/@form/TextField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { useT } from "@/i18n/use-t";
 import { getCategories } from "@/lib/api/category";
 import type { ProductFilter } from "@/lib/api/product";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ export const ProductFilterForm = ({
 	onFilter,
 	onReset,
 }: ProductFilterFormProps) => {
+	const t = useT();
 	const { data: categories } = useQuery(
 		getCategories({
 			limit: 100,
@@ -52,53 +54,54 @@ export const ProductFilterForm = ({
 				<div className="flex h-[calc(100vh-130px)] w-full flex-col items-start justify-between gap-4 overflow-y-auto">
 					<div className="w-full space-y-6">
 						<RadioField<ProductFilter>
-							label="Status"
+							label={t("products.filter.status", "Status")}
 							name="is_active"
 							orientation="horizontal"
 							options={[
 								{
 									value: true,
-									label: "Active",
+									label: t("products.common.status.active", "Active"),
 								},
 								{
 									value: false,
-									label: "Inactive",
+									label: t("products.common.status.inactive", "Inactive"),
 								},
 							]}
 						/>
 						<RadioField<ProductFilter>
-							label="Featured"
+							label={t("products.filter.featured", "Featured")}
 							name="is_featured"
 							orientation="horizontal"
 							options={[
 								{
 									value: true,
-									label: "Featured",
+									label: t("products.common.status.featured", "Featured"),
 								},
 								{
 									value: false,
-									label: "Not Featured",
+									label: t("products.common.status.notFeatured", "Not Featured"),
 								},
 							]}
 						/>
 						<RadioField<ProductFilter>
-							label="In Stock"
+							label={t("products.filter.inStock", "In Stock")}
 							name="is_in_stock"
 							orientation="horizontal"
 							options={[
 								{
 									value: true,
-									label: "In Stock",
+									label: t("products.common.status.inStock", "In Stock"),
 								},
 								{
 									value: false,
-									label: "Out of Stock",
+									label: t("products.common.status.outOfStock", "Out of Stock"),
 								},
 							]}
 						/>
 						<SelectField<ProductFilter>
-							label="Category"
+							label={t("products.filter.category", "Category")}
 							name="category"
+							placeholder={t("products.filter.categoryPlaceholder", "Select a category")}
 							options={
 								categories?.results.map((category) => ({
 									label: category.name,
@@ -108,16 +111,22 @@ export const ProductFilterForm = ({
 						/>
 						<div className="grid grid-cols-2 gap-4">
 							<TextField<ProductFilter>
-								label="Minimum Price"
+								label={t("products.filter.minPrice", "Minimum Price")}
 								name="min_price"
 								type="number"
-								placeholder="Enter minimum price"
+								placeholder={t(
+									"products.filter.minPricePlaceholder",
+									"Enter minimum price",
+								)}
 							/>
 							<TextField<ProductFilter>
-								label="Maximum Price"
+								label={t("products.filter.maxPrice", "Maximum Price")}
 								name="max_price"
 								type="number"
-								placeholder="Enter maximum price"
+								placeholder={t(
+									"products.filter.maxPricePlaceholder",
+									"Enter maximum price",
+								)}
 							/>
 						</div>
 					</div>
@@ -125,9 +134,11 @@ export const ProductFilterForm = ({
 					{/* action buttons */}
 					<div className="sticky bottom-0 left-0 right-0 flex w-full items-center justify-end gap-4 bg-background">
 						<Button type="button" onClick={handleResetFilter} variant="outline">
-							Reset
+							{t("products.filter.reset", "Reset")}
 						</Button>
-						<Button type="submit">Apply Filters</Button>
+						<Button type="submit">
+							{t("products.filter.apply", "Apply Filters")}
+						</Button>
 					</div>
 				</div>
 			</form>

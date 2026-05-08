@@ -3,6 +3,9 @@ import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -32,6 +35,8 @@ const initialParams: OrderFilter = {
 };
 
 export function OrderList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const navigate = useNavigate();
 	const { params, handleChangeParams, resetParams } = useFilterParams({
 		initialParams,
@@ -107,7 +112,7 @@ export function OrderList() {
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
-		return new Intl.DateTimeFormat("en-US", {
+		return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-BD", {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
@@ -116,16 +121,31 @@ export function OrderList() {
 
 	const formatTime = (dateString: string) => {
 		const date = new Date(dateString);
-		return new Intl.DateTimeFormat("en-US", {
+		return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-BD", {
 			hour: "2-digit",
 			minute: "2-digit",
 		}).format(date);
 	};
 
+	const formatCurrency = (value: string) =>
+		`৳${Number(value).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		})}`;
+
+	const getStatusLabel = (status: IOrderStatus) =>
+		t(`orders.common.status.${status}`, status.charAt(0).toUpperCase() + status.slice(1));
+
+	const getPaymentStatusLabel = (status: IOrderPaymentStatus) =>
+		t(
+			`orders.common.payment.${status}`,
+			status.charAt(0).toUpperCase() + status.slice(1),
+		);
+
 	const columns: Column<OrderListItem>[] = [
 		{
 			key: "order_number",
-			header: "Order",
+			header: t("orders.list.table.order", "Order"),
 			render: (order) => (
 				<Link
 					to={`/orders/${order.id}`}
@@ -137,17 +157,19 @@ export function OrderList() {
 		},
 		{
 			key: "customer_name",
-			header: "Customer",
+			header: t("orders.list.table.customer", "Customer"),
 			render: (order) => (
 				<span className="text-muted-foreground">{order.customer_name}</span>
 			),
 		},
 		{
 			key: "is_guest_order",
-			header: "Guest",
+			header: t("orders.list.table.guest", "Guest"),
 			render: (order) =>
 				order.is_guest_order ? (
-					<Badge variant="secondary">Guest</Badge>
+					<Badge variant="secondary">
+						{t("orders.list.guestBadge", "Guest")}
+					</Badge>
 				) : (
 					<span className="text-muted-foreground">—</span>
 				),
@@ -155,42 +177,45 @@ export function OrderList() {
 		},
 		{
 			key: "items_count",
-			header: "Items",
-			render: (order) => <span>{order.items_count}</span>,
+			header: t("orders.list.table.items", "Items"),
+			render: (order) => (
+				<span>
+					{order.items_count.toLocaleString(
+						locale === "bn" ? "bn-BD" : "en-IN",
+					)}
+				</span>
+			),
 			className: "text-center",
 		},
 		{
 			key: "total_amount",
-			header: "Total",
+			header: t("orders.list.table.total", "Total"),
 			render: (order) => (
-				<span className="font-medium">
-					৳ {parseFloat(order.total_amount).toFixed(2)}
-				</span>
+				<span className="font-medium">{formatCurrency(order.total_amount)}</span>
 			),
 			className: "text-right",
 		},
 		{
 			key: "status",
-			header: "Status",
+			header: t("orders.list.table.status", "Status"),
 			render: (order) => (
 				<Badge variant={getStatusBadgeVariant(order.status)}>
-					{order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+					{getStatusLabel(order.status)}
 				</Badge>
 			),
 		},
 		{
 			key: "payment_status",
-			header: "Payment",
+			header: t("orders.list.table.payment", "Payment"),
 			render: (order) => (
 				<Badge variant={getPaymentStatusBadgeVariant(order.payment_status)}>
-					{order.payment_status.charAt(0).toUpperCase() +
-						order.payment_status.slice(1)}
+					{getPaymentStatusLabel(order.payment_status)}
 				</Badge>
 			),
 		},
 		{
 			key: "created_at",
-			header: "Date",
+			header: t("orders.list.table.date", "Date"),
 			render: (order) => (
 				<div className="text-muted-foreground">
 					<div className="text-sm">{formatDate(order.created_at)}</div>
@@ -209,11 +234,13 @@ export function OrderList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="orders.list.actions.label" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => navigate(`/orders/${order.id}`)}>
 							<Eye className="h-4 w-4 mr-2" />
-							View Details
+							<T id="orders.list.actions.view" defaultMessage="View Details" />
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -247,14 +274,19 @@ export function OrderList() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Orders</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="orders.list.title" defaultMessage="Orders" />
+					</h1>
 					<p className="text-muted-foreground">
-						Manage customer orders and track deliveries
+						<T
+							id="orders.list.description"
+							defaultMessage="Manage customer orders and track deliveries"
+						/>
 					</p>
 				</div>
 				<Button onClick={() => navigate("/orders/create")}>
 					<Plus className="h-4 w-4 mr-2" />
-					Create Order
+					<T id="orders.list.add" defaultMessage="Create Order" />
 				</Button>
 			</div>
 
@@ -263,10 +295,21 @@ export function OrderList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search orders by number or customer name..."
+					placeholder={t(
+						"orders.list.searchPlaceholder",
+						"Search orders by number or customer name...",
+					)}
 					className="flex-1"
 				/>
-				<FilterDrawer open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+				<FilterDrawer
+					open={isFilterOpen}
+					onOpenChange={setIsFilterOpen}
+					title={t("orders.filter.title", "Filters")}
+					description={t(
+						"orders.filter.description",
+						"Apply filters to refine the order list",
+					)}
+				>
 					<OrderFilterForm
 						initialFilter={params}
 						onFilter={handleApplyFilters}
@@ -280,7 +323,7 @@ export function OrderList() {
 				data={orders}
 				columns={columns}
 				isLoading={isFetching}
-				emptyMessage="No orders found"
+				emptyMessage={t("orders.list.empty", "No orders found")}
 				pagination={{
 					currentPage,
 					totalPages,

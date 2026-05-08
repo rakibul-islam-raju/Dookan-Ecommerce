@@ -1,6 +1,7 @@
 import { RadioField } from "@/components/ui/@form/RadioField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { useT } from "@/i18n/use-t";
 import type { ReviewFilter } from "@/lib/api/review";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -16,6 +17,7 @@ export const ReviewFilterForm = ({
 	onFilter,
 	onReset,
 }: ReviewFilterFormProps) => {
+	const t = useT();
 	const form = useForm<ReviewFilter>({
 		defaultValues: initialFilter,
 	});
@@ -39,24 +41,30 @@ export const ReviewFilterForm = ({
 				<div className="flex h-[calc(100vh-130px)] w-full flex-col items-start justify-between gap-4 overflow-y-auto">
 					<div className="w-full space-y-6">
 						<RadioField<ReviewFilter>
-							label="Approval Status"
+							label={t("reviews.filter.approvalStatus", "Approval Status")}
 							name="is_approved"
 							orientation="vertical"
 							options={[
-								{ value: "true", label: "Approved" },
-								{ value: "false", label: "Pending" },
+								{
+									value: "true",
+									label: t("reviews.list.status.approved", "Approved"),
+								},
+								{
+									value: "false",
+									label: t("reviews.list.status.pending", "Pending"),
+								},
 							]}
 						/>
 						<RadioField<ReviewFilter>
-							label="Rating"
+							label={t("reviews.filter.rating", "Rating")}
 							name="rating"
 							orientation="vertical"
 							options={[
-								{ value: "5", label: "5 Stars" },
-								{ value: "4", label: "4 Stars" },
-								{ value: "3", label: "3 Stars" },
-								{ value: "2", label: "2 Stars" },
-								{ value: "1", label: "1 Star" },
+								{ value: "5", label: t("reviews.filter.stars5", "5 Stars") },
+								{ value: "4", label: t("reviews.filter.stars4", "4 Stars") },
+								{ value: "3", label: t("reviews.filter.stars3", "3 Stars") },
+								{ value: "2", label: t("reviews.filter.stars2", "2 Stars") },
+								{ value: "1", label: t("reviews.filter.stars1", "1 Star") },
 							]}
 						/>
 					</div>
@@ -67,9 +75,11 @@ export const ReviewFilterForm = ({
 							onClick={handleResetFilter}
 							variant="outline"
 						>
-							Reset
+							{t("reviews.filter.reset", "Reset")}
 						</Button>
-						<Button type="submit">Apply Filters</Button>
+						<Button type="submit">
+							{t("reviews.filter.apply", "Apply Filters")}
+						</Button>
 					</div>
 				</div>
 			</form>

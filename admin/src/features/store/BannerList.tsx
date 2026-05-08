@@ -3,6 +3,9 @@ import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -20,7 +23,6 @@ import {
 	type BannerListItem,
 } from "@/lib/api/store";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -33,6 +35,8 @@ const initialParams: BannerFilter = {
 };
 
 export function BannerList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { params, handleChangeParams, resetParams } = useFilterParams({
 		initialParams,
 	});
@@ -62,15 +66,27 @@ export function BannerList() {
 	};
 
 	const handleDelete = async (banner: BannerListItem) => {
-		if (!confirm(`Are you sure you want to delete "${banner.title}"?`)) {
+		if (
+			!confirm(
+				t(
+					"store.banners.deleteConfirm",
+					'Are you sure you want to delete "{title}"?',
+					{ title: banner.title },
+				),
+			)
+		) {
 			return;
 		}
 
 		try {
 			await deleteMutation.mutateAsync(banner.id);
-			toast.success("Banner deleted successfully");
+			toast.success(
+				t("store.banners.toast.deleteSuccess", "Banner deleted successfully"),
+			);
 		} catch (error) {
-			toast.error("Failed to delete banner");
+			toast.error(
+				t("store.banners.toast.deleteFailed", "Failed to delete banner"),
+			);
 			console.error("Delete error:", error);
 		}
 	};
@@ -80,14 +96,18 @@ export function BannerList() {
 	};
 
 	const formatDate = (dateString: string | null) => {
-		if (!dateString) return "-";
-		return format(new Date(dateString), "MMM d, yyyy");
+		if (!dateString) return t("store.common.empty", "-");
+		return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-BD", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+		}).format(new Date(dateString));
 	};
 
 	const columns: Column<BannerListItem>[] = [
 		{
 			key: "image",
-			header: "Image",
+			header: t("store.banners.table.image", "Image"),
 			render: (banner) => (
 				<img
 					src={banner.image}
@@ -99,31 +119,37 @@ export function BannerList() {
 		},
 		{
 			key: "title",
-			header: "Title",
+			header: t("store.banners.table.title", "Title"),
 			render: (banner) => <div className="font-medium">{banner.title}</div>,
 		},
 		{
 			key: "dates",
-			header: "Schedule",
+			header: t("store.banners.table.schedule", "Schedule"),
 			render: (banner) => (
 				<div className="text-sm text-muted-foreground">
-					<div>Start: {formatDate(banner.start_date)}</div>
-					<div>End: {formatDate(banner.end_date)}</div>
+					<div>
+						{t("store.common.start", "Start")}: {formatDate(banner.start_date)}
+					</div>
+					<div>
+						{t("store.common.end", "End")}: {formatDate(banner.end_date)}
+					</div>
 				</div>
 			),
 		},
 		{
 			key: "display_order",
-			header: "Order",
+			header: t("store.banners.table.order", "Order"),
 			render: (banner) => <span>{banner.display_order}</span>,
 			className: "text-center",
 		},
 		{
 			key: "is_active",
-			header: "Status",
+			header: t("store.banners.table.status", "Status"),
 			render: (banner) => (
 				<Badge variant={getStatusBadgeVariant(banner.is_active)}>
-					{banner.is_active ? "Active" : "Inactive"}
+					{banner.is_active
+						? t("store.common.status.active", "Active")
+						: t("store.common.status.inactive", "Inactive")}
 				</Badge>
 			),
 		},
@@ -138,11 +164,13 @@ export function BannerList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="store.common.actions" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => handleEdit(banner)}>
 							<Pencil className="h-4 w-4 mr-2" />
-							Edit
+							<T id="store.common.edit" defaultMessage="Edit" />
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleDelete(banner)}
@@ -150,7 +178,7 @@ export function BannerList() {
 							disabled={deleteMutation.isPending}
 						>
 							<Trash2 className="h-4 w-4 mr-2" />
-							Delete
+							<T id="store.common.delete" defaultMessage="Delete" />
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -182,9 +210,14 @@ export function BannerList() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Banners</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="store.banners.title" defaultMessage="Banners" />
+					</h1>
 					<p className="text-muted-foreground">
-						Manage your promotional banners
+						<T
+							id="store.banners.description"
+							defaultMessage="Manage your promotional banners"
+						/>
 					</p>
 				</div>
 				<Button
@@ -195,7 +228,7 @@ export function BannerList() {
 					}}
 				>
 					<Plus className="h-4 w-4 mr-2" />
-					Add Banner
+					<T id="store.banners.add" defaultMessage="Add Banner" />
 				</Button>
 			</div>
 
@@ -203,10 +236,21 @@ export function BannerList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search banners by title..."
+					placeholder={t(
+						"store.banners.searchPlaceholder",
+						"Search banners by title...",
+					)}
 					className="flex-1"
 				/>
-				<FilterDrawer open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+				<FilterDrawer
+					open={isFilterOpen}
+					onOpenChange={setIsFilterOpen}
+					title={t("store.banners.filter.title", "Filters")}
+					description={t(
+						"store.banners.filter.description",
+						"Apply filters to refine your banner list",
+					)}
+				>
 					<BannerFilterForm
 						initialFilter={params}
 						onFilter={handleApplyFilters}
@@ -220,10 +264,10 @@ export function BannerList() {
 				columns={columns}
 				emptyMessage={
 					isLoading
-						? "Loading banners..."
+						? t("store.banners.loading", "Loading banners...")
 						: error
-							? "Error loading banners"
-							: "No banners found"
+							? t("store.banners.error", "Error loading banners")
+							: t("store.banners.empty", "No banners found")
 				}
 				pagination={{
 					currentPage,

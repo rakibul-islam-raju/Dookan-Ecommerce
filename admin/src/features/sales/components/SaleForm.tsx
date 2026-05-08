@@ -5,6 +5,8 @@ import { TextField } from "@/components/ui/@form/TextField";
 import { TextareaField } from "@/components/ui/@form/TextareaField";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { getCategories } from "@/lib/api/category";
 import { getProducts } from "@/lib/api/product";
@@ -18,21 +20,51 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const saleSchema = z.object({
-	name: z.string().min(1, "Sale name is required").max(200),
-	description: z.string().max(1000).optional().or(z.literal("")),
-	discount_type: z.enum(["percentage", "fixed_amount"]),
-	discount_value: z.coerce.number().positive("Discount value must be positive"),
-	applies_to: z.enum(["all_products", "specific_categories", "specific_products"]),
-	categories: z.array(z.string()).default([]),
-	products: z.array(z.string()).default([]),
-	valid_from: z.string().min(1, "Start date is required"),
-	valid_until: z.string().min(1, "End date is required"),
-	allow_coupon_stacking: z.boolean().default(true),
-	is_active: z.boolean().default(true),
-});
+type TranslateFn = ReturnType<typeof useT>;
 
-type SaleFormData = z.infer<typeof saleSchema>;
+const createSaleSchema = (t: TranslateFn) =>
+	z.object({
+		name: z
+			.string()
+			.min(1, t("sales.form.validation.nameRequired", "Sale name is required"))
+			.max(
+				200,
+				t("sales.form.validation.nameMax", "Sale name must not exceed 200 characters"),
+			),
+		description: z
+			.string()
+			.max(
+				1000,
+				t(
+					"sales.form.validation.descriptionMax",
+					"Description must not exceed 1000 characters",
+				),
+			)
+			.optional()
+			.or(z.literal("")),
+		discount_type: z.enum(["percentage", "fixed_amount"]),
+		discount_value: z.coerce
+			.number()
+			.positive(
+				t(
+					"sales.form.validation.discountPositive",
+					"Discount value must be positive",
+				),
+			),
+		applies_to: z.enum(["all_products", "specific_categories", "specific_products"]),
+		categories: z.array(z.string()).default([]),
+		products: z.array(z.string()).default([]),
+		valid_from: z
+			.string()
+			.min(1, t("sales.form.validation.validFrom", "Start date is required")),
+		valid_until: z
+			.string()
+			.min(1, t("sales.form.validation.validUntil", "End date is required")),
+		allow_coupon_stacking: z.boolean().default(true),
+		is_active: z.boolean().default(true),
+	});
+
+type SaleFormData = z.infer<ReturnType<typeof createSaleSchema>>;
 
 interface SaleFormProps {
 	handleClose: () => void;
@@ -40,25 +72,15 @@ interface SaleFormProps {
 	mode: "create" | "edit";
 }
 
-const DISCOUNT_TYPE_OPTIONS = [
-	{ value: "percentage", label: "Percentage (%)" },
-	{ value: "fixed_amount", label: "Fixed Amount (৳)" },
-];
-
-const APPLIES_TO_OPTIONS = [
-	{ value: "all_products", label: "All Products" },
-	{ value: "specific_categories", label: "Specific Categories" },
-	{ value: "specific_products", label: "Specific Products" },
-];
-
 export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
+	const t = useT();
 	const { mutate: createSale, isPending: isCreating } = useCreateSale();
 	const { mutate: updateSale, isPending: isUpdating } = useUpdateSale();
 
 	const isEditMode = mode === "edit";
 	const isPending = isCreating || isUpdating;
 
-	const form = useZodForm(saleSchema, {
+	const form = useZodForm(createSaleSchema(t), {
 		defaultValues: {
 			name: "",
 			description: "",
@@ -75,6 +97,36 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 	});
 
 	const appliesTo = form.watch("applies_to");
+	const discountType = form.watch("discount_type");
+
+	const discountTypeOptions = [
+		{
+			value: "percentage",
+			label: t("sales.form.discountType.percentage", "Percentage (%)"),
+		},
+		{
+			value: "fixed_amount",
+			label: t("sales.form.discountType.fixedAmount", "Fixed Amount (৳)"),
+		},
+	];
+
+	const appliesToOptions = [
+		{
+			value: "all_products",
+			label: t("sales.form.appliesTo.allProducts", "All Products"),
+		},
+		{
+			value: "specific_categories",
+			label: t(
+				"sales.form.appliesTo.specificCategories",
+				"Specific Categories",
+			),
+		},
+		{
+			value: "specific_products",
+			label: t("sales.form.appliesTo.specificProducts", "Specific Products"),
+		},
+	];
 
 	const { data: categoriesData } = useQuery(
 		getCategories({ limit: 200, offset: 0, is_active: true })
@@ -106,7 +158,9 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Sale updated successfully");
+						toast.success(
+							t("sales.form.toast.updateSuccess", "Sale updated successfully"),
+						);
 					},
 				}
 			);
@@ -114,7 +168,9 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 			createSale(payload, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Sale created successfully");
+					toast.success(
+						t("sales.form.toast.createSuccess", "Sale created successfully"),
+					);
 				},
 			});
 		}
@@ -145,44 +201,54 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 			<div className="grid gap-4 py-4">
 				<TextField
 					name="name"
-					label="Sale Name"
-					placeholder="e.g., Summer Sale, Eid Special"
+					label={t("sales.form.name", "Sale Name")}
+					placeholder={t(
+						"sales.form.namePlaceholder",
+						"e.g., Summer Sale, Eid Special",
+					)}
 					required
 				/>
 
 				<div className="grid grid-cols-2 gap-4">
 					<SelectField
 						name="discount_type"
-						label="Discount Type"
-						options={DISCOUNT_TYPE_OPTIONS}
+						label={t("sales.form.discountType", "Discount Type")}
+						options={discountTypeOptions}
 						required
 					/>
 					<TextField
 						name="discount_value"
-						label="Discount Value"
+						label={t("sales.form.discountValue", "Discount Value")}
 						placeholder={
-							form.watch("discount_type") === "percentage" ? "e.g., 20" : "e.g., 100"
+							discountType === "percentage"
+								? t("sales.form.discountValuePlaceholderPercentage", "e.g., 20")
+								: t("sales.form.discountValuePlaceholderFixed", "e.g., 100")
 						}
 						type="number"
 						required
 						description={
-							form.watch("discount_type") === "percentage"
-								? "Percentage off (0–100)"
-								: "Fixed amount in ৳"
+							discountType === "percentage"
+								? t(
+										"sales.form.discountValueHelpPercentage",
+										"Percentage off (0-100)",
+									)
+								: t("sales.form.discountValueHelpFixed", "Fixed amount in ৳")
 						}
 					/>
 				</div>
 
 				<SelectField
 					name="applies_to"
-					label="Applies To"
-					options={APPLIES_TO_OPTIONS}
+					label={t("sales.form.appliesTo", "Applies To")}
+					options={appliesToOptions}
 					required
 				/>
 
 				{appliesTo === "specific_categories" && (
 					<div>
-						<label className="text-sm font-medium">Categories</label>
+						<label className="text-sm font-medium">
+							{t("sales.form.categories", "Categories")}
+						</label>
 						<div className="mt-2 border rounded-md p-3 max-h-48 overflow-y-auto grid grid-cols-2 gap-2">
 							{categoryOptions.map((opt) => (
 								<label key={opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
@@ -204,7 +270,9 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 								</label>
 							))}
 							{categoryOptions.length === 0 && (
-								<span className="text-muted-foreground text-sm col-span-2">No categories found</span>
+								<span className="text-muted-foreground text-sm col-span-2">
+									{t("sales.form.noCategories", "No categories found")}
+								</span>
 							)}
 						</div>
 					</div>
@@ -212,7 +280,9 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 
 				{appliesTo === "specific_products" && (
 					<div>
-						<label className="text-sm font-medium">Products</label>
+						<label className="text-sm font-medium">
+							{t("sales.form.products", "Products")}
+						</label>
 						<div className="mt-2 border rounded-md p-3 max-h-48 overflow-y-auto grid grid-cols-1 gap-2">
 							{productOptions.map((opt) => (
 								<label key={opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
@@ -234,7 +304,9 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 								</label>
 							))}
 							{productOptions.length === 0 && (
-								<span className="text-muted-foreground text-sm">No products found</span>
+								<span className="text-muted-foreground text-sm">
+									{t("sales.form.noProducts", "No products found")}
+								</span>
 							)}
 						</div>
 					</div>
@@ -243,13 +315,13 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="valid_from"
-						label="Valid From"
+						label={t("sales.form.validFrom", "Valid From")}
 						type="datetime-local"
 						required
 					/>
 					<TextField
 						name="valid_until"
-						label="Valid Until"
+						label={t("sales.form.validUntil", "Valid Until")}
 						type="datetime-local"
 						required
 					/>
@@ -257,25 +329,38 @@ export const SaleForm = ({ handleClose, sale, mode }: SaleFormProps) => {
 
 				<TextareaField
 					name="description"
-					label="Description"
-					placeholder="e.g., 20% off on all organic products"
+					label={t("sales.form.description", "Description")}
+					placeholder={t(
+						"sales.form.descriptionPlaceholder",
+						"e.g., 20% off on all organic products",
+					)}
 				/>
 
 				<div className="flex flex-col gap-2">
 					<CheckboxField
 						name="allow_coupon_stacking"
-						label="Allow coupon codes to be used with this sale"
+						label={t(
+							"sales.form.allowCouponStacking",
+							"Allow coupon codes to be used with this sale",
+						)}
 					/>
-					<CheckboxField name="is_active" label="Active" />
+					<CheckboxField
+						name="is_active"
+						label={t("sales.form.active", "Active")}
+					/>
 				</div>
 			</div>
 
 			<div className="flex justify-end gap-2">
 				<Button type="button" variant="outline" onClick={handleCancel} disabled={isPending}>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Sale" : "Create Sale"}
+					{isEditMode ? (
+						<T id="sales.form.update" defaultMessage="Update Sale" />
+					) : (
+						<T id="sales.form.create" defaultMessage="Create Sale" />
+					)}
 				</LoadingButton>
 			</div>
 		</BaseForm>

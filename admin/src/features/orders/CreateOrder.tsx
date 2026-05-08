@@ -6,6 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { T } from "@/i18n/translate";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { OrderForm } from "./components/OrderForm";
@@ -30,9 +31,14 @@ export function CreateOrder() {
 					<ArrowLeft className="h-4 w-4" />
 				</Button>
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Create Order</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="orders.create.title" defaultMessage="Create Order" />
+					</h1>
 					<p className="text-muted-foreground">
-						Manually place a new order on behalf of a customer
+						<T
+							id="orders.create.description"
+							defaultMessage="Manually place a new order on behalf of a customer"
+						/>
 					</p>
 				</div>
 			</div>
@@ -40,10 +46,14 @@ export function CreateOrder() {
 			{/* Form Card */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-2xl">Order Details</CardTitle>
+					<CardTitle className="text-2xl">
+						<T id="orders.create.cardTitle" defaultMessage="Order Details" />
+					</CardTitle>
 					<CardDescription>
-						Fill in the order information below. Required fields are marked with
-						an asterisk (*).
+						<T
+							id="orders.create.cardDescription"
+							defaultMessage="Fill in the order information below. Required fields are marked with an asterisk (*)."
+						/>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

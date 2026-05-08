@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import { type AnnouncementListItem } from "@/lib/api/store";
 import { AnnouncementForm } from "./AnnouncementForm";
 
@@ -29,17 +30,35 @@ export function AnnouncementFormModal({
 
 	return (
 		<Dialog open={open} onOpenChange={handleClose}>
-			<DialogContent className="sm:max-w-[600px]">
-				<DialogHeader>
-					<DialogTitle>
-						{isEditMode ? "Edit Announcement" : "Create New Announcement"}
-					</DialogTitle>
-					<DialogDescription>
-						{isEditMode
-							? "Update the announcement details below. Changes will be saved immediately."
-							: "Add a new announcement to display on your store. Fill in the details below."}
-					</DialogDescription>
-				</DialogHeader>
+				<DialogContent className="sm:max-w-[600px]">
+					<DialogHeader>
+						<DialogTitle>
+							{isEditMode ? (
+								<T
+									id="store.announcements.modal.editTitle"
+									defaultMessage="Edit Announcement"
+								/>
+							) : (
+								<T
+									id="store.announcements.modal.createTitle"
+									defaultMessage="Create New Announcement"
+								/>
+							)}
+						</DialogTitle>
+						<DialogDescription>
+							{isEditMode ? (
+								<T
+									id="store.announcements.modal.editDescription"
+									defaultMessage="Update the announcement details below. Changes will be saved immediately."
+								/>
+							) : (
+								<T
+									id="store.announcements.modal.createDescription"
+									defaultMessage="Add a new announcement to display on your store. Fill in the details below."
+								/>
+							)}
+						</DialogDescription>
+					</DialogHeader>
 
 				<div>
 					<AnnouncementForm

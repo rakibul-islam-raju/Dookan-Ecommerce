@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
 	useCreateBanner,
@@ -16,27 +18,50 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const bannerSchema = z.object({
-	title: z
-		.string()
-		.min(1, "Title is required")
-		.max(200, "Title must not exceed 200 characters"),
-	description: z
-		.string()
-		.max(1000, "Description must not exceed 1000 characters")
-		.optional()
-		.or(z.literal("")),
-	start_date: z.string().optional().or(z.literal("")),
-	end_date: z.string().optional().or(z.literal("")),
-	display_order: z.coerce
-		.number()
-		.int("Order must be a whole number")
-		.min(0, "Order must be 0 or greater")
-		.default(0),
-	is_active: z.boolean().default(true),
-});
+type TranslateFn = ReturnType<typeof useT>;
 
-type BannerFormData = z.infer<typeof bannerSchema>;
+const createBannerSchema = (t: TranslateFn) =>
+	z.object({
+		title: z
+			.string()
+			.min(1, t("store.banners.form.validation.title", "Title is required"))
+			.max(
+				200,
+				t(
+					"store.banners.form.validation.titleMax",
+					"Title must not exceed 200 characters",
+				),
+			),
+		description: z
+			.string()
+			.max(
+				1000,
+				t(
+					"store.banners.form.validation.descriptionMax",
+					"Description must not exceed 1000 characters",
+				),
+			)
+			.optional()
+			.or(z.literal("")),
+		start_date: z.string().optional().or(z.literal("")),
+		end_date: z.string().optional().or(z.literal("")),
+		display_order: z.coerce
+			.number()
+			.int(
+				t(
+					"store.banners.form.validation.orderInteger",
+					"Order must be a whole number",
+				),
+			)
+			.min(
+				0,
+				t("store.banners.form.validation.orderMin", "Order must be 0 or greater"),
+			)
+			.default(0),
+		is_active: z.boolean().default(true),
+	});
+
+type BannerFormData = z.infer<ReturnType<typeof createBannerSchema>>;
 
 interface BannerFormProps {
 	handleClose: () => void;
@@ -45,6 +70,7 @@ interface BannerFormProps {
 }
 
 export const BannerForm = ({ handleClose, banner, mode }: BannerFormProps) => {
+	const t = useT();
 	const { mutate: createBanner, isPending: isCreating } = useCreateBanner();
 	const { mutate: updateBanner, isPending: isUpdating } = useUpdateBanner();
 	const [imageFile, setImageFile] = useState<File | null>(null);
@@ -53,7 +79,7 @@ export const BannerForm = ({ handleClose, banner, mode }: BannerFormProps) => {
 	const isEditMode = mode === "edit";
 	const isPending = isCreating || isUpdating;
 
-	const form = useZodForm(bannerSchema, {
+	const form = useZodForm(createBannerSchema(t), {
 		defaultValues: {
 			title: "",
 			description: "",
@@ -98,13 +124,23 @@ export const BannerForm = ({ handleClose, banner, mode }: BannerFormProps) => {
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Banner updated successfully");
+						toast.success(
+							t(
+								"store.banners.form.toast.updateSuccess",
+								"Banner updated successfully",
+							),
+						);
 					},
 				}
 			);
 		} else {
 			if (!imageFile) {
-				toast.error("Please select an image for the banner");
+				toast.error(
+					t(
+						"store.banners.form.toast.imageRequired",
+						"Please select an image for the banner",
+					),
+				);
 				return;
 			}
 			createBanner(
@@ -117,7 +153,12 @@ export const BannerForm = ({ handleClose, banner, mode }: BannerFormProps) => {
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Banner created successfully");
+						toast.success(
+							t(
+								"store.banners.form.toast.createSuccess",
+								"Banner created successfully",
+							),
+						);
 					},
 				}
 			);
@@ -149,21 +190,34 @@ export const BannerForm = ({ handleClose, banner, mode }: BannerFormProps) => {
 			<div className="grid gap-4 py-4">
 				<TextField
 					name="title"
-					label="Title"
-					placeholder="e.g., Summer Sale, New Arrivals"
+					label={t("store.banners.form.title", "Title")}
+					placeholder={t(
+						"store.banners.form.titlePlaceholder",
+						"e.g., Summer Sale, New Arrivals",
+					)}
 					required
-					description="The banner headline"
+					description={t(
+						"store.banners.form.titleDescription",
+						"The banner headline",
+					)}
 				/>
 				<TextareaField
 					name="description"
-					label="Description"
-					placeholder="e.g., Get up to 50% off on all products"
-					description="Additional details about the banner"
+					label={t("store.banners.form.description", "Description")}
+					placeholder={t(
+						"store.banners.form.descriptionPlaceholder",
+						"e.g., Get up to 50% off on all products",
+					)}
+					description={t(
+						"store.banners.form.descriptionHelp",
+						"Additional details about the banner",
+					)}
 				/>
 
 				<div className="space-y-2">
 					<Label htmlFor="image">
-						Banner Image {!isEditMode && <span className="text-destructive">*</span>}
+						<T id="store.banners.form.image" defaultMessage="Banner Image" />{" "}
+						{!isEditMode && <span className="text-destructive">*</span>}
 					</Label>
 					<Input
 						id="image"
@@ -175,42 +229,60 @@ export const BannerForm = ({ handleClose, banner, mode }: BannerFormProps) => {
 						<div className="mt-2">
 							<img
 								src={imagePreview}
-								alt="Preview"
+								alt={t("store.common.preview", "Preview")}
 								className="max-h-32 rounded-md object-cover"
 							/>
 						</div>
 					)}
 					<p className="text-sm text-muted-foreground">
 						{isEditMode
-							? "Leave empty to keep the current image"
-							: "Upload an image for the banner"}
+							? t(
+									"store.banners.form.imageHelpEdit",
+									"Leave empty to keep the current image",
+								)
+							: t(
+									"store.banners.form.imageHelpCreate",
+									"Upload an image for the banner",
+								)}
 					</p>
 				</div>
 
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="start_date"
-						label="Start Date"
+						label={t("store.common.startDate", "Start Date")}
 						type="datetime-local"
-						description="When the banner becomes visible"
+						description={t(
+							"store.banners.form.startDateHelp",
+							"When the banner becomes visible",
+						)}
 					/>
 					<TextField
 						name="end_date"
-						label="End Date"
+						label={t("store.common.endDate", "End Date")}
 						type="datetime-local"
-						description="When the banner expires"
+						description={t(
+							"store.banners.form.endDateHelp",
+							"When the banner expires",
+						)}
 					/>
 				</div>
 
 				<TextField
 					name="display_order"
-					label="Display Order"
-					placeholder="e.g., 1"
+					label={t("store.common.displayOrder", "Display Order")}
+					placeholder={t("store.common.displayOrderPlaceholder", "e.g., 1")}
 					type="number"
-					description="Lower numbers appear first"
+					description={t(
+						"store.banners.form.displayOrderHelp",
+						"Lower numbers appear first",
+					)}
 				/>
 
-				<CheckboxField name="is_active" label="Is Active" />
+				<CheckboxField
+					name="is_active"
+					label={t("store.common.isActive", "Is Active")}
+				/>
 			</div>
 
 			<div className="flex justify-end gap-2">
@@ -220,10 +292,20 @@ export const BannerForm = ({ handleClose, banner, mode }: BannerFormProps) => {
 					onClick={handleCancel}
 					disabled={isPending}
 				>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Banner" : "Create Banner"}
+					{isEditMode ? (
+						<T
+							id="store.banners.form.update"
+							defaultMessage="Update Banner"
+						/>
+					) : (
+						<T
+							id="store.banners.form.create"
+							defaultMessage="Create Banner"
+						/>
+					)}
 				</LoadingButton>
 			</div>
 		</BaseForm>

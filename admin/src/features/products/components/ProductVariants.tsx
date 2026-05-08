@@ -33,6 +33,9 @@ import {
 	type CreateProductVariantRequest,
 	type ProductVariant,
 } from "@/lib/api/variant";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useQuery } from "@tanstack/react-query";
 import { Edit, Loader2, Plus, Trash } from "lucide-react";
 import { useState } from "react";
@@ -67,6 +70,8 @@ const getNextOptionIds = (
 };
 
 export const ProductVariants = ({ productId }: ProductVariantsProps) => {
+	const t = useT();
+	const { locale } = useLocale();
 	const { data: variants = [], isLoading } = useQuery(
 		getProductVariants(productId),
 	);
@@ -94,12 +99,15 @@ export const ProductVariants = ({ productId }: ProductVariantsProps) => {
 					<div>
 						<CardTitle>Product Variants</CardTitle>
 						<CardDescription>
-							Manage size, color, weight, and other variant options
+							{t(
+								"products.variants.description",
+								"Manage size, color, weight, and other variant options",
+							)}
 						</CardDescription>
 					</div>
 					<Button size="sm" onClick={handleAdd}>
 						<Plus className="h-4 w-4 mr-1" />
-						Add Variant
+						{t("products.variants.add", "Add Variant")}
 					</Button>
 				</div>
 			</CardHeader>
@@ -110,22 +118,44 @@ export const ProductVariants = ({ productId }: ProductVariantsProps) => {
 					</div>
 				) : variants.length === 0 ? (
 					<div className="text-center py-8 text-muted-foreground">
-						<p>No variants configured for this product.</p>
+						<p>
+							<T
+								id="products.variants.empty"
+								defaultMessage="No variants configured for this product."
+							/>
+						</p>
 						<p className="text-sm mt-1">
-							Add variants to offer different sizes, colors, or weights.
+							<T
+								id="products.variants.emptyDescription"
+								defaultMessage="Add variants to offer different sizes, colors, or weights."
+							/>
 						</p>
 					</div>
 				) : (
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Name</TableHead>
-								<TableHead>SKU</TableHead>
-								<TableHead>Options</TableHead>
-								<TableHead className="text-right">Price</TableHead>
-								<TableHead className="text-right">Stock</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead className="text-right">Actions</TableHead>
+								<TableHead>
+									<T id="products.variants.table.name" defaultMessage="Name" />
+								</TableHead>
+								<TableHead>
+									<T id="products.variants.table.sku" defaultMessage="SKU" />
+								</TableHead>
+								<TableHead>
+									<T id="products.variants.table.options" defaultMessage="Options" />
+								</TableHead>
+								<TableHead className="text-right">
+									<T id="products.variants.table.price" defaultMessage="Price" />
+								</TableHead>
+								<TableHead className="text-right">
+									<T id="products.variants.table.stock" defaultMessage="Stock" />
+								</TableHead>
+								<TableHead>
+									<T id="products.variants.table.status" defaultMessage="Status" />
+								</TableHead>
+								<TableHead className="text-right">
+									<T id="products.variants.table.actions" defaultMessage="Actions" />
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -134,6 +164,8 @@ export const ProductVariants = ({ productId }: ProductVariantsProps) => {
 									key={variant.id}
 									variant={variant}
 									onEdit={handleEdit}
+									t={t}
+									locale={locale}
 								/>
 							))}
 						</TableBody>
@@ -162,18 +194,26 @@ export const ProductVariants = ({ productId }: ProductVariantsProps) => {
 function VariantRow({
 	variant,
 	onEdit,
+	t,
+	locale,
 }: {
 	variant: ProductVariant;
 	onEdit: (v: ProductVariant) => void;
+	t: ReturnType<typeof useT>;
+	locale: "en" | "bn";
 }) {
 	const { mutate: deleteVariant, isPending: isDeleting } =
 		useDeleteProductVariant();
 
 	const handleDelete = () => {
-		if (!confirm("Delete this variant?")) return;
+		if (!confirm(t("products.variants.deleteConfirm", "Delete this variant?"))) return;
 		deleteVariant(variant.id, {
-			onSuccess: () => toast.success("Variant deleted"),
-			onError: () => toast.error("Failed to delete variant"),
+			onSuccess: () =>
+				toast.success(t("products.variants.deleteSuccess", "Variant deleted")),
+			onError: () =>
+				toast.error(
+					t("products.variants.deleteFailed", "Failed to delete variant"),
+				),
 		});
 	};
 
@@ -193,12 +233,20 @@ function VariantRow({
 				</div>
 			</TableCell>
 			<TableCell className="text-right font-medium">
-				BDT {Number(variant.base_price).toFixed(2)}
+				{`৳${Number(variant.base_price).toLocaleString(
+					locale === "bn" ? "bn-BD" : "en-BD",
+					{
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+					},
+				)}`}
 			</TableCell>
 			<TableCell className="text-right">{variant.stock_quantity}</TableCell>
 			<TableCell>
 				<Badge variant={variant.is_active ? "success" : "secondary"}>
-					{variant.is_active ? "Active" : "Inactive"}
+					{variant.is_active
+						? t("products.common.status.active", "Active")
+						: t("products.common.status.inactive", "Inactive")}
 				</Badge>
 			</TableCell>
 			<TableCell className="text-right">
@@ -249,6 +297,7 @@ function VariantFormDialog({
 	variant,
 	variantTypes,
 }: VariantFormDialogProps) {
+	const t = useT();
 	const isEdit = !!variant;
 	const { mutate: createVariant, isPending: isCreating } =
 		useCreateProductVariant();
@@ -301,7 +350,12 @@ function VariantFormDialog({
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!(formData.name || "").trim() && !(formData.option_ids?.length ?? 0)) {
-			toast.error("Select variant options or enter a variant name.");
+			toast.error(
+				t(
+					"products.variants.validation.nameOrOptions",
+					"Select variant options or enter a variant name.",
+				),
+			);
 			return;
 		}
 
@@ -310,10 +364,13 @@ function VariantFormDialog({
 				{ variantId: variant.id, data: formData },
 				{
 					onSuccess: () => {
-						toast.success("Variant updated");
+						toast.success(t("products.variants.updateSuccess", "Variant updated"));
 						onOpenChange(false);
 					},
-					onError: () => toast.error("Failed to update variant"),
+					onError: () =>
+						toast.error(
+							t("products.variants.updateFailed", "Failed to update variant"),
+						),
 				},
 			);
 		} else {
@@ -321,10 +378,13 @@ function VariantFormDialog({
 				{ productId, data: formData },
 				{
 					onSuccess: () => {
-						toast.success("Variant created");
+						toast.success(t("products.variants.createSuccess", "Variant created"));
 						onOpenChange(false);
 					},
-					onError: () => toast.error("Failed to create variant"),
+					onError: () =>
+						toast.error(
+							t("products.variants.createFailed", "Failed to create variant"),
+						),
 				},
 			);
 		}
@@ -334,7 +394,11 @@ function VariantFormDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-lg">
 				<DialogHeader>
-					<DialogTitle>{isEdit ? "Edit Variant" : "Add Variant"}</DialogTitle>
+					<DialogTitle>
+						{isEdit
+							? t("products.variants.dialog.editTitle", "Edit Variant")
+							: t("products.variants.dialog.addTitle", "Add Variant")}
+					</DialogTitle>
 				</DialogHeader>
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="grid grid-cols-2 gap-4">
@@ -357,7 +421,10 @@ function VariantFormDialog({
 								onChange={(e) =>
 									setFormData((p) => ({ ...p, name: e.target.value }))
 								}
-								placeholder="Auto-generated from options"
+								placeholder={t(
+									"products.variants.dialog.namePlaceholder",
+									"Auto-generated from options",
+								)}
 							/>
 						</div>
 					</div>
@@ -430,8 +497,10 @@ function VariantFormDialog({
 							<div>
 								<Label>Variant Options</Label>
 								<p className="text-xs text-muted-foreground mt-1">
-									Choose up to one option from each variant type. Leave name blank
-									to auto-generate it from the selected options.
+									{t(
+										"products.variants.dialog.optionsHelp",
+										"Choose up to one option from each variant type. Leave name blank to auto-generate it from the selected options.",
+									)}
 								</p>
 							</div>
 							{variantTypes.map((vt) => (
@@ -484,11 +553,13 @@ function VariantFormDialog({
 							variant="outline"
 							onClick={() => onOpenChange(false)}
 						>
-							Cancel
+							<T id="common.cancel" defaultMessage="Cancel" />
 						</Button>
 						<Button type="submit" disabled={isPending}>
 							{isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-							{isEdit ? "Update" : "Create"}
+							{isEdit
+								? t("products.variants.dialog.update", "Update")
+								: t("products.variants.dialog.create", "Create")}
 						</Button>
 					</DialogFooter>
 				</form>

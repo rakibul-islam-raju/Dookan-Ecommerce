@@ -5,6 +5,8 @@ import { TextField } from "@/components/ui/@form/TextField";
 import { TextareaField } from "@/components/ui/@form/TextareaField";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
 	useCreateCoupon,
@@ -15,44 +17,84 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const couponSchema = z.object({
-	code: z
-		.string()
-		.min(1, "Coupon code is required")
-		.max(50, "Code must not exceed 50 characters")
-		.transform((val) => val.toUpperCase()),
-	description: z.string().max(500).optional().or(z.literal("")),
-	discount_type: z.enum(["percentage", "fixed_amount"]),
-	discount_value: z.coerce
-		.number()
-		.positive("Discount value must be positive"),
-	min_order_amount: z.coerce.number().min(0).default(0),
-	max_discount_amount: z.coerce
-		.number()
-		.positive("Must be positive")
-		.optional()
-		.or(z.literal(0))
-		.or(z.literal("").transform(() => undefined)),
-	max_uses: z.coerce
-		.number()
-		.int()
-		.positive("Must be positive")
-		.optional()
-		.or(z.literal(0).transform(() => undefined))
-		.or(z.literal("").transform(() => undefined)),
-	max_uses_per_user: z.coerce
-		.number()
-		.int()
-		.positive("Must be positive")
-		.optional()
-		.or(z.literal(0).transform(() => undefined))
-		.or(z.literal("").transform(() => undefined)),
-	valid_from: z.string().min(1, "Start date is required"),
-	valid_until: z.string().min(1, "End date is required"),
-	is_active: z.boolean().default(true),
-});
+type TranslateFn = ReturnType<typeof useT>;
 
-type CouponFormData = z.infer<typeof couponSchema>;
+const createCouponSchema = (t: TranslateFn) =>
+	z.object({
+		code: z
+			.string()
+			.min(1, t("coupons.form.validation.codeRequired", "Coupon code is required"))
+			.max(
+				50,
+				t("coupons.form.validation.codeMax", "Code must not exceed 50 characters"),
+			)
+			.transform((val) => val.toUpperCase()),
+		description: z
+			.string()
+			.max(
+				500,
+				t(
+					"coupons.form.validation.descriptionMax",
+					"Description must not exceed 500 characters",
+				),
+			)
+			.optional()
+			.or(z.literal("")),
+		discount_type: z.enum(["percentage", "fixed_amount"]),
+		discount_value: z.coerce
+			.number()
+			.positive(
+				t(
+					"coupons.form.validation.discountPositive",
+					"Discount value must be positive",
+				),
+			),
+		min_order_amount: z.coerce
+			.number()
+			.min(
+				0,
+				t(
+					"coupons.form.validation.nonNegative",
+					"Value must be 0 or greater",
+				),
+			)
+			.default(0),
+		max_discount_amount: z.coerce
+			.number()
+			.positive(
+				t("coupons.form.validation.positive", "Must be positive"),
+			)
+			.optional()
+			.or(z.literal(0))
+			.or(z.literal("").transform(() => undefined)),
+		max_uses: z.coerce
+			.number()
+			.int()
+			.positive(
+				t("coupons.form.validation.positive", "Must be positive"),
+			)
+			.optional()
+			.or(z.literal(0).transform(() => undefined))
+			.or(z.literal("").transform(() => undefined)),
+		max_uses_per_user: z.coerce
+			.number()
+			.int()
+			.positive(
+				t("coupons.form.validation.positive", "Must be positive"),
+			)
+			.optional()
+			.or(z.literal(0).transform(() => undefined))
+			.or(z.literal("").transform(() => undefined)),
+		valid_from: z
+			.string()
+			.min(1, t("coupons.form.validation.validFrom", "Start date is required")),
+		valid_until: z
+			.string()
+			.min(1, t("coupons.form.validation.validUntil", "End date is required")),
+		is_active: z.boolean().default(true),
+	});
+
+type CouponFormData = z.infer<ReturnType<typeof createCouponSchema>>;
 
 interface CouponFormProps {
 	handleClose: () => void;
@@ -60,19 +102,15 @@ interface CouponFormProps {
 	mode: "create" | "edit";
 }
 
-const DISCOUNT_TYPE_OPTIONS = [
-	{ value: "percentage", label: "Percentage (%)" },
-	{ value: "fixed_amount", label: "Fixed Amount (৳)" },
-];
-
 export const CouponForm = ({ handleClose, coupon, mode }: CouponFormProps) => {
+	const t = useT();
 	const { mutate: createCoupon, isPending: isCreating } = useCreateCoupon();
 	const { mutate: updateCoupon, isPending: isUpdating } = useUpdateCoupon();
 
 	const isEditMode = mode === "edit";
 	const isPending = isCreating || isUpdating;
 
-	const form = useZodForm(couponSchema, {
+	const form = useZodForm(createCouponSchema(t), {
 		defaultValues: {
 			code: "",
 			description: "",
@@ -87,6 +125,17 @@ export const CouponForm = ({ handleClose, coupon, mode }: CouponFormProps) => {
 			is_active: true,
 		},
 	});
+
+	const discountTypeOptions = [
+		{
+			value: "percentage",
+			label: t("coupons.form.discountType.percentage", "Percentage (%)"),
+		},
+		{
+			value: "fixed_amount",
+			label: t("coupons.form.discountType.fixedAmount", "Fixed Amount (৳)"),
+		},
+	];
 
 	const handleCancel = () => {
 		handleClose();
@@ -107,7 +156,9 @@ export const CouponForm = ({ handleClose, coupon, mode }: CouponFormProps) => {
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Coupon updated successfully");
+						toast.success(
+							t("coupons.form.toast.updateSuccess", "Coupon updated successfully"),
+						);
 					},
 				}
 			);
@@ -115,7 +166,9 @@ export const CouponForm = ({ handleClose, coupon, mode }: CouponFormProps) => {
 			createCoupon(payload, {
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Coupon created successfully");
+					toast.success(
+						t("coupons.form.toast.createSuccess", "Coupon created successfully"),
+					);
 				},
 			});
 		}
@@ -151,15 +204,18 @@ export const CouponForm = ({ handleClose, coupon, mode }: CouponFormProps) => {
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="code"
-						label="Coupon Code"
-						placeholder="e.g., SAVE20"
+						label={t("coupons.form.code", "Coupon Code")}
+						placeholder={t("coupons.form.codePlaceholder", "e.g., SAVE20")}
 						required
-						description="Unique code customers will enter"
+						description={t(
+							"coupons.form.codeHelp",
+							"Unique code customers will enter",
+						)}
 					/>
 					<SelectField
 						name="discount_type"
-						label="Discount Type"
-						options={DISCOUNT_TYPE_OPTIONS}
+						label={t("coupons.form.discountType", "Discount Type")}
+						options={discountTypeOptions}
 						required
 					/>
 				</div>
@@ -167,59 +223,80 @@ export const CouponForm = ({ handleClose, coupon, mode }: CouponFormProps) => {
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="discount_value"
-						label="Discount Value"
-						placeholder="e.g., 20"
+						label={t("coupons.form.discountValue", "Discount Value")}
+						placeholder={t(
+							"coupons.form.discountValuePlaceholder",
+							"e.g., 20",
+						)}
 						type="number"
 						required
 						description={
 							form.watch("discount_type") === "percentage"
-								? "Percentage off (0-100)"
-								: "Fixed amount in ৳"
+								? t(
+										"coupons.form.discountValueHelpPercentage",
+										"Percentage off (0-100)",
+									)
+								: t(
+										"coupons.form.discountValueHelpFixed",
+										"Fixed amount in ৳",
+									)
 						}
 					/>
 					<TextField
 						name="min_order_amount"
-						label="Min Order Amount"
-						placeholder="e.g., 500"
+						label={t("coupons.form.minOrderAmount", "Min Order Amount")}
+						placeholder={t(
+							"coupons.form.minOrderAmountPlaceholder",
+							"e.g., 500",
+						)}
 						type="number"
-						description="Minimum subtotal to use coupon"
+						description={t(
+							"coupons.form.minOrderAmountHelp",
+							"Minimum subtotal to use coupon",
+						)}
 					/>
 				</div>
 
 				<div className="grid grid-cols-3 gap-4">
 					<TextField
 						name="max_discount_amount"
-						label="Max Discount"
-						placeholder="e.g., 200"
+						label={t("coupons.form.maxDiscount", "Max Discount")}
+						placeholder={t(
+							"coupons.form.maxDiscountPlaceholder",
+							"e.g., 200",
+						)}
 						type="number"
-						description="Cap on discount (for %)"
+						description={t(
+							"coupons.form.maxDiscountHelp",
+							"Cap on discount (for %)",
+						)}
 					/>
 					<TextField
 						name="max_uses"
-						label="Total Uses"
-						placeholder="Unlimited"
+						label={t("coupons.form.totalUses", "Total Uses")}
+						placeholder={t("coupons.form.unlimited", "Unlimited")}
 						type="number"
-						description="Max total uses"
+						description={t("coupons.form.totalUsesHelp", "Max total uses")}
 					/>
 					<TextField
 						name="max_uses_per_user"
-						label="Per User"
-						placeholder="Unlimited"
+						label={t("coupons.form.perUser", "Per User")}
+						placeholder={t("coupons.form.unlimited", "Unlimited")}
 						type="number"
-						description="Max uses per user"
+						description={t("coupons.form.perUserHelp", "Max uses per user")}
 					/>
 				</div>
 
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="valid_from"
-						label="Valid From"
+						label={t("coupons.form.validFrom", "Valid From")}
 						type="datetime-local"
 						required
 					/>
 					<TextField
 						name="valid_until"
-						label="Valid Until"
+						label={t("coupons.form.validUntil", "Valid Until")}
 						type="datetime-local"
 						required
 					/>
@@ -227,11 +304,17 @@ export const CouponForm = ({ handleClose, coupon, mode }: CouponFormProps) => {
 
 				<TextareaField
 					name="description"
-					label="Description"
-					placeholder="e.g., 20% off on all orders above ৳500"
+					label={t("coupons.form.description", "Description")}
+					placeholder={t(
+						"coupons.form.descriptionPlaceholder",
+						"e.g., 20% off on all orders above ৳500",
+					)}
 				/>
 
-				<CheckboxField name="is_active" label="Active" />
+				<CheckboxField
+					name="is_active"
+					label={t("coupons.form.active", "Active")}
+				/>
 			</div>
 
 			<div className="flex justify-end gap-2">
@@ -241,10 +324,14 @@ export const CouponForm = ({ handleClose, coupon, mode }: CouponFormProps) => {
 					onClick={handleCancel}
 					disabled={isPending}
 				>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Coupon" : "Create Coupon"}
+					{isEditMode ? (
+						<T id="coupons.form.update" defaultMessage="Update Coupon" />
+					) : (
+						<T id="coupons.form.create" defaultMessage="Create Coupon" />
+					)}
 				</LoadingButton>
 			</div>
 		</BaseForm>

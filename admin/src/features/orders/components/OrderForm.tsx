@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useLocale } from "@/i18n/locale-context";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useCreateOrder } from "@/lib/api/orders";
 import { getProducts, type ProductListItem } from "@/lib/api/product";
@@ -28,39 +30,66 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
 
-// ─── Schema ──────────────────────────────────────────────────────────────────
+type TranslateFn = ReturnType<typeof useT>;
 
-const orderItemSchema = z.object({
-	product_id: z.string().min(1, "Product is required"),
-	variant_id: z.string().min(1, "Variant is required"),
-	quantity: z.coerce.number().int().min(1, "Min 1"),
-});
+const createOrderSchema = (t: TranslateFn) =>
+	z.object({
+		customer_name: z
+			.string()
+			.min(1, t("orders.form.validation.customerName", "Customer name is required")),
+		customer_email: z
+			.string()
+			.email(t("orders.form.validation.email", "Enter a valid email"))
+			.optional()
+			.or(z.literal("")),
+		guest_mobile_number: z.string().optional(),
+		payment_method: z.enum(["cod", "online", "card", "upi"]),
+		delivery_type: z.enum(["inside_dhaka", "outside_dhaka"]),
+		customer_note: z.string().optional(),
+		items: z
+			.array(
+				z.object({
+					product_id: z
+						.string()
+						.min(1, t("orders.form.validation.product", "Product is required")),
+					variant_id: z
+						.string()
+						.min(1, t("orders.form.validation.variant", "Variant is required")),
+					quantity: z.coerce
+						.number()
+						.int()
+						.min(1, t("orders.form.validation.quantity", "Min 1")),
+				}),
+			)
+			.min(1, t("orders.form.validation.items", "Add at least one item")),
+		shipping_address: z.object({
+			full_name: z
+				.string()
+				.min(1, t("orders.form.validation.fullName", "Full name is required")),
+			mobile_number: z
+				.string()
+				.min(
+					1,
+					t("orders.form.validation.mobileNumber", "Mobile number is required"),
+				),
+			address_line1: z
+				.string()
+				.min(1, t("orders.form.validation.address", "Address is required")),
+			address_line2: z.string().optional(),
+			city: z
+				.string()
+				.min(1, t("orders.form.validation.city", "City is required")),
+			state: z
+				.string()
+				.min(1, t("orders.form.validation.state", "State / District is required")),
+			postal_code: z
+				.string()
+				.min(1, t("orders.form.validation.postalCode", "Postal code is required")),
+			country: z.string().default("Bangladesh"),
+		}),
+	});
 
-const orderSchema = z.object({
-	customer_name: z.string().min(1, "Customer name is required"),
-	customer_email: z
-		.string()
-		.email("Enter a valid email")
-		.optional()
-		.or(z.literal("")),
-	guest_mobile_number: z.string().optional(),
-	payment_method: z.enum(["cod", "online", "card", "upi"]),
-	delivery_type: z.enum(["inside_dhaka", "outside_dhaka"]),
-	customer_note: z.string().optional(),
-	items: z.array(orderItemSchema).min(1, "Add at least one item"),
-	shipping_address: z.object({
-		full_name: z.string().min(1, "Full name is required"),
-		mobile_number: z.string().min(1, "Mobile number is required"),
-		address_line1: z.string().min(1, "Address is required"),
-		address_line2: z.string().optional(),
-		city: z.string().min(1, "City is required"),
-		state: z.string().min(1, "State / District is required"),
-		postal_code: z.string().min(1, "Postal code is required"),
-		country: z.string().default("Bangladesh"),
-	}),
-});
-
-type OrderFormData = z.infer<typeof orderSchema>;
+type OrderFormData = z.infer<ReturnType<typeof createOrderSchema>>;
 
 const defaultValues: OrderFormData = {
 	customer_name: "",
@@ -89,9 +118,18 @@ interface ProductPickerProps {
 	onChange: (value: string) => void;
 	products: ProductListItem[];
 	hasError?: boolean;
+	t: TranslateFn;
+	locale: "en" | "bn";
 }
 
-function ProductPicker({ value, onChange, products, hasError }: ProductPickerProps) {
+function ProductPicker({
+	value,
+	onChange,
+	products,
+	hasError,
+	t,
+	locale,
+}: ProductPickerProps) {
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
 
@@ -116,14 +154,19 @@ function ProductPicker({ value, onChange, products, hasError }: ProductPickerPro
 					)}
 				>
 					<span className="truncate text-sm">
-						{selected ? selected.name : "Select product..."}
+						{selected
+							? selected.name
+							: t("orders.form.items.selectProduct", "Select product...")}
 					</span>
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-[420px] p-2" align="start">
 				<Input
-					placeholder="Search by name or SKU..."
+					placeholder={t(
+						"orders.form.items.searchProduct",
+						"Search by name or SKU...",
+					)}
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					className="mb-2 h-8 text-sm"
@@ -132,7 +175,7 @@ function ProductPicker({ value, onChange, products, hasError }: ProductPickerPro
 				<div className="max-h-[220px] overflow-y-auto space-y-0.5">
 					{filtered.length === 0 ? (
 						<p className="py-4 text-center text-sm text-muted-foreground">
-							No products found
+							{t("orders.form.items.noProducts", "No products found")}
 						</p>
 					) : (
 						filtered.map((product) => (
@@ -159,8 +202,16 @@ function ProductPicker({ value, onChange, products, hasError }: ProductPickerPro
 								<div className="min-w-0">
 									<p className="text-sm font-medium truncate">{product.name}</p>
 									<p className="text-xs text-muted-foreground">
-										SKU: {product.sku} &middot; ৳
-										{parseFloat(product.base_price).toFixed(2)}
+										{t("orders.form.items.skuLine", "SKU: {sku} · {price}", {
+											sku: product.sku,
+											price: `৳${parseFloat(product.base_price).toLocaleString(
+												locale === "bn" ? "bn-BD" : "en-BD",
+												{
+													minimumFractionDigits: 2,
+													maximumFractionDigits: 2,
+												},
+											)}`,
+										})}
 									</p>
 								</div>
 							</div>
@@ -179,9 +230,18 @@ interface VariantPickerProps {
 	value: string;
 	onChange: (value: string) => void;
 	hasError?: boolean;
+	t: TranslateFn;
+	locale: "en" | "bn";
 }
 
-function VariantPicker({ productId, value, onChange, hasError }: VariantPickerProps) {
+function VariantPicker({
+	productId,
+	value,
+	onChange,
+	hasError,
+	t,
+	locale,
+}: VariantPickerProps) {
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
 
@@ -205,7 +265,9 @@ function VariantPicker({ productId, value, onChange, hasError }: VariantPickerPr
 				disabled
 				className="w-full justify-between font-normal h-9 px-3 text-muted-foreground"
 			>
-				<span className="truncate text-sm">Select product first...</span>
+				<span className="truncate text-sm">
+					{t("orders.form.items.selectProductFirst", "Select product first...")}
+				</span>
 				<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 			</Button>
 		);
@@ -227,15 +289,18 @@ function VariantPicker({ productId, value, onChange, hasError }: VariantPickerPr
 						{selected
 							? `${selected.name} (${selected.sku})`
 							: isLoading
-							? "Loading..."
-							: "Select variant..."}
+								? t("orders.form.items.loadingVariants", "Loading...")
+								: t("orders.form.items.selectVariant", "Select variant...")}
 					</span>
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-[380px] p-2" align="start">
 				<Input
-					placeholder="Search by name or SKU..."
+					placeholder={t(
+						"orders.form.items.searchVariant",
+						"Search by name or SKU...",
+					)}
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					className="mb-2 h-8 text-sm"
@@ -244,7 +309,7 @@ function VariantPicker({ productId, value, onChange, hasError }: VariantPickerPr
 				<div className="max-h-[200px] overflow-y-auto space-y-0.5">
 					{filtered.length === 0 ? (
 						<p className="py-4 text-center text-sm text-muted-foreground">
-							No variants found
+							{t("orders.form.items.noVariants", "No variants found")}
 						</p>
 					) : (
 						filtered.map((variant: ProductVariant) => (
@@ -272,8 +337,25 @@ function VariantPicker({ productId, value, onChange, hasError }: VariantPickerPr
 								<div className="min-w-0 flex-1">
 									<p className="text-sm font-medium truncate">{variant.name}</p>
 									<p className="text-xs text-muted-foreground">
-										{variant.sku} &middot; ৳{parseFloat(variant.base_price).toFixed(2)}
-										{!variant.is_in_stock && " · Out of stock"}
+										{t(
+											"orders.form.items.variantLine",
+											"{sku} · {price}{stockState}",
+											{
+												sku: variant.sku,
+												price: `৳${parseFloat(
+													variant.base_price,
+												).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
+													minimumFractionDigits: 2,
+													maximumFractionDigits: 2,
+												})}`,
+												stockState: !variant.is_in_stock
+													? ` · ${t(
+															"orders.form.items.outOfStock",
+															"Out of stock",
+														)}`
+													: "",
+											},
+										)}
 									</p>
 								</div>
 							</div>
@@ -288,9 +370,11 @@ function VariantPicker({ productId, value, onChange, hasError }: VariantPickerPr
 // ─── Order Form ───────────────────────────────────────────────────────────────
 
 export function OrderForm({ handleClose }: { handleClose: () => void }) {
+	const t = useT();
+	const { locale } = useLocale();
 	const navigate = useNavigate();
 
-	const form = useZodForm(orderSchema, {
+	const form = useZodForm(createOrderSchema(t), {
 		defaultValues,
 		mode: "onChange",
 	});
@@ -321,11 +405,18 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 			},
 			{
 				onSuccess: (order) => {
-					toast.success("Order created successfully");
+					toast.success(
+						t("orders.form.toast.createSuccess", "Order created successfully"),
+					);
 					navigate(`/orders/${order.id}`);
 				},
 				onError: () => {
-					toast.error("Failed to create order. Please check the form and try again.");
+					toast.error(
+						t(
+							"orders.form.toast.createFailed",
+							"Failed to create order. Please check the form and try again.",
+						),
+					);
 				},
 			}
 		);
@@ -341,32 +432,49 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 			{/* ── Customer Information ─────────────────────────────── */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Customer Information</CardTitle>
+					<CardTitle>
+						{t("orders.form.customer.title", "Customer Information")}
+					</CardTitle>
 					<CardDescription>
-						Enter the customer's details. Use the mobile field for guest orders.
+						{t(
+							"orders.form.customer.description",
+							"Enter the customer's details. Use the mobile field for guest orders.",
+						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<TextField
 						name="customer_name"
-						label="Customer Name"
+						label={t("orders.form.customer.name", "Customer Name")}
 						required
-						placeholder="e.g., John Doe"
+						placeholder={t("orders.form.customer.namePlaceholder", "e.g., John Doe")}
 					/>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField
 							name="customer_email"
-							label="Email"
+							label={t("orders.form.customer.email", "Email")}
 							type="email"
-							placeholder="e.g., customer@example.com"
-							helpText="Optional. Leave blank for guest orders."
+							placeholder={t(
+								"orders.form.customer.emailPlaceholder",
+								"e.g., customer@example.com",
+							)}
+							helpText={t(
+								"orders.form.customer.emailHelp",
+								"Optional. Leave blank for guest orders.",
+							)}
 						/>
 						<TextField
 							name="guest_mobile_number"
-							label="Mobile Number"
+							label={t("orders.form.customer.mobile", "Mobile Number")}
 							type="tel"
-							placeholder="e.g., 01700000000"
-							helpText="Required for guest orders without an account."
+							placeholder={t(
+								"orders.form.customer.mobilePlaceholder",
+								"e.g., 01700000000",
+							)}
+							helpText={t(
+								"orders.form.customer.mobileHelp",
+								"Required for guest orders without an account.",
+							)}
 						/>
 					</div>
 				</CardContent>
@@ -375,22 +483,28 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 			{/* ── Order Items ──────────────────────────────────────── */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Order Items</CardTitle>
+					<CardTitle>{t("orders.form.items.title", "Order Items")}</CardTitle>
 					<CardDescription>
-						Add the products, variants, and quantities for this order.
+						{t(
+							"orders.form.items.description",
+							"Add the products, variants, and quantities for this order.",
+						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-3">
 					{/* Column headers */}
 					<div className="hidden md:grid md:grid-cols-[1fr_1fr_100px_40px] gap-3 px-1">
 						<Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-							Product <span className="text-red-500">*</span>
+							{t("orders.form.items.product", "Product")}{" "}
+							<span className="text-red-500">*</span>
 						</Label>
 						<Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-							Variant <span className="text-red-500">*</span>
+							{t("orders.form.items.variant", "Variant")}{" "}
+							<span className="text-red-500">*</span>
 						</Label>
 						<Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-							Qty <span className="text-red-500">*</span>
+							{t("orders.form.items.quantity", "Qty")}{" "}
+							<span className="text-red-500">*</span>
 						</Label>
 						<span />
 					</div>
@@ -405,7 +519,8 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 								{/* Product picker */}
 								<div>
 									<Label className="md:hidden text-sm font-medium mb-1 block">
-										Product <span className="text-red-500">*</span>
+										{t("orders.form.items.product", "Product")}{" "}
+										<span className="text-red-500">*</span>
 									</Label>
 									<ProductPicker
 										value={form.watch(`items.${index}.product_id`)}
@@ -418,6 +533,8 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 										}}
 										products={products}
 										hasError={!!itemsErrors?.[index]?.product_id}
+										t={t}
+										locale={locale}
 									/>
 									{itemsErrors?.[index]?.product_id && (
 										<p className="text-xs text-red-500 mt-1">
@@ -429,7 +546,8 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 								{/* Variant picker */}
 								<div>
 									<Label className="md:hidden text-sm font-medium mb-1 block">
-										Variant <span className="text-red-500">*</span>
+										{t("orders.form.items.variant", "Variant")}{" "}
+										<span className="text-red-500">*</span>
 									</Label>
 									<VariantPicker
 										productId={productId}
@@ -440,6 +558,8 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 											})
 										}
 										hasError={!!itemsErrors?.[index]?.variant_id}
+										t={t}
+										locale={locale}
 									/>
 									{itemsErrors?.[index]?.variant_id && (
 										<p className="text-xs text-red-500 mt-1">
@@ -451,7 +571,8 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 								{/* Quantity */}
 								<div>
 									<Label className="md:hidden text-sm font-medium mb-1 block">
-										Qty <span className="text-red-500">*</span>
+										{t("orders.form.items.quantity", "Qty")}{" "}
+										<span className="text-red-500">*</span>
 									</Label>
 									<Input
 										type="number"
@@ -480,7 +601,7 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 									className="h-9 w-9 text-muted-foreground hover:text-destructive"
 									onClick={() => remove(index)}
 									disabled={fields.length === 1}
-									title="Remove item"
+									title={t("orders.form.items.remove", "Remove item")}
 								>
 									<Trash2 className="h-4 w-4" />
 								</Button>
@@ -501,7 +622,7 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 						disabled={isLoadingProducts}
 					>
 						<Plus className="h-4 w-4 mr-2" />
-						Add Item
+						{t("orders.form.items.add", "Add Item")}
 					</Button>
 				</CardContent>
 			</Card>
@@ -509,60 +630,73 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 			{/* ── Shipping Address ─────────────────────────────────── */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Shipping Address</CardTitle>
-					<CardDescription>Delivery address for this order.</CardDescription>
+					<CardTitle>
+						{t("orders.form.shipping.title", "Shipping Address")}
+					</CardTitle>
+					<CardDescription>
+						{t("orders.form.shipping.description", "Delivery address for this order.")}
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField
 							name="shipping_address.full_name"
-							label="Full Name"
+							label={t("orders.form.shipping.fullName", "Full Name")}
 							required
-							placeholder="e.g., John Doe"
+							placeholder={t("orders.form.shipping.fullNamePlaceholder", "e.g., John Doe")}
 						/>
 						<TextField
 							name="shipping_address.mobile_number"
-							label="Mobile Number"
+							label={t("orders.form.shipping.mobile", "Mobile Number")}
 							type="tel"
 							required
-							placeholder="e.g., 01700000000"
+							placeholder={t("orders.form.shipping.mobilePlaceholder", "e.g., 01700000000")}
 						/>
 					</div>
 					<TextField
 						name="shipping_address.address_line1"
-						label="Address Line 1"
+						label={t("orders.form.shipping.addressLine1", "Address Line 1")}
 						required
-						placeholder="House / flat number, street name"
+						placeholder={t(
+							"orders.form.shipping.addressLine1Placeholder",
+							"House / flat number, street name",
+						)}
 					/>
 					<TextField
 						name="shipping_address.address_line2"
-						label="Address Line 2"
-						placeholder="Apartment, suite, landmark (optional)"
+						label={t("orders.form.shipping.addressLine2", "Address Line 2")}
+						placeholder={t(
+							"orders.form.shipping.addressLine2Placeholder",
+							"Apartment, suite, landmark (optional)",
+						)}
 					/>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 						<TextField
 							name="shipping_address.city"
-							label="City"
+							label={t("orders.form.shipping.city", "City")}
 							required
-							placeholder="e.g., Dhaka"
+							placeholder={t("orders.form.shipping.cityPlaceholder", "e.g., Dhaka")}
 						/>
 						<TextField
 							name="shipping_address.state"
-							label="State / District"
+							label={t("orders.form.shipping.state", "State / District")}
 							required
-							placeholder="e.g., Dhaka Division"
+							placeholder={t(
+								"orders.form.shipping.statePlaceholder",
+								"e.g., Dhaka Division",
+							)}
 						/>
 						<TextField
 							name="shipping_address.postal_code"
-							label="Postal Code"
+							label={t("orders.form.shipping.postalCode", "Postal Code")}
 							required
-							placeholder="e.g., 1207"
+							placeholder={t("orders.form.shipping.postalCodePlaceholder", "e.g., 1207")}
 						/>
 					</div>
 					<TextField
 						name="shipping_address.country"
-						label="Country"
-						placeholder="Bangladesh"
+						label={t("orders.form.shipping.country", "Country")}
+						placeholder={t("orders.form.shipping.countryPlaceholder", "Bangladesh")}
 					/>
 				</CardContent>
 			</Card>
@@ -570,34 +704,75 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 			{/* ── Payment & Delivery ───────────────────────────────── */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Payment & Delivery</CardTitle>
+					<CardTitle>
+						{t("orders.form.payment.title", "Payment & Delivery")}
+					</CardTitle>
 					<CardDescription>
-						Select the payment method and delivery zone.
+						{t(
+							"orders.form.payment.description",
+							"Select the payment method and delivery zone.",
+						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<SelectField
 							name="payment_method"
-							label="Payment Method"
+							label={t("orders.form.payment.method", "Payment Method")}
 							required
 							options={[
-								{ value: "cod", label: "Cash on Delivery" },
-								{ value: "online", label: "Online Payment" },
-								{ value: "card", label: "Card" },
-								{ value: "upi", label: "UPI" },
+								{
+									value: "cod",
+									label: t(
+										"orders.common.paymentMethod.cod",
+										"Cash on Delivery",
+									),
+								},
+								{
+									value: "online",
+									label: t(
+										"orders.common.paymentMethod.online",
+										"Online Payment",
+									),
+								},
+								{
+									value: "card",
+									label: t("orders.common.paymentMethod.card", "Card"),
+								},
+								{
+									value: "upi",
+									label: t("orders.common.paymentMethod.upi", "UPI"),
+								},
 							]}
-							placeholder="Select payment method"
+							placeholder={t(
+								"orders.form.payment.methodPlaceholder",
+								"Select payment method",
+							)}
 						/>
 						<SelectField
 							name="delivery_type"
-							label="Delivery Type"
+							label={t("orders.form.payment.deliveryType", "Delivery Type")}
 							required
 							options={[
-								{ value: "inside_dhaka", label: "Inside Dhaka" },
-								{ value: "outside_dhaka", label: "Outside Dhaka" },
+								{
+									value: "inside_dhaka",
+									label: t(
+										"orders.common.deliveryType.insideDhaka",
+										"Inside Dhaka",
+									),
+								},
+								{
+									value: "outside_dhaka",
+									label: t(
+										"orders.common.deliveryType.outsideDhaka",
+										"Outside Dhaka",
+									),
+								},
 							]}
-							placeholder="Select delivery type"
+							placeholder={t(
+								"orders.form.payment.deliveryTypePlaceholder",
+								"Select delivery type",
+							)}
 						/>
 					</div>
 				</CardContent>
@@ -606,16 +781,22 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 			{/* ── Notes ───────────────────────────────────────────── */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Customer Note</CardTitle>
+					<CardTitle>{t("orders.form.note.title", "Customer Note")}</CardTitle>
 					<CardDescription>
-						Optional message or special instruction from the customer.
+						{t(
+							"orders.form.note.description",
+							"Optional message or special instruction from the customer.",
+						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<TextareaField
 						name="customer_note"
-						label="Note"
-						placeholder="Any special instructions for this order..."
+						label={t("orders.form.note.label", "Note")}
+						placeholder={t(
+							"orders.form.note.placeholder",
+							"Any special instructions for this order...",
+						)}
 						rows={3}
 					/>
 				</CardContent>
@@ -630,10 +811,10 @@ export function OrderForm({ handleClose }: { handleClose: () => void }) {
 					onClick={handleClose}
 					disabled={isPending}
 				>
-					Cancel
+					{t("orders.form.cancel", "Cancel")}
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					Create Order
+					{t("orders.form.submit", "Create Order")}
 				</LoadingButton>
 			</div>
 		</BaseForm>

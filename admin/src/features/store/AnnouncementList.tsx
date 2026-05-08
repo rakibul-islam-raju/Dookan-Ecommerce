@@ -3,6 +3,9 @@ import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -20,7 +23,6 @@ import {
 	type AnnouncementListItem,
 } from "@/lib/api/store";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -33,6 +35,8 @@ const initialParams: AnnouncementFilter = {
 };
 
 export function AnnouncementList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { params, handleChangeParams, resetParams } = useFilterParams({
 		initialParams,
 	});
@@ -61,15 +65,33 @@ export function AnnouncementList() {
 	};
 
 	const handleDelete = async (announcement: AnnouncementListItem) => {
-		if (!confirm(`Are you sure you want to delete "${announcement.title}"?`)) {
+		if (
+			!confirm(
+				t(
+					"store.announcements.deleteConfirm",
+					'Are you sure you want to delete "{title}"?',
+					{ title: announcement.title },
+				),
+			)
+		) {
 			return;
 		}
 
 		try {
 			await deleteMutation.mutateAsync(announcement.id);
-			toast.success("Announcement deleted successfully");
+			toast.success(
+				t(
+					"store.announcements.toast.deleteSuccess",
+					"Announcement deleted successfully",
+				),
+			);
 		} catch (error) {
-			toast.error("Failed to delete announcement");
+			toast.error(
+				t(
+					"store.announcements.toast.deleteFailed",
+					"Failed to delete announcement",
+				),
+			);
 			console.error("Delete error:", error);
 		}
 	};
@@ -79,20 +101,26 @@ export function AnnouncementList() {
 	};
 
 	const formatDate = (dateString: string) => {
-		return format(new Date(dateString), "MMM d, yyyy h:mm a");
+		return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-BD", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		}).format(new Date(dateString));
 	};
 
 	const columns: Column<AnnouncementListItem>[] = [
 		{
 			key: "title",
-			header: "Title",
+			header: t("store.announcements.table.title", "Title"),
 			render: (announcement) => (
 				<div className="font-medium">{announcement.title}</div>
 			),
 		},
 		{
 			key: "description",
-			header: "Description",
+			header: t("store.announcements.table.description", "Description"),
 			render: (announcement) => (
 				<span className="text-muted-foreground truncate max-w-xs block">
 					{announcement.description.length > 100
@@ -103,20 +131,26 @@ export function AnnouncementList() {
 		},
 		{
 			key: "dates",
-			header: "Schedule",
+			header: t("store.announcements.table.schedule", "Schedule"),
 			render: (announcement) => (
 				<div className="text-sm text-muted-foreground">
-					<div>Start: {formatDate(announcement.start_date)}</div>
-					<div>End: {formatDate(announcement.end_date)}</div>
+					<div>
+						{t("store.common.start", "Start")}: {formatDate(announcement.start_date)}
+					</div>
+					<div>
+						{t("store.common.end", "End")}: {formatDate(announcement.end_date)}
+					</div>
 				</div>
 			),
 		},
 		{
 			key: "is_active",
-			header: "Status",
+			header: t("store.announcements.table.status", "Status"),
 			render: (announcement) => (
 				<Badge variant={getStatusBadgeVariant(announcement.is_active)}>
-					{announcement.is_active ? "Active" : "Inactive"}
+					{announcement.is_active
+						? t("store.common.status.active", "Active")
+						: t("store.common.status.inactive", "Inactive")}
 				</Badge>
 			),
 		},
@@ -131,11 +165,13 @@ export function AnnouncementList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="store.common.actions" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => handleEdit(announcement)}>
 							<Pencil className="h-4 w-4 mr-2" />
-							Edit
+							<T id="store.common.edit" defaultMessage="Edit" />
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleDelete(announcement)}
@@ -143,7 +179,7 @@ export function AnnouncementList() {
 							disabled={deleteMutation.isPending}
 						>
 							<Trash2 className="h-4 w-4 mr-2" />
-							Delete
+							<T id="store.common.delete" defaultMessage="Delete" />
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -175,9 +211,14 @@ export function AnnouncementList() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Announcements</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="store.announcements.title" defaultMessage="Announcements" />
+					</h1>
 					<p className="text-muted-foreground">
-						Manage your store announcements
+						<T
+							id="store.announcements.description"
+							defaultMessage="Manage your store announcements"
+						/>
 					</p>
 				</div>
 				<Button
@@ -188,7 +229,10 @@ export function AnnouncementList() {
 					}}
 				>
 					<Plus className="h-4 w-4 mr-2" />
-					Add Announcement
+					<T
+						id="store.announcements.add"
+						defaultMessage="Add Announcement"
+					/>
 				</Button>
 			</div>
 
@@ -196,10 +240,21 @@ export function AnnouncementList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search announcements by title..."
+					placeholder={t(
+						"store.announcements.searchPlaceholder",
+						"Search announcements by title...",
+					)}
 					className="flex-1"
 				/>
-				<FilterDrawer open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+				<FilterDrawer
+					open={isFilterOpen}
+					onOpenChange={setIsFilterOpen}
+					title={t("store.announcements.filter.title", "Filters")}
+					description={t(
+						"store.announcements.filter.description",
+						"Apply filters to refine your announcement list",
+					)}
+				>
 					<AnnouncementFilterForm
 						initialFilter={params}
 						onFilter={handleApplyFilters}
@@ -213,10 +268,10 @@ export function AnnouncementList() {
 				columns={columns}
 				emptyMessage={
 					isLoading
-						? "Loading announcements..."
+						? t("store.announcements.loading", "Loading announcements...")
 						: error
-							? "Error loading announcements"
-							: "No announcements found"
+							? t("store.announcements.error", "Error loading announcements")
+							: t("store.announcements.empty", "No announcements found")
 				}
 				pagination={{
 					currentPage,

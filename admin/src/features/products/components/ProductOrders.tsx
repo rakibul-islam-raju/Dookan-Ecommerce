@@ -32,6 +32,9 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	getOrdersByProductId,
 	useCancelOrder,
@@ -80,19 +83,13 @@ const getStatusBadgeVariant = (
 	}
 };
 
-const formatDate = (dateString: string) => {
-	return new Date(dateString).toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
-};
-
 interface ProductOrdersProps {
 	productId: string;
 }
 
 export const ProductOrders = ({ productId }: ProductOrdersProps) => {
+	const t = useT();
+	const { locale } = useLocale();
 	const navigate = useNavigate();
 
 	// Dialog states
@@ -114,6 +111,22 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 		useUpdateOrderStatus();
 	const { mutate: cancelOrder, isPending: isCancellingOrder } =
 		useCancelOrder();
+
+	const getStatusLabel = (status: IOrderStatus) =>
+		t(`orders.common.status.${status}`, status.charAt(0).toUpperCase() + status.slice(1));
+
+	const formatCurrency = (value: string | number) =>
+		`৳${Number(value).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		})}`;
+
+	const formatDateLocalized = (dateString: string) =>
+		new Date(dateString).toLocaleDateString(locale === "bn" ? "bn-BD" : "en-BD", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		});
 
 	const handleOpenStatusDialog = (order: OrderListItem) => {
 		setSelectedOrderId(order.id);
@@ -141,14 +154,21 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 			},
 			{
 				onSuccess: () => {
-					toast.success("Order status updated successfully");
+					toast.success(
+						t(
+							"products.orders.toast.statusUpdated",
+							"Order status updated successfully",
+						),
+					);
 					setIsStatusDialogOpen(false);
 					setSelectedOrderId(null);
 					setSelectedStatus("");
 					setStatusNote("");
 				},
 				onError: (error) => {
-					toast.error("Failed to update order status");
+					toast.error(
+						t("products.orders.toast.statusFailed", "Failed to update order status"),
+					);
 					console.error(error);
 				},
 			}
@@ -165,13 +185,17 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 			},
 			{
 				onSuccess: () => {
-					toast.success("Order cancelled successfully");
+					toast.success(
+						t("products.orders.toast.cancelled", "Order cancelled successfully"),
+					);
 					setIsCancelDialogOpen(false);
 					setSelectedOrderId(null);
 					setCancelNote("");
 				},
 				onError: (error) => {
-					toast.error("Failed to cancel order");
+					toast.error(
+						t("products.orders.toast.cancelFailed", "Failed to cancel order"),
+					);
 					console.error(error);
 				},
 			}
@@ -186,7 +210,7 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<FileText className="h-5 w-5" />
-						Product Orders
+						<T id="products.orders.title" defaultMessage="Product Orders" />
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
@@ -197,18 +221,38 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 					) : orders.length === 0 ? (
 						<div className="text-center py-12">
 							<FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-							<p className="text-muted-foreground">No orders found for this product</p>
+							<p className="text-muted-foreground">
+								<T
+									id="products.orders.empty"
+									defaultMessage="No orders found for this product"
+								/>
+							</p>
 						</div>
 					) : (
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Order Number</TableHead>
-									<TableHead>Customer</TableHead>
-									<TableHead>Status</TableHead>
-									<TableHead>Date</TableHead>
-									<TableHead className="text-right">Amount</TableHead>
-									<TableHead className="text-right">Items</TableHead>
+									<TableHead>
+										<T
+											id="products.orders.table.orderNumber"
+											defaultMessage="Order Number"
+										/>
+									</TableHead>
+									<TableHead>
+										<T id="products.orders.table.customer" defaultMessage="Customer" />
+									</TableHead>
+									<TableHead>
+										<T id="products.orders.table.status" defaultMessage="Status" />
+									</TableHead>
+									<TableHead>
+										<T id="products.orders.table.date" defaultMessage="Date" />
+									</TableHead>
+									<TableHead className="text-right">
+										<T id="products.orders.table.amount" defaultMessage="Amount" />
+									</TableHead>
+									<TableHead className="text-right">
+										<T id="products.orders.table.items" defaultMessage="Items" />
+									</TableHead>
 									<TableHead className="w-[70px]"></TableHead>
 								</TableRow>
 							</TableHeader>
@@ -228,18 +272,19 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 											<TableCell>{order.customer_name}</TableCell>
 											<TableCell>
 												<Badge variant={getStatusBadgeVariant(order.status)}>
-													{order.status.charAt(0).toUpperCase() +
-														order.status.slice(1)}
+													{getStatusLabel(order.status)}
 												</Badge>
 											</TableCell>
 											<TableCell className="text-muted-foreground">
-												{formatDate(order.created_at)}
+												{formatDateLocalized(order.created_at)}
 											</TableCell>
 											<TableCell className="text-right">
-												BDT {Number(order.total_amount).toFixed(2)}
+												{formatCurrency(order.total_amount)}
 											</TableCell>
 											<TableCell className="text-right">
-												{order.items_count}
+												{order.items_count.toLocaleString(
+													locale === "bn" ? "bn-BD" : "en-IN",
+												)}
 											</TableCell>
 											<TableCell>
 												<div className="flex justify-end gap-1">
@@ -250,7 +295,10 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 														onClick={() =>
 															navigate(`/orders/${order.id}`)
 														}
-														title="View Order Details"
+														title={t(
+															"products.orders.actions.view",
+															"View Order Details",
+														)}
 													>
 														<ArrowRight className="h-4 w-4" />
 													</Button>
@@ -268,7 +316,10 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 															<DropdownMenuItem
 																onClick={() => handleOpenStatusDialog(order)}
 															>
-																Change Status
+																<T
+																	id="products.orders.actions.changeStatus"
+																	defaultMessage="Change Status"
+																/>
 															</DropdownMenuItem>
 															{canCancel && (
 																<>
@@ -278,7 +329,10 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 																		onClick={() => handleOpenCancelDialog(order)}
 																	>
 																		<XCircle className="h-4 w-4 mr-2" />
-																		Cancel Order
+																		<T
+																			id="products.orders.actions.cancel"
+																			defaultMessage="Cancel Order"
+																		/>
 																	</DropdownMenuItem>
 																</>
 															)}
@@ -299,14 +353,28 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 			<Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Change Order Status</DialogTitle>
+						<DialogTitle>
+							<T
+								id="products.orders.dialog.status.title"
+								defaultMessage="Change Order Status"
+							/>
+						</DialogTitle>
 						<DialogDescription>
-							Update the status of order #{selectedOrderNumber}
+							{t(
+								"products.orders.dialog.status.description",
+								"Update the status of order #{orderNumber}",
+								{ orderNumber: selectedOrderNumber },
+							)}
 						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4 pt-4">
 						<div className="space-y-2">
-							<Label htmlFor="status">New Status</Label>
+							<Label htmlFor="status">
+								<T
+									id="products.orders.dialog.status.newStatus"
+									defaultMessage="New Status"
+								/>
+							</Label>
 							<Select
 								value={selectedStatus}
 								onValueChange={(value) =>
@@ -314,22 +382,35 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 								}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select status" />
+									<SelectValue
+										placeholder={t(
+											"products.orders.dialog.status.placeholder",
+											"Select status",
+										)}
+									/>
 								</SelectTrigger>
 								<SelectContent>
 									{ORDER_STATUSES.map((status) => (
 										<SelectItem key={status.value} value={status.value}>
-											{status.label}
+											{getStatusLabel(status.value)}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="note">Note (Optional)</Label>
+							<Label htmlFor="note">
+								<T
+									id="products.orders.dialog.status.note"
+									defaultMessage="Note (Optional)"
+								/>
+							</Label>
 							<Textarea
 								id="note"
-								placeholder="Add a note about this status change..."
+								placeholder={t(
+									"products.orders.dialog.status.notePlaceholder",
+									"Add a note about this status change...",
+								)}
 								value={statusNote}
 								onChange={(e) => setStatusNote(e.target.value)}
 								rows={3}
@@ -340,7 +421,7 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 								variant="outline"
 								onClick={() => setIsStatusDialogOpen(false)}
 							>
-								Cancel
+								<T id="common.cancel" defaultMessage="Cancel" />
 							</Button>
 							<Button
 								onClick={handleUpdateStatus}
@@ -349,7 +430,10 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 								{isUpdatingStatus && (
 									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
 								)}
-								Update Status
+								<T
+									id="products.orders.dialog.status.submit"
+									defaultMessage="Update Status"
+								/>
 							</Button>
 						</div>
 					</div>
@@ -360,18 +444,34 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 			<Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Cancel Order</DialogTitle>
+						<DialogTitle>
+							<T
+								id="products.orders.dialog.cancel.title"
+								defaultMessage="Cancel Order"
+							/>
+						</DialogTitle>
 						<DialogDescription>
-							Are you sure you want to cancel order #{selectedOrderNumber}? This
-							action cannot be undone.
+							{t(
+								"products.orders.dialog.cancel.description",
+								"Are you sure you want to cancel order #{orderNumber}? This action cannot be undone.",
+								{ orderNumber: selectedOrderNumber },
+							)}
 						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4 pt-4">
 						<div className="space-y-2">
-							<Label htmlFor="cancel-note">Cancellation Reason (Optional)</Label>
+							<Label htmlFor="cancel-note">
+								<T
+									id="products.orders.dialog.cancel.reason"
+									defaultMessage="Cancellation Reason (Optional)"
+								/>
+							</Label>
 							<Textarea
 								id="cancel-note"
-								placeholder="Enter the reason for cancellation..."
+								placeholder={t(
+									"products.orders.dialog.cancel.reasonPlaceholder",
+									"Enter the reason for cancellation...",
+								)}
 								value={cancelNote}
 								onChange={(e) => setCancelNote(e.target.value)}
 								rows={3}
@@ -382,7 +482,10 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 								variant="outline"
 								onClick={() => setIsCancelDialogOpen(false)}
 							>
-								Keep Order
+								<T
+									id="products.orders.dialog.cancel.keep"
+									defaultMessage="Keep Order"
+								/>
 							</Button>
 							<Button
 								variant="destructive"
@@ -392,7 +495,10 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 								{isCancellingOrder && (
 									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
 								)}
-								Cancel Order
+								<T
+									id="products.orders.dialog.cancel.submit"
+									defaultMessage="Cancel Order"
+								/>
 							</Button>
 						</div>
 					</div>

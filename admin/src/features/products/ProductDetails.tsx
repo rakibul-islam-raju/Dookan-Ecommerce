@@ -9,7 +9,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useProductDetails, useUpdateProduct } from "@/lib/api/product";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -30,6 +32,8 @@ import { ProductOrders } from "./components/ProductOrders";
 import { ProductVariants } from "./components/ProductVariants";
 
 export const ProductDetails = () => {
+	const t = useT();
+	const { locale } = useLocale();
 	const { id } = useParams();
 	const navigate = useNavigate();
 
@@ -43,6 +47,12 @@ export const ProductDetails = () => {
 	const { mutate: updateProduct, isPending: isUpdatingProduct } =
 		useUpdateProduct();
 
+	const formatCurrency = (value: string | number) =>
+		`৳${Number(value).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		})}`;
+
 	const handlePublishProduct = () => {
 		updateProduct(
 			{
@@ -53,10 +63,17 @@ export const ProductDetails = () => {
 			},
 			{
 				onSuccess: () => {
-					toast.success("Product published successfully");
+					toast.success(
+						t(
+							"products.details.toast.publishSuccess",
+							"Product published successfully",
+						),
+					);
 				},
 				onError: (error) => {
-					toast.error("Failed to publish product");
+					toast.error(
+						t("products.details.toast.publishFailed", "Failed to publish product"),
+					);
 					console.error(error);
 				},
 				onSettled: () => {
@@ -82,10 +99,12 @@ export const ProductDetails = () => {
 		return (
 			<div className="flex flex-col justify-center items-center h-full min-h-[400px] gap-4">
 				<Package className="h-12 w-12 text-muted-foreground" />
-				<p className="text-muted-foreground">Product not found</p>
+				<p className="text-muted-foreground">
+					<T id="products.details.notFound" defaultMessage="Product not found" />
+				</p>
 				<Button onClick={handleBack} variant="outline" size="sm">
 					<ArrowLeft className="h-4 w-4 mr-2" />
-					Back to Products
+					<T id="products.details.back" defaultMessage="Back to Products" />
 				</Button>
 			</div>
 		);
@@ -124,15 +143,23 @@ export const ProductDetails = () => {
 				<div className="flex items-center gap-2">
 					{!product.is_active ? (
 						<Button
-							className="bg-green-500 text-white hover:bg-green-600 hover:text-\"
+							className="bg-green-500 text-white hover:bg-green-600"
 							variant="outline"
 							onClick={() => setConfirmPublishProduct(true)}
 							disabled={isUpdatingProduct}
 						>
-							Publish Product
+							<T
+								id="products.details.publish"
+								defaultMessage="Publish Product"
+							/>
 						</Button>
 					) : (
-						<Badge variant="success">Published</Badge>
+						<Badge variant="success">
+							<T
+								id="products.common.status.published"
+								defaultMessage="Published"
+							/>
+						</Badge>
 					)}
 					<div>
 						<DropdownMenu>
@@ -146,11 +173,17 @@ export const ProductDetails = () => {
 									onClick={() => navigate(`/products/edit/${id}`)}
 								>
 									<Edit className="h-4 w-4 mr-2" />
-									Edit Product
+									<T
+										id="products.details.actions.edit"
+										defaultMessage="Edit Product"
+									/>
 								</DropdownMenuItem>
 								<DropdownMenuItem variant="destructive">
 									<Trash className="h-4 w-4 mr-2" />
-									Delete Product
+									<T
+										id="products.details.actions.delete"
+										defaultMessage="Delete Product"
+									/>
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
@@ -165,13 +198,21 @@ export const ProductDetails = () => {
 					{/* General Information */}
 					<Card>
 						<CardHeader>
-							<CardTitle>General Information</CardTitle>
+							<CardTitle>
+								<T
+									id="products.details.general.title"
+									defaultMessage="General Information"
+								/>
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{/* name */}
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Product Name
+									<T
+										id="products.details.general.name"
+										defaultMessage="Product Name"
+									/>
 								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
 									<p className="font-medium">{product.name}</p>
@@ -182,7 +223,10 @@ export const ProductDetails = () => {
 							{product.short_description && (
 								<div>
 									<p className="text-sm text-muted-foreground mb-1.5">
-										Short Description
+										<T
+											id="products.details.general.shortDescription"
+											defaultMessage="Short Description"
+										/>
 									</p>
 								</div>
 							)}
@@ -191,7 +235,10 @@ export const ProductDetails = () => {
 							{product.description && (
 								<div>
 									<p className="text-sm text-muted-foreground mb-1.5">
-										Description
+										<T
+											id="products.details.general.description"
+											defaultMessage="Description"
+										/>
 									</p>
 									<div className="px-3 py-2 bg-muted/50 rounded-md">
 										<p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
@@ -209,15 +256,25 @@ export const ProductDetails = () => {
 					{/* SEO data */}
 					<Card>
 						<CardHeader>
-							<CardTitle>SEO Details</CardTitle>
+							<CardTitle>
+								<T id="products.details.seo.title" defaultMessage="SEO Details" />
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<p className="text-sm text-muted-foreground mb-1.5">Meta Title</p>
+							<p className="text-sm text-muted-foreground mb-1.5">
+								<T
+									id="products.details.seo.metaTitle"
+									defaultMessage="Meta Title"
+								/>
+							</p>
 							<div className="px-3 py-2 bg-muted/50 rounded-md">
 								<p className="font-medium text-sm">{product.meta_title}</p>
 							</div>
 							<p className="text-sm text-muted-foreground mb-1.5">
-								Meta Description
+								<T
+									id="products.details.seo.metaDescription"
+									defaultMessage="Meta Description"
+								/>
 							</p>
 							<div className="px-3 py-2 bg-muted/50 rounded-md">
 								<p className="font-medium text-sm">
@@ -235,18 +292,26 @@ export const ProductDetails = () => {
 						<CardContent>
 							<div className="flex flex-wrap items-center gap-2">
 								<Badge variant={product.is_active ? "success" : "destructive"}>
-									{product.is_active ? "Active" : "Inactive"}
+									{product.is_active
+										? t("products.common.status.active", "Active")
+										: t("products.common.status.inactive", "Inactive")}
 								</Badge>
 								<Badge variant={product.is_featured ? "info" : "secondary"}>
-									{product.is_featured ? "Featured" : "Not Featured"}
+									{product.is_featured
+										? t("products.common.status.featured", "Featured")
+										: t("products.common.status.notFeatured", "Not Featured")}
 								</Badge>
 								<Badge variant={product.is_digital ? "purple" : "secondary"}>
-									{product.is_digital ? "Digital" : "Physical"}
+									{product.is_digital
+										? t("products.common.status.digital", "Digital")
+										: t("products.common.status.physical", "Physical")}
 								</Badge>
 								<Badge
 									variant={product.is_in_stock ? "success" : "destructive"}
 								>
-									{product.is_in_stock ? "In Stock" : "Out of Stock"}
+									{product.is_in_stock
+										? t("products.common.status.inStock", "In Stock")
+										: t("products.common.status.outOfStock", "Out of Stock")}
 								</Badge>
 							</div>
 						</CardContent>
@@ -255,7 +320,12 @@ export const ProductDetails = () => {
 					{/* Product Organization */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Product Details</CardTitle>
+							<CardTitle>
+								<T
+									id="products.details.details.title"
+									defaultMessage="Product Details"
+								/>
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{/* sku */}
@@ -269,7 +339,10 @@ export const ProductDetails = () => {
 							{/* category */}
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Product Category
+									<T
+										id="products.details.details.category"
+										defaultMessage="Product Category"
+									/>
 								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
 									<p className="font-medium text-sm">{product.category.name}</p>
@@ -277,7 +350,9 @@ export const ProductDetails = () => {
 							</div>
 							{/* unit */}
 							<div>
-								<p className="text-sm text-muted-foreground mb-1.5">Unit</p>
+								<p className="text-sm text-muted-foreground mb-1.5">
+									<T id="products.details.details.unit" defaultMessage="Unit" />
+								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
 									<p className="font-medium text-sm">
 										{product.unit_value} {product.unit}
@@ -288,11 +363,16 @@ export const ProductDetails = () => {
 							{/* total stock */}
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Total Stock
+									<T
+										id="products.details.details.totalStock"
+										defaultMessage="Total Stock"
+									/>
 								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
 									<p className="font-medium text-sm">
-										{product.is_digital ? "N/A (Digital)" : (product.total_stock ?? 0)}
+										{product.is_digital
+											? t("products.details.details.notApplicable", "N/A (Digital)")
+											: (product.total_stock ?? 0)}
 									</p>
 								</div>
 							</div>
@@ -302,41 +382,48 @@ export const ProductDetails = () => {
 					{/* Pricing */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Pricing</CardTitle>
+							<CardTitle>
+								<T id="products.details.pricing.title" defaultMessage="Pricing" />
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{/* cost price */}
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Cost Price
+									<T
+										id="products.details.pricing.costPrice"
+										defaultMessage="Cost Price"
+									/>
 								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
-									<p className="font-medium">
-										BDT {Number(product.cost_price).toFixed(2)}
-									</p>
+									<p className="font-medium">{formatCurrency(product.cost_price)}</p>
 								</div>
 							</div>
 							{/* base price (MRP) */}
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Base Price (MRP)
+									<T
+										id="products.details.pricing.basePrice"
+										defaultMessage="Base Price (MRP)"
+									/>
 								</p>
 								<div className="px-3 py-2 bg-muted/50 rounded-md">
-									<p className="font-medium">
-										BDT {Number(product.base_price).toFixed(2)}
-									</p>
+									<p className="font-medium">{formatCurrency(product.base_price)}</p>
 								</div>
 							</div>
 							{/* sale price */}
 							<div>
 								<p className="text-sm text-muted-foreground mb-1.5">
-									Sale Price
+									<T
+										id="products.details.pricing.salePrice"
+										defaultMessage="Sale Price"
+									/>
 								</p>
 								{product.sale_price ? (
 									<div className="px-3 py-2 bg-green-50 border border-green-200 rounded-md">
 										<div className="flex items-center justify-between">
 											<p className="font-semibold text-green-700">
-												BDT {Number(product.sale_price).toFixed(2)}
+												{formatCurrency(product.sale_price)}
 											</p>
 											{product.sale_discount_percentage ? (
 												<span className="text-xs font-medium bg-red-500 text-white px-2 py-0.5 rounded">
@@ -353,7 +440,10 @@ export const ProductDetails = () => {
 								) : (
 									<div className="px-3 py-2 bg-muted/50 rounded-md">
 										<p className="text-sm text-muted-foreground">
-											No active sale
+											<T
+												id="products.details.pricing.noSale"
+												defaultMessage="No active sale"
+											/>
 										</p>
 									</div>
 								)}
@@ -413,10 +503,13 @@ export const ProductDetails = () => {
 
 			{/* Confirm Publish Product Dialog */}
 			<AppConfirmDialog
-				title="Publish Product"
-				description="Are you sure you want to publish this product?"
-				confirmButtonText="Publish"
-				cancelButtonText="Cancel"
+				title={t("products.details.publishDialog.title", "Publish Product")}
+				description={t(
+					"products.details.publishDialog.description",
+					"Are you sure you want to publish this product?",
+				)}
+				confirmButtonText={t("products.details.publishDialog.confirm", "Publish")}
+				cancelButtonText={t("common.cancel", "Cancel")}
 				open={confirmPublishProduct}
 				onConfirm={handlePublishProduct}
 				onCancel={() => setConfirmPublishProduct(false)}

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import {
 	getCategories,
@@ -19,37 +21,83 @@ import { useEffect, useState } from "react";
 import { CheckboxField } from "@/components/ui/@form/CheckboxField";
 import { X } from "lucide-react";
 
-// Zod schema for category form
-const categorySchema = z.object({
-	name: z
-		.string()
-		.min(1, "Category name is required")
-		.min(2, "Category name must be at least 2 characters")
-		.max(100, "Category name must not exceed 100 characters"),
-	slug: z
-		.string()
-		.min(1, "Slug is required")
-		.min(2, "Slug must be at least 2 characters")
-		.max(100, "Slug must not exceed 100 characters")
-		.regex(
-			/^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-			"Slug must be lowercase letters, numbers, and hyphens only",
-		),
-	description: z
-		.string()
-		.max(500, "Description must not exceed 500 characters")
-		.optional()
-		.or(z.literal("")),
-	parent: z.string().nullable().optional(),
-	display_order: z.coerce
-		.number()
-		.int("Order must be a whole number")
-		.min(0, "Order must be 0 or greater")
-		.default(0),
-	is_active: z.boolean().default(true),
-});
+type TranslateFn = ReturnType<typeof useT>;
 
-type CategoryFormData = z.infer<typeof categorySchema>;
+const createCategorySchema = (t: TranslateFn) =>
+	z.object({
+		name: z
+			.string()
+			.min(
+				1,
+				t("categories.form.validation.nameRequired", "Category name is required"),
+			)
+			.min(
+				2,
+				t(
+					"categories.form.validation.nameMin",
+					"Category name must be at least 2 characters",
+				),
+			)
+			.max(
+				100,
+				t(
+					"categories.form.validation.nameMax",
+					"Category name must not exceed 100 characters",
+				),
+			),
+		slug: z
+			.string()
+			.min(1, t("categories.form.validation.slugRequired", "Slug is required"))
+			.min(
+				2,
+				t(
+					"categories.form.validation.slugMin",
+					"Slug must be at least 2 characters",
+				),
+			)
+			.max(
+				100,
+				t(
+					"categories.form.validation.slugMax",
+					"Slug must not exceed 100 characters",
+				),
+			)
+			.regex(
+				/^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+				t(
+					"categories.form.validation.slugPattern",
+					"Slug must be lowercase letters, numbers, and hyphens only",
+				),
+			),
+		description: z
+			.string()
+			.max(
+				500,
+				t(
+					"categories.form.validation.descriptionMax",
+					"Description must not exceed 500 characters",
+				),
+			)
+			.optional()
+			.or(z.literal("")),
+		parent: z.string().nullable().optional(),
+		display_order: z.coerce
+			.number()
+			.int(
+				t(
+					"categories.form.validation.orderInteger",
+					"Order must be a whole number",
+				),
+			)
+			.min(
+				0,
+				t("categories.form.validation.orderMin", "Order must be 0 or greater"),
+			)
+			.default(0),
+		is_active: z.boolean().default(true),
+	});
+
+type CategoryFormData = z.infer<ReturnType<typeof createCategorySchema>>;
 
 interface CategoryFormProps {
 	handleClose: () => void;
@@ -64,6 +112,7 @@ export const CategoryForm = ({
 	mode,
 	intialOrder,
 }: CategoryFormProps) => {
+	const t = useT();
 	const { mutate: createCategory, isPending: isCreating } = useCreateCategory();
 
 	const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory();
@@ -83,7 +132,7 @@ export const CategoryForm = ({
 		(c) => c.id !== category?.id && !c.parent,
 	);
 
-	const form = useZodForm(categorySchema, {
+	const form = useZodForm(createCategorySchema(t), {
 		defaultValues: {
 			name: "",
 			slug: "",
@@ -133,7 +182,12 @@ export const CategoryForm = ({
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Category updated successfully");
+						toast.success(
+							t(
+								"categories.form.toast.updateSuccess",
+								"Category updated successfully",
+							),
+						);
 					},
 				},
 			);
@@ -143,7 +197,12 @@ export const CategoryForm = ({
 				{
 					onSuccess: () => {
 						handleCancel();
-						toast.success("Category created successfully");
+						toast.success(
+							t(
+								"categories.form.toast.createSuccess",
+								"Category created successfully",
+							),
+						);
 					},
 				},
 			);
@@ -170,27 +229,47 @@ export const CategoryForm = ({
 			<div className="grid gap-4 py-4">
 				<TextField
 					name="name"
-					label="Category Name"
-					placeholder="e.g., Electronics, Clothing, Home & Garden"
+					label={t("categories.form.name", "Category Name")}
+					placeholder={t(
+						"categories.form.namePlaceholder",
+						"e.g., Electronics, Clothing, Home & Garden",
+					)}
 					required
-					description="The display name of the category"
+					description={t(
+						"categories.form.nameHelp",
+						"The display name of the category",
+					)}
 				/>
 				<TextField
 					name="slug"
-					label="Slug"
-					placeholder="e.g., electronics, clothing, home-garden"
+					label={t("categories.form.slug", "Slug")}
+					placeholder={t(
+						"categories.form.slugPlaceholder",
+						"e.g., electronics, clothing, home-garden",
+					)}
 					required
-					description="The URL-friendly version of the category name"
+					description={t(
+						"categories.form.slugHelp",
+						"The URL-friendly version of the category name",
+					)}
 				/>
 				<TextField
 					name="description"
-					label="Description"
-					placeholder="e.g., Electronics, Clothing, Home & Garden"
-					description="The display name of the category"
+					label={t("categories.form.description", "Description")}
+					placeholder={t(
+						"categories.form.descriptionPlaceholder",
+						"e.g., Electronics, Clothing, Home & Garden",
+					)}
+					description={t(
+						"categories.form.descriptionHelp",
+						"Short description about this category",
+					)}
 				/>
 
 				<div className="space-y-2">
-					<Label htmlFor="parent-category">Parent Category</Label>
+					<Label htmlFor="parent-category">
+						{t("categories.form.parent", "Parent Category")}
+					</Label>
 					<select
 						id="parent-category"
 						value={form.watch("parent") || ""}
@@ -199,7 +278,12 @@ export const CategoryForm = ({
 						}
 						className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					>
-						<option value="">None (Top-level category)</option>
+						<option value="">
+							{t(
+								"categories.form.parentPlaceholder",
+								"None (Top-level category)",
+							)}
+						</option>
 						{parentOptions.map((cat) => (
 							<option key={cat.id} value={cat.id}>
 								{cat.name}
@@ -207,12 +291,17 @@ export const CategoryForm = ({
 						))}
 					</select>
 					<p className="text-sm text-muted-foreground">
-						Select a parent to make this a subcategory
+						{t(
+							"categories.form.parentHelp",
+							"Select a parent to make this a subcategory",
+						)}
 					</p>
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="category-image">Category Image</Label>
+					<Label htmlFor="category-image">
+						{t("categories.form.image", "Category Image")}
+					</Label>
 					<Input
 						id="category-image"
 						type="file"
@@ -223,7 +312,7 @@ export const CategoryForm = ({
 						<div className="relative mt-2 inline-block">
 							<img
 								src={imagePreview}
-								alt="Category preview"
+								alt={t("categories.form.imagePreview", "Category preview")}
 								className="max-h-32 rounded-md object-cover"
 							/>
 							<button
@@ -237,19 +326,31 @@ export const CategoryForm = ({
 					)}
 					<p className="text-sm text-muted-foreground">
 						{isEditMode
-							? "Leave empty to keep the current image"
-							: "Optional image for the category"}
+							? t(
+									"categories.form.imageHelpEdit",
+									"Leave empty to keep the current image",
+								)
+							: t(
+									"categories.form.imageHelpCreate",
+									"Optional image for the category",
+								)}
 					</p>
 				</div>
 
 				<TextField
 					name="display_order"
-					label="Order"
-					placeholder="e.g., 1"
-					description="The order of the category"
+					label={t("categories.form.displayOrder", "Order")}
+					placeholder={t("categories.form.displayOrderPlaceholder", "e.g., 1")}
+					description={t(
+						"categories.form.displayOrderHelp",
+						"The order of the category",
+					)}
 					type="number"
 				/>
-				<CheckboxField name="is_active" label="Is Active" />
+				<CheckboxField
+					name="is_active"
+					label={t("categories.form.isActive", "Is Active")}
+				/>
 			</div>
 
 			<div className="flex justify-end gap-2">
@@ -259,10 +360,14 @@ export const CategoryForm = ({
 					onClick={handleCancel}
 					disabled={isPending}
 				>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					{isEditMode ? "Update Category" : "Create Category"}
+					{isEditMode ? (
+						<T id="categories.form.update" defaultMessage="Update Category" />
+					) : (
+						<T id="categories.form.create" defaultMessage="Create Category" />
+					)}
 				</LoadingButton>
 			</div>
 		</BaseForm>

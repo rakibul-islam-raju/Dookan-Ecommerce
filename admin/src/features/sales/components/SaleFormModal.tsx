@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import type { SaleListItem } from "@/lib/api/sale";
 import { SaleForm } from "./SaleForm";
 
@@ -32,12 +33,28 @@ export function SaleFormModal({
 			<DialogContent className="sm:max-w-[750px] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
-						{isEditMode ? "Edit Sale" : "Create New Sale"}
+						{isEditMode ? (
+							<T id="sales.modal.editTitle" defaultMessage="Edit Sale" />
+						) : (
+							<T
+								id="sales.modal.createTitle"
+								defaultMessage="Create New Sale"
+							/>
+						)}
 					</DialogTitle>
 					<DialogDescription>
 						{isEditMode
-							? "Update the sale details below."
-							: "Create a new sale or promotion for your store."}
+							? (
+								<T
+									id="sales.modal.editDescription"
+									defaultMessage="Update the sale details below."
+								/>
+							) : (
+								<T
+									id="sales.modal.createDescription"
+									defaultMessage="Create a new sale or promotion for your store."
+								/>
+							)}
 					</DialogDescription>
 				</DialogHeader>
 				<SaleForm handleClose={handleClose} sale={sale} mode={mode} />

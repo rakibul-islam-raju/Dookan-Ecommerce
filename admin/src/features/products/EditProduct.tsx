@@ -6,6 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { T } from "@/i18n/translate";
 import { useProductDetails } from "@/lib/api/product";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -37,10 +38,14 @@ export function EditProduct() {
 					<ArrowLeft className="h-4 w-4" />
 				</Button>
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Edit Product</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="products.edit.title" defaultMessage="Edit Product" />
+					</h1>
 					<p className="text-muted-foreground">
-						Edit the product information below. All required fields are marked
-						with an asterisk.
+						<T
+							id="products.edit.description"
+							defaultMessage="Edit the product information below. All required fields are marked with an asterisk."
+						/>
 					</p>
 				</div>
 			</div>
@@ -48,10 +53,14 @@ export function EditProduct() {
 			{/* Product Form Card */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-2xl">Product Details</CardTitle>
+					<CardTitle className="text-2xl">
+						<T id="products.edit.cardTitle" defaultMessage="Product Details" />
+					</CardTitle>
 					<CardDescription>
-						Fill in the product information below. All required fields are
-						marked with an asterisk.
+						<T
+							id="products.edit.cardDescription"
+							defaultMessage="Fill in the product information below. All required fields are marked with an asterisk."
+						/>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
