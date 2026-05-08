@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import { type CategoryListItem } from "@/lib/api/category";
 import { CategoryForm } from "./CategoryForm";
 
@@ -34,12 +35,32 @@ export function CategoryFormModal({
 			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
 					<DialogTitle>
-						{isEditMode ? "Edit Category" : "Create New Category"}
+						{isEditMode ? (
+							<T
+								id="categories.modal.editTitle"
+								defaultMessage="Edit Category"
+							/>
+						) : (
+							<T
+								id="categories.modal.createTitle"
+								defaultMessage="Create New Category"
+							/>
+						)}
 					</DialogTitle>
 					<DialogDescription>
 						{isEditMode
-							? "Update the category details below. Changes will be saved immediately."
-							: "Add a new category to organize your products. Fill in the details below."}
+							? (
+								<T
+									id="categories.modal.editDescription"
+									defaultMessage="Update the category details below. Changes will be saved immediately."
+								/>
+							)
+							: (
+								<T
+									id="categories.modal.createDescription"
+									defaultMessage="Add a new category to organize your products. Fill in the details below."
+								/>
+							)}
 					</DialogDescription>
 				</DialogHeader>
 

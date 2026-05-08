@@ -4,6 +4,9 @@ import { TextareaField } from "@/components/ui/@form/TextareaField";
 import { TextField } from "@/components/ui/@form/TextField";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useCreateReceipt } from "@/lib/api/inventory";
 import { getProducts } from "@/lib/api/product";
@@ -11,29 +14,33 @@ import { getProductVariants } from "@/lib/api/variant";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
-import { useWatch } from "react-hook-form";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
-
-const schema = z.object({
-	product_id: z.string().min(1, "Please select a product"),
-	variant: z.string().min(1, "Please select a variant"),
-	supplier_name: z.string().max(200).optional().or(z.literal("")),
-	reference: z.string().max(100).optional().or(z.literal("")),
-	received_at: z.string().min(1, "Received date is required"),
-	quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
-	supplier_unit_cost: z.coerce.number().nonnegative("Cost must be 0 or greater"),
-	landed_cost: z.coerce.number().nonnegative().optional().default(0),
-	note: z.string().optional().or(z.literal("")),
-});
-
-type FormData = z.infer<typeof schema>;
 
 interface ReceiptFormProps {
 	handleClose: () => void;
 }
 
-function CostPreview({ form }: { form: ReturnType<typeof useZodForm<typeof schema>> }) {
+interface ReceiptFormValues {
+	product_id: string;
+	variant: string;
+	supplier_name?: string;
+	reference?: string;
+	received_at: string;
+	quantity: number;
+	supplier_unit_cost: number;
+	landed_cost: number;
+	note?: string;
+}
+
+function CostPreview({
+	form,
+}: {
+	form: UseFormReturn<ReceiptFormValues>;
+}) {
+	const t = useT();
+	const { locale } = useLocale();
 	const qty = useWatch({ control: form.control, name: "quantity" });
 	const unitCost = useWatch({ control: form.control, name: "supplier_unit_cost" });
 	const landedCost = useWatch({ control: form.control, name: "landed_cost" });
@@ -58,17 +65,48 @@ function CostPreview({ form }: { form: ReturnType<typeof useZodForm<typeof schem
 	return (
 		<div className="rounded-md bg-muted/50 p-3 text-sm space-y-1">
 			<div className="flex justify-between">
-				<span className="text-muted-foreground">Calculated Unit Cost</span>
-				<span className="font-medium tabular-nums">৳{calcUnitCost.toFixed(2)}</span>
+				<span className="text-muted-foreground">
+					<T
+						id="inventory.receiptForm.calculatedUnitCost"
+						defaultMessage="Calculated Unit Cost"
+					/>
+				</span>
+				<span className="font-medium tabular-nums">
+					{`৳${calcUnitCost.toLocaleString(locale === "bn" ? "bn-BD" : "en-IN", {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+					})}`}
+				</span>
 			</div>
 			<div className="flex justify-between">
-				<span className="text-muted-foreground">Total Cost</span>
-				<span className="font-medium tabular-nums">৳{totalCost.toFixed(2)}</span>
+				<span className="text-muted-foreground">
+					<T id="inventory.receiptForm.totalCost" defaultMessage="Total Cost" />
+				</span>
+				<span className="font-medium tabular-nums">
+					{`৳${totalCost.toLocaleString(locale === "bn" ? "bn-BD" : "en-IN", {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+					})}`}
+				</span>
 			</div>
 			{Number(landedCost) > 0 && (
 				<p className="text-xs text-muted-foreground pt-1">
-					Landed cost of ৳{Number(landedCost).toFixed(2)} spread across{" "}
-					{Number(qty)} units.
+					{t(
+						"inventory.receiptForm.landedCostNote",
+						"Landed cost of ৳{cost} spread across {quantity} units.",
+						{
+							cost: Number(landedCost).toLocaleString(
+								locale === "bn" ? "bn-BD" : "en-IN",
+								{
+									minimumFractionDigits: 2,
+									maximumFractionDigits: 2,
+								},
+							),
+							quantity: Number(qty).toLocaleString(
+								locale === "bn" ? "bn-BD" : "en-IN",
+							),
+						},
+					)}
 				</p>
 			)}
 		</div>
@@ -76,7 +114,24 @@ function CostPreview({ form }: { form: ReturnType<typeof useZodForm<typeof schem
 }
 
 export function ReceiptForm({ handleClose }: ReceiptFormProps) {
+	const t = useT();
 	const { mutate: createReceipt, isPending } = useCreateReceipt();
+
+	const schema = z.object({
+		product_id: z.string().min(1, t("inventory.receiptForm.validation.product", "Please select a product")),
+		variant: z.string().min(1, t("inventory.receiptForm.validation.variant", "Please select a variant")),
+		supplier_name: z.string().max(200).optional().or(z.literal("")),
+		reference: z.string().max(100).optional().or(z.literal("")),
+		received_at: z.string().min(1, t("inventory.receiptForm.validation.receivedAt", "Received date is required")),
+		quantity: z.coerce.number().int().min(1, t("inventory.receiptForm.validation.quantity", "Quantity must be at least 1")),
+		supplier_unit_cost: z.coerce
+			.number()
+			.nonnegative(t("inventory.receiptForm.validation.unitCost", "Cost must be 0 or greater")),
+		landed_cost: z.coerce.number().nonnegative().optional().default(0),
+		note: z.string().optional().or(z.literal("")),
+	});
+
+	type FormData = z.infer<typeof schema>;
 
 	const form = useZodForm(schema, {
 		defaultValues: {
@@ -115,10 +170,12 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 	};
 
 	const onSubmit = (data: FormData) => {
-		const { product_id: _p, ...payload } = data;
 		createReceipt(
 			{
-				...payload,
+				variant: data.variant,
+				received_at: data.received_at,
+				quantity: data.quantity,
+				supplier_unit_cost: data.supplier_unit_cost,
 				supplier_name: data.supplier_name || undefined,
 				reference: data.reference || undefined,
 				note: data.note || undefined,
@@ -127,9 +184,9 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 			{
 				onSuccess: () => {
 					handleCancel();
-					toast.success("Receipt recorded. Stock updated.");
+					toast.success(t("inventory.receiptForm.createSuccess", "Receipt recorded. Stock updated."));
 				},
-				onError: () => toast.error("Failed to record receipt"),
+				onError: () => toast.error(t("inventory.receiptForm.createFailed", "Failed to record receipt")),
 			},
 		);
 	};
@@ -140,7 +197,8 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 				{/* Product selector */}
 				<div className="space-y-2">
 					<label className="text-sm font-medium">
-						Product <span className="text-destructive">*</span>
+						<T id="inventory.receiptForm.product" defaultMessage="Product" />{" "}
+						<span className="text-destructive">*</span>
 					</label>
 					<select
 						value={form.watch("product_id")}
@@ -150,7 +208,9 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 						}}
 						className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					>
-						<option value="">Select a product...</option>
+						<option value="">
+							{t("inventory.receiptForm.productPlaceholder", "Select a product...")}
+						</option>
 						{productOptions.map((p) => (
 							<option key={p.value} value={p.value}>
 								{p.label}
@@ -167,7 +227,8 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 				{/* Variant selector */}
 				<div className="space-y-2">
 					<label className="text-sm font-medium">
-						Variant <span className="text-destructive">*</span>
+						<T id="inventory.receiptForm.variant" defaultMessage="Variant" />{" "}
+						<span className="text-destructive">*</span>
 					</label>
 					<select
 						value={form.watch("variant")}
@@ -177,10 +238,10 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 					>
 						<option value="">
 							{!selectedProductId
-								? "Select a product first"
+								? t("inventory.receiptForm.variantPlaceholder.noProduct", "Select a product first")
 								: variantsLoading
-									? "Loading variants..."
-									: "Select a variant..."}
+									? t("inventory.receiptForm.variantPlaceholder.loading", "Loading variants...")
+									: t("inventory.receiptForm.variantPlaceholder.ready", "Select a variant...")}
 						</option>
 						{variantOptions.map((v) => (
 							<option key={v.value} value={v.value}>
@@ -189,7 +250,10 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 						))}
 					</select>
 					<p className="text-xs text-muted-foreground">
-						Stock quantity and cost price will be updated for this variant.
+						<T
+							id="inventory.receiptForm.variantHelp"
+							defaultMessage="Stock quantity and cost price will be updated for this variant."
+						/>
 					</p>
 					{form.formState.errors.variant && (
 						<p className="text-xs text-destructive">
@@ -201,48 +265,57 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 				<div className="grid grid-cols-2 gap-4">
 					<TextField
 						name="supplier_name"
-						label="Supplier Name"
-						placeholder="e.g., ABC Suppliers"
-						helpText="Optional — name of the supplier."
+						label={t("inventory.receiptForm.supplierName", "Supplier Name")}
+						placeholder={t("inventory.receiptForm.supplierNamePlaceholder", "e.g., ABC Suppliers")}
+						helpText={t("inventory.receiptForm.supplierNameHelp", "Optional; name of the supplier.")}
 					/>
 					<TextField
 						name="reference"
-						label="Reference"
-						placeholder="e.g., INV-2026-001"
-						helpText="Optional — invoice or delivery note number."
+						label={t("inventory.receiptForm.reference", "Reference")}
+						placeholder={t("inventory.receiptForm.referencePlaceholder", "e.g., INV-2026-001")}
+						helpText={t(
+							"inventory.receiptForm.referenceHelp",
+							"Optional; invoice or delivery note number.",
+						)}
 					/>
 				</div>
 
 				<DateField
 					name="received_at"
-					label="Received On"
+					label={t("inventory.receiptForm.receivedOn", "Received On")}
 					required
-					helpText="When the stock was physically received."
+					helpText={t(
+						"inventory.receiptForm.receivedOnHelp",
+						"When the stock was physically received.",
+					)}
 				/>
 
 				<div className="grid grid-cols-3 gap-4">
 					<TextField
 						name="quantity"
-						label="Quantity"
+						label={t("inventory.receiptForm.quantity", "Quantity")}
 						type="number"
 						placeholder="0"
 						required
-						helpText="Number of units received."
+						helpText={t("inventory.receiptForm.quantityHelp", "Number of units received.")}
 					/>
 					<TextField
 						name="supplier_unit_cost"
-						label="Unit Cost (৳)"
+						label={t("inventory.receiptForm.unitCost", "Unit Cost (৳)")}
 						type="number"
 						placeholder="0.00"
 						required
-						helpText="Cost per unit from supplier."
+						helpText={t("inventory.receiptForm.unitCostHelp", "Cost per unit from supplier.")}
 					/>
 					<TextField
 						name="landed_cost"
-						label="Landed Cost (৳)"
+						label={t("inventory.receiptForm.landedCost", "Landed Cost (৳)")}
 						type="number"
 						placeholder="0.00"
-						helpText="Shipping, customs, handling (total extra cost)."
+						helpText={t(
+							"inventory.receiptForm.landedCostHelp",
+							"Shipping, customs, handling (total extra cost).",
+						)}
 					/>
 				</div>
 
@@ -250,19 +323,19 @@ export function ReceiptForm({ handleClose }: ReceiptFormProps) {
 
 				<TextareaField
 					name="note"
-					label="Note"
-					placeholder="Any additional details..."
+					label={t("inventory.receiptForm.note", "Note")}
+					placeholder={t("inventory.receiptForm.notePlaceholder", "Any additional details...")}
 					rows={2}
-					helpText="Optional."
+					helpText={t("inventory.receiptForm.optional", "Optional")}
 				/>
 			</div>
 
 			<div className="flex justify-end gap-2">
 				<Button type="button" variant="outline" onClick={handleCancel} disabled={isPending}>
-					Cancel
+					<T id="common.cancel" defaultMessage="Cancel" />
 				</Button>
 				<LoadingButton type="submit" isLoading={isPending}>
-					Record Receipt
+					<T id="inventory.receiptForm.submit" defaultMessage="Record Receipt" />
 				</LoadingButton>
 			</div>
 		</BaseForm>

@@ -11,25 +11,12 @@ import { TextareaField } from "@/components/ui/@form/TextareaField";
 import { TextField } from "@/components/ui/@form/TextField";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useCreateMaterialTransaction } from "@/lib/api/inventory";
 import { toast } from "react-toastify";
 import { z } from "zod";
-
-const schema = z.object({
-	transaction_type: z.enum(["purchase", "adjustment_in", "adjustment_out"]),
-	quantity_change: z.coerce.number().positive("Quantity must be greater than 0"),
-	unit_cost: z.coerce.number().nonnegative().optional().nullable(),
-	note: z.string().optional().or(z.literal("")),
-});
-
-type FormData = z.infer<typeof schema>;
-
-const transactionTypeOptions = [
-	{ value: "purchase", label: "Purchase — Record stock received from a supplier" },
-	{ value: "adjustment_in", label: "Adjustment In — Correct stock upward (e.g. after recount)" },
-	{ value: "adjustment_out", label: "Adjustment Out — Correct stock downward (e.g. damage or loss)" },
-];
 
 interface MaterialTransactionFormModalProps {
 	open: boolean;
@@ -46,7 +33,48 @@ export function MaterialTransactionFormModal({
 	materialName,
 	unit,
 }: MaterialTransactionFormModalProps) {
+	const t = useT();
 	const { mutate: createTransaction, isPending } = useCreateMaterialTransaction();
+
+	const schema = z.object({
+		transaction_type: z.enum(["purchase", "adjustment_in", "adjustment_out"]),
+		quantity_change: z.coerce
+			.number()
+			.positive(
+				t(
+					"inventory.transactionForm.validation.quantity",
+					"Quantity must be greater than 0",
+				),
+			),
+		unit_cost: z.coerce.number().nonnegative().optional().nullable(),
+		note: z.string().optional().or(z.literal("")),
+	});
+
+	type FormData = z.infer<typeof schema>;
+
+	const transactionTypeOptions = [
+		{
+			value: "purchase",
+			label: t(
+				"inventory.transactionForm.type.purchase",
+				"Purchase — Record stock received from a supplier",
+			),
+		},
+		{
+			value: "adjustment_in",
+			label: t(
+				"inventory.transactionForm.type.adjustmentIn",
+				"Adjustment In — Correct stock upward (e.g. after recount)",
+			),
+		},
+		{
+			value: "adjustment_out",
+			label: t(
+				"inventory.transactionForm.type.adjustmentOut",
+				"Adjustment Out — Correct stock downward (e.g. damage or loss)",
+			),
+		},
+	];
 
 	const form = useZodForm(schema, {
 		defaultValues: {
@@ -73,9 +101,9 @@ export function MaterialTransactionFormModal({
 			{
 				onSuccess: () => {
 					handleClose();
-					toast.success("Transaction recorded");
+					toast.success(t("inventory.transactionForm.createSuccess", "Transaction recorded"));
 				},
-				onError: () => toast.error("Failed to record transaction"),
+				onError: () => toast.error(t("inventory.transactionForm.createFailed", "Failed to record transaction")),
 			},
 		);
 	};
@@ -84,9 +112,18 @@ export function MaterialTransactionFormModal({
 		<Dialog open={open} onOpenChange={handleClose}>
 			<DialogContent className="sm:max-w-[480px]">
 				<DialogHeader>
-					<DialogTitle>Record Transaction</DialogTitle>
+					<DialogTitle>
+						<T
+							id="inventory.transactionForm.title"
+							defaultMessage="Record Transaction"
+						/>
+					</DialogTitle>
 					<DialogDescription>
-						Record a stock movement for <strong>{materialName}</strong>.
+						{t(
+							"inventory.transactionForm.description",
+							"Record a stock movement for {materialName}.",
+							{ materialName },
+						)}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -94,41 +131,59 @@ export function MaterialTransactionFormModal({
 					<div className="grid gap-4 py-4">
 						<SelectField
 							name="transaction_type"
-							label="Transaction Type"
+							label={t("inventory.transactionForm.transactionType", "Transaction Type")}
 							required
 							options={transactionTypeOptions}
-							helpText="Choose the reason for this stock movement."
+							helpText={t(
+								"inventory.transactionForm.transactionTypeHelp",
+								"Choose the reason for this stock movement.",
+							)}
 						/>
 						<TextField
 							name="quantity_change"
-							label={`Quantity (${unit})`}
+							label={t("inventory.transactionForm.quantity", "Quantity ({unit})", { unit })}
 							type="number"
 							placeholder="0"
 							required
-							helpText="Amount to add or remove. Always enter a positive number — the direction is determined by the transaction type."
+							helpText={t(
+								"inventory.transactionForm.quantityHelp",
+								"Amount to add or remove. Always enter a positive number; the direction is determined by the transaction type.",
+							)}
 						/>
 						<TextField
 							name="unit_cost"
-							label="Unit Cost (৳)"
+							label={t("inventory.transactionForm.unitCost", "Unit Cost (৳)")}
 							type="number"
-							placeholder="Optional"
-							helpText="Cost per unit. For purchases, this updates the weighted average cost."
+							placeholder={t("inventory.transactionForm.optional", "Optional")}
+							helpText={t(
+								"inventory.transactionForm.unitCostHelp",
+								"Cost per unit. For purchases, this updates the weighted average cost.",
+							)}
 						/>
 						<TextareaField
 							name="note"
-							label="Note"
-							placeholder="Reason or reference for this adjustment..."
+							label={t("inventory.transactionForm.note", "Note")}
+							placeholder={t(
+								"inventory.transactionForm.notePlaceholder",
+								"Reason or reference for this adjustment...",
+							)}
 							rows={2}
-							helpText="Optional — useful for audit trail."
+							helpText={t(
+								"inventory.transactionForm.noteHelp",
+								"Optional; useful for audit trail.",
+							)}
 						/>
 					</div>
 
 					<div className="flex justify-end gap-2">
 						<Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>
-							Cancel
+							<T id="common.cancel" defaultMessage="Cancel" />
 						</Button>
 						<LoadingButton type="submit" isLoading={isPending}>
-							Record Transaction
+							<T
+								id="inventory.transactionForm.submit"
+								defaultMessage="Record Transaction"
+							/>
 						</LoadingButton>
 					</div>
 				</BaseForm>

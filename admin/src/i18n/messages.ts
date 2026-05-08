@@ -373,6 +373,564 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 		"expenses.reports.table.amount": "Amount (৳)",
 		"expenses.reports.table.percent": "% of Total",
 		"expenses.reports.table.total": "Total",
+		"inventory.common.empty": "—",
+		"inventory.actions.label": "Actions",
+		"inventory.actions.viewDetails": "View Details",
+		"inventory.actions.edit": "Edit",
+		"inventory.actions.delete": "Delete",
+		"inventory.status.active": "Active",
+		"inventory.status.inactive": "Inactive",
+		"inventory.mode.manufacturing": "manufacturing",
+		"inventory.mode.trading": "trading",
+		"inventory.transactionType.purchaseReceipt": "Purchase",
+		"inventory.transactionType.productionReceipt": "Production",
+		"inventory.transactionType.adjustmentIn": "Adj. In",
+		"inventory.transactionType.adjustmentOut": "Adj. Out",
+		"inventory.transactionType.orderSale": "Sale",
+		"inventory.transactionType.orderCancelReturn": "Return",
+		"inventory.materialTransactionType.purchase": "Purchase",
+		"inventory.materialTransactionType.adjustmentIn": "Adj. In",
+		"inventory.materialTransactionType.adjustmentOut": "Adj. Out",
+		"inventory.materialTransactionType.issueToBatch": "To Batch",
+		"inventory.materialTransactionType.returnFromBatch": "From Batch",
+		"inventory.batchStatus.draft": "Draft",
+		"inventory.batchStatus.inProgress": "In Progress",
+		"inventory.batchStatus.completed": "Completed",
+		"inventory.batchStatus.cancelled": "Cancelled",
+		"inventory.dashboard.title": "Inventory",
+		"inventory.dashboard.description.manufacturing":
+			"Track your stock levels, purchases, materials, and production runs.",
+		"inventory.dashboard.description.trading":
+			"Track your stock levels, purchases, and receipts.",
+		"inventory.dashboard.modeBadge": "{mode} mode",
+		"inventory.dashboard.currentMode":
+			"Your current mode is {mode}, configured by your administrator.",
+		"inventory.dashboard.summary.totalMaterials": "Total Materials",
+		"inventory.dashboard.summary.lowStockMaterials": "Low Stock Materials",
+		"inventory.dashboard.summary.needsRestocking": "Needs restocking",
+		"inventory.dashboard.summary.activeBatches": "Active Batches",
+		"inventory.dashboard.summary.draftOrInProgress": "Draft or in progress",
+		"inventory.dashboard.cards.materials.title": "Raw Materials",
+		"inventory.dashboard.cards.materials.description":
+			"Manage materials, track stock levels, record purchases, and set reorder alerts.",
+		"inventory.dashboard.cards.materials.cta": "Go to Materials",
+		"inventory.dashboard.cards.batches.title": "Production Batches",
+		"inventory.dashboard.cards.batches.description":
+			"Create and manage production batches. Track materials consumed and finished goods produced.",
+		"inventory.dashboard.cards.batches.cta": "Go to Batches",
+		"inventory.dashboard.cards.receipts.title": "Finished Goods Receipts",
+		"inventory.dashboard.cards.receipts.description":
+			"Record stock received from suppliers. Each receipt automatically updates the variant's available stock and cost price.",
+		"inventory.dashboard.cards.receipts.cta": "Go to Receipts",
+		"inventory.dashboard.recent.title": "Recent Stock Activity",
+		"inventory.dashboard.recent.empty": "No stock movements yet.",
+		"inventory.dashboard.table.date": "Date",
+		"inventory.dashboard.table.product": "Product",
+		"inventory.dashboard.table.variant": "Variant",
+		"inventory.dashboard.table.type": "Type",
+		"inventory.dashboard.table.change": "Change",
+		"inventory.dashboard.table.balance": "Balance",
+		"inventory.materials.title": "Raw Materials",
+		"inventory.materials.description":
+			"Raw materials are the inputs for your production batches. Track current stock, costs, and set reorder alerts.",
+		"inventory.materials.add": "Add Material",
+		"inventory.materials.searchPlaceholder": "Search materials by name or SKU...",
+		"inventory.materials.error": "Error loading materials",
+		"inventory.materials.empty.search": 'No materials found for "{query}"',
+		"inventory.materials.empty.default":
+			"No materials yet. Add your first raw material to start tracking stock for production batches.",
+		"inventory.materials.deleteTitle": "Delete Material",
+		"inventory.materials.deleteDescription":
+			'Are you sure you want to delete "{name}"? This cannot be undone.',
+		"inventory.materials.deleteSuccess": "Material deleted",
+		"inventory.materials.deleteFailed": "Failed to delete material",
+		"inventory.materials.lowStock": "Low Stock",
+		"inventory.materials.table.name": "Name",
+		"inventory.materials.table.sku": "SKU",
+		"inventory.materials.table.category": "Category",
+		"inventory.materials.table.currentStock": "Current Stock",
+		"inventory.materials.table.reorderLevel": "Reorder Level",
+		"inventory.materials.table.avgCost": "Avg Cost",
+		"inventory.materials.table.status": "Status",
+		"inventory.materialModal.editTitle": "Edit Material",
+		"inventory.materialModal.createTitle": "Add Raw Material",
+		"inventory.materialModal.editDescription":
+			"Update the material details. Stock quantity and cost are managed through transactions.",
+		"inventory.materialModal.createDescription":
+			"Add a new raw material to track in your production process.",
+		"inventory.materialForm.validation.name": "Name is required",
+		"inventory.materialForm.validation.sku": "SKU is required",
+		"inventory.materialForm.validation.unit": "Unit is required",
+		"inventory.materialForm.validation.reorderLevel":
+			"Reorder level must be 0 or greater",
+		"inventory.materialForm.name": "Material Name",
+		"inventory.materialForm.namePlaceholder": "e.g., Cotton Fabric",
+		"inventory.materialForm.nameHelp":
+			"A descriptive name for this raw material.",
+		"inventory.materialForm.sku": "SKU",
+		"inventory.materialForm.skuPlaceholder": "e.g., FAB-001",
+		"inventory.materialForm.skuHelp.edit":
+			"SKU cannot be changed after creation.",
+		"inventory.materialForm.skuHelp.create":
+			"Unique identifier for this material. Cannot be changed later.",
+		"inventory.materialForm.unit": "Unit",
+		"inventory.materialForm.unitPlaceholder":
+			"e.g., kg, meter, piece, litre",
+		"inventory.materialForm.unitHelp":
+			"The measurement unit used for stock quantities and transactions.",
+		"inventory.materialForm.reorderLevel": "Reorder Level",
+		"inventory.materialForm.reorderLevelHelp":
+			"You'll see a low-stock alert when the current quantity falls to or below this level.",
+		"inventory.materialForm.active": "Active",
+		"inventory.materialForm.activeHelp":
+			"Inactive materials won't appear in production batch forms.",
+		"inventory.materialForm.update": "Update Material",
+		"inventory.materialForm.create": "Create Material",
+		"inventory.materialForm.updateSuccess": "Material updated",
+		"inventory.materialForm.updateFailed": "Failed to update material",
+		"inventory.materialForm.createSuccess": "Material created",
+		"inventory.materialForm.createFailed": "Failed to create material",
+		"inventory.materialDetail.notFound": "Material not found.",
+		"inventory.materialDetail.tabs.details": "Details",
+		"inventory.materialDetail.tabs.transactions": "Stock Transactions",
+		"inventory.materialDetail.stats.currentStock": "Current Stock",
+		"inventory.materialDetail.stats.avgUnitCost": "Avg Unit Cost",
+		"inventory.materialDetail.stats.totalValue": "Total Value",
+		"inventory.materialDetail.transactions.description":
+			"Complete history of all stock movements for this material.",
+		"inventory.materialDetail.transactions.record": "Record Transaction",
+		"inventory.materialDetail.transactions.empty":
+			"No transactions yet. Record the first stock movement above.",
+		"inventory.materialDetail.table.date": "Date",
+		"inventory.materialDetail.table.type": "Type",
+		"inventory.materialDetail.table.quantity": "Quantity",
+		"inventory.materialDetail.table.unitCost": "Unit Cost",
+		"inventory.materialDetail.table.balanceAfter": "Balance After",
+		"inventory.materialDetail.table.note": "Note",
+		"inventory.materialDetail.info.title": "Material Info",
+		"inventory.materialDetail.info.sku": "SKU",
+		"inventory.materialDetail.info.unit": "Unit",
+		"inventory.materialDetail.info.category": "Category",
+		"inventory.materialDetail.info.reorderLevel": "Reorder Level",
+		"inventory.materialDetail.info.lastUpdated": "Last Updated",
+		"inventory.transactionForm.title": "Record Transaction",
+		"inventory.transactionForm.description":
+			"Record a stock movement for {materialName}.",
+		"inventory.transactionForm.validation.quantity":
+			"Quantity must be greater than 0",
+		"inventory.transactionForm.transactionType": "Transaction Type",
+		"inventory.transactionForm.transactionTypeHelp":
+			"Choose the reason for this stock movement.",
+		"inventory.transactionForm.type.purchase":
+			"Purchase — Record stock received from a supplier",
+		"inventory.transactionForm.type.adjustmentIn":
+			"Adjustment In — Correct stock upward (e.g. after recount)",
+		"inventory.transactionForm.type.adjustmentOut":
+			"Adjustment Out — Correct stock downward (e.g. damage or loss)",
+		"inventory.transactionForm.quantity": "Quantity ({unit})",
+		"inventory.transactionForm.quantityHelp":
+			"Amount to add or remove. Always enter a positive number; the direction is determined by the transaction type.",
+		"inventory.transactionForm.unitCost": "Unit Cost (৳)",
+		"inventory.transactionForm.unitCostHelp":
+			"Cost per unit. For purchases, this updates the weighted average cost.",
+		"inventory.transactionForm.note": "Note",
+		"inventory.transactionForm.notePlaceholder":
+			"Reason or reference for this adjustment...",
+		"inventory.transactionForm.noteHelp":
+			"Optional; useful for audit trail.",
+		"inventory.transactionForm.optional": "Optional",
+		"inventory.transactionForm.submit": "Record Transaction",
+		"inventory.transactionForm.createSuccess": "Transaction recorded",
+		"inventory.transactionForm.createFailed":
+			"Failed to record transaction",
+		"inventory.batches.title": "Production Batches",
+		"inventory.batches.description":
+			"A production batch tracks the raw materials consumed and finished goods produced in a single production run.",
+		"inventory.batches.add": "New Batch",
+		"inventory.batches.error": "Error loading batches",
+		"inventory.batches.empty":
+			"No production batches yet. Create a batch to record a production run.",
+		"inventory.batches.deleteTitle": "Delete Batch",
+		"inventory.batches.deleteDescription":
+			'Are you sure you want to delete batch "{code}"? Only draft batches can be deleted.',
+		"inventory.batches.deleteSuccess": "Batch deleted",
+		"inventory.batches.deleteFailed":
+			"Failed to delete batch. Only draft batches can be deleted.",
+		"inventory.batches.table.code": "Batch Code",
+		"inventory.batches.table.status": "Status",
+		"inventory.batches.table.materials": "Materials",
+		"inventory.batches.table.outputs": "Outputs",
+		"inventory.batches.table.started": "Started",
+		"inventory.batches.table.completed": "Completed",
+		"inventory.createBatch.title": "New Production Batch",
+		"inventory.createBatch.description":
+			"Define the materials consumed and products you expect to produce. You can save as a draft and update quantities before completing.",
+		"inventory.createBatch.validation.code": "Batch code is required",
+		"inventory.createBatch.validation.materials":
+			"Add at least one material",
+		"inventory.createBatch.validation.outputs":
+			"Add at least one output",
+		"inventory.createBatch.status.draft": "Draft — save for later",
+		"inventory.createBatch.status.inProgress":
+			"In Progress — production started",
+		"inventory.createBatch.info.title": "Batch Info",
+		"inventory.createBatch.info.code": "Batch Code",
+		"inventory.createBatch.info.codePlaceholder": "e.g., BATCH-2026-001",
+		"inventory.createBatch.info.codeHelp":
+			"Unique identifier for this production run.",
+		"inventory.createBatch.info.status": "Status",
+		"inventory.createBatch.info.statusHelp":
+			"Draft to save for later; In Progress if production has started.",
+		"inventory.createBatch.info.startedOn": "Started On",
+		"inventory.createBatch.info.startedOnHelp":
+			"Optional; when production started.",
+		"inventory.createBatch.info.notes": "Notes",
+		"inventory.createBatch.info.notesPlaceholder":
+			"Any notes about this batch...",
+		"inventory.createBatch.info.optional": "Optional",
+		"inventory.createBatch.materials.title": "Materials",
+		"inventory.createBatch.materials.optionalNote":
+			"Planned qty is optional",
+		"inventory.createBatch.materials.description":
+			"Add each raw material consumed in this batch. Planned quantity is optional.",
+		"inventory.createBatch.materials.selectMaterial":
+			"Select material...",
+		"inventory.createBatch.materials.planned": "Planned",
+		"inventory.createBatch.materials.actual": "Actual *",
+		"inventory.createBatch.materials.header.material": "Material",
+		"inventory.createBatch.materials.header.plannedQty": "Planned qty",
+		"inventory.createBatch.materials.header.actualQty": "Actual qty",
+		"inventory.createBatch.materials.add": "Add Material",
+		"inventory.createBatch.outputs.title": "Finished Outputs",
+		"inventory.createBatch.outputs.description":
+			"Add the products you expect to produce in this batch.",
+		"inventory.createBatch.outputs.add": "Add Output",
+		"inventory.createBatch.outputs.selectProduct": "Select product...",
+		"inventory.createBatch.outputs.selectVariant": "Select variant...",
+		"inventory.createBatch.outputs.selectProductFirst":
+			"Select product first",
+		"inventory.createBatch.outputs.quantity": "Qty *",
+		"inventory.createBatch.submit": "Create Batch",
+		"inventory.createBatch.createSuccess": "Batch created",
+		"inventory.createBatch.createFailed": "Failed to create batch",
+		"inventory.batchDetail.notFound": "Batch not found.",
+		"inventory.batchDetail.markInProgress": "Mark In Progress",
+		"inventory.batchDetail.complete": "Complete Batch",
+		"inventory.batchDetail.completeSuccess":
+			"Batch completed. Stock and costs updated.",
+		"inventory.batchDetail.completeFailed":
+			"Failed to complete batch. Check materials and outputs.",
+		"inventory.batchDetail.inProgressSuccess":
+			"Batch marked as In Progress",
+		"inventory.batchDetail.inProgressFailed":
+			"Failed to update batch status",
+		"inventory.batchDetail.cancelSuccess": "Batch cancelled",
+		"inventory.batchDetail.cancelFailed": "Failed to cancel batch",
+		"inventory.batchDetail.materials.title": "Materials Consumed",
+		"inventory.batchDetail.materials.description":
+			"Raw materials used in this production run.",
+		"inventory.batchDetail.materials.empty": "No materials added.",
+		"inventory.batchDetail.materials.table.material": "Material",
+		"inventory.batchDetail.materials.table.planned": "Planned",
+		"inventory.batchDetail.materials.table.actual": "Actual",
+		"inventory.batchDetail.materials.table.unitCost": "Unit Cost",
+		"inventory.batchDetail.materials.table.totalCost": "Total Cost",
+		"inventory.batchDetail.outputs.title": "Finished Outputs",
+		"inventory.batchDetail.outputs.description":
+			"Products produced in this batch.",
+		"inventory.batchDetail.outputs.empty": "No outputs added.",
+		"inventory.batchDetail.outputs.table.product": "Product",
+		"inventory.batchDetail.outputs.table.variant": "Variant",
+		"inventory.batchDetail.outputs.table.quantity": "Quantity",
+		"inventory.batchDetail.outputs.table.unitCost": "Unit Cost",
+		"inventory.batchDetail.outputs.table.totalCost": "Total Cost",
+		"inventory.batchDetail.costing.title": "Batch Costing",
+		"inventory.batchDetail.costing.totalMaterialCost":
+			"Total Material Cost",
+		"inventory.batchDetail.costing.totalOutputCost":
+			"Total Output Cost",
+		"inventory.batchDetail.info.title": "Batch Details",
+		"inventory.batchDetail.info.status": "Status",
+		"inventory.batchDetail.info.started": "Started",
+		"inventory.batchDetail.info.completed": "Completed",
+		"inventory.batchDetail.info.notes": "Notes",
+		"inventory.batchDetail.completeDialog.title":
+			"Complete Production Batch",
+		"inventory.batchDetail.completeDialog.description":
+			"Completing this batch will reduce raw material stock by the amounts listed, add the produced quantity to each variant's stock, and update variant cost prices. This cannot be undone.",
+		"inventory.batchDetail.completeDialog.confirm":
+			"Confirm & Complete",
+		"inventory.batchDetail.cancelDialog.title": "Cancel Batch",
+		"inventory.batchDetail.cancelDialog.description":
+			'Are you sure you want to cancel batch "{code}"? This cannot be undone.',
+		"inventory.batchDetail.cancelDialog.confirm": "Cancel Batch",
+		"inventory.batchDetail.cancelDialog.keep": "Keep Batch",
+		"inventory.receipts.title": "Finished Goods Receipts",
+		"inventory.receipts.description":
+			"Record stock received from suppliers. Each receipt automatically updates the variant's available stock and cost price.",
+		"inventory.receipts.add": "Record Receipt",
+		"inventory.receipts.error": "Error loading receipts",
+		"inventory.receipts.empty":
+			"No receipts recorded yet. Record your first goods receipt to add stock to a product variant.",
+		"inventory.receipts.table.date": "Date",
+		"inventory.receipts.table.product": "Product",
+		"inventory.receipts.table.variant": "Variant",
+		"inventory.receipts.table.supplier": "Supplier",
+		"inventory.receipts.table.quantity": "Qty",
+		"inventory.receipts.table.unitCost": "Unit Cost",
+		"inventory.receipts.table.totalCost": "Total Cost",
+		"inventory.receipts.table.reference": "Reference",
+		"inventory.receiptModal.title": "Record Goods Receipt",
+		"inventory.receiptModal.description":
+			"Record stock received from a supplier. The variant's available stock and cost price will be updated automatically when you save.",
+		"inventory.receiptForm.validation.product":
+			"Please select a product",
+		"inventory.receiptForm.validation.variant":
+			"Please select a variant",
+		"inventory.receiptForm.validation.receivedAt":
+			"Received date is required",
+		"inventory.receiptForm.validation.quantity":
+			"Quantity must be at least 1",
+		"inventory.receiptForm.validation.unitCost":
+			"Cost must be 0 or greater",
+		"inventory.receiptForm.product": "Product",
+		"inventory.receiptForm.productPlaceholder": "Select a product...",
+		"inventory.receiptForm.variant": "Variant",
+		"inventory.receiptForm.variantPlaceholder.noProduct":
+			"Select a product first",
+		"inventory.receiptForm.variantPlaceholder.loading":
+			"Loading variants...",
+		"inventory.receiptForm.variantPlaceholder.ready":
+			"Select a variant...",
+		"inventory.receiptForm.variantHelp":
+			"Stock quantity and cost price will be updated for this variant.",
+		"inventory.receiptForm.supplierName": "Supplier Name",
+		"inventory.receiptForm.supplierNamePlaceholder":
+			"e.g., ABC Suppliers",
+		"inventory.receiptForm.supplierNameHelp":
+			"Optional; name of the supplier.",
+		"inventory.receiptForm.reference": "Reference",
+		"inventory.receiptForm.referencePlaceholder": "e.g., INV-2026-001",
+		"inventory.receiptForm.referenceHelp":
+			"Optional; invoice or delivery note number.",
+		"inventory.receiptForm.receivedOn": "Received On",
+		"inventory.receiptForm.receivedOnHelp":
+			"When the stock was physically received.",
+		"inventory.receiptForm.quantity": "Quantity",
+		"inventory.receiptForm.quantityHelp": "Number of units received.",
+		"inventory.receiptForm.unitCost": "Unit Cost (৳)",
+		"inventory.receiptForm.unitCostHelp":
+			"Cost per unit from supplier.",
+		"inventory.receiptForm.landedCost": "Landed Cost (৳)",
+		"inventory.receiptForm.landedCostHelp":
+			"Shipping, customs, handling (total extra cost).",
+		"inventory.receiptForm.calculatedUnitCost": "Calculated Unit Cost",
+		"inventory.receiptForm.totalCost": "Total Cost",
+		"inventory.receiptForm.landedCostNote":
+			"Landed cost of ৳{cost} spread across {quantity} units.",
+		"inventory.receiptForm.note": "Note",
+		"inventory.receiptForm.notePlaceholder":
+			"Any additional details...",
+		"inventory.receiptForm.optional": "Optional",
+		"inventory.receiptForm.submit": "Record Receipt",
+		"inventory.receiptForm.createSuccess":
+			"Receipt recorded. Stock updated.",
+		"inventory.receiptForm.createFailed": "Failed to record receipt",
+		"categories.list.title": "Categories",
+		"categories.list.description": "Manage your product categories",
+		"categories.list.add": "Add Category",
+		"categories.list.searchPlaceholder":
+			"Search categories by name or slug...",
+		"categories.list.reorderHint":
+			"Drag and drop is available on the default category list. Clear search or filters to reorder categories.",
+		"categories.list.loading": "Loading categories...",
+		"categories.list.error": "Error loading categories",
+		"categories.list.empty": "No categories found",
+		"categories.list.deleteConfirm":
+			'Are you sure you want to delete "{name}"?',
+		"categories.list.deleteSuccess":
+			"Category deleted successfully",
+		"categories.list.deleteFailed": "Failed to delete category",
+		"categories.list.reorderSuccess":
+			"Category order updated successfully",
+		"categories.list.table.image": "Image",
+		"categories.list.table.imageEmpty": "N/A",
+		"categories.list.table.name": "Category Name",
+		"categories.list.table.inParent": "in {parent}",
+		"categories.list.table.slug": "Slug",
+		"categories.list.table.description": "Description",
+		"categories.list.table.empty": "-",
+		"categories.list.table.order": "Order",
+		"categories.list.table.status": "Status",
+		"categories.list.status.active": "Active",
+		"categories.list.status.inactive": "Inactive",
+		"categories.list.actions.label": "Actions",
+		"categories.list.actions.edit": "Edit",
+		"categories.list.actions.delete": "Delete",
+		"categories.filter.title": "Filters",
+		"categories.filter.description":
+			"Apply filters to refine your category list",
+		"categories.filter.status": "Status",
+		"categories.filter.reset": "Reset",
+		"categories.filter.apply": "Apply Filters",
+		"categories.modal.editTitle": "Edit Category",
+		"categories.modal.createTitle": "Create New Category",
+		"categories.modal.editDescription":
+			"Update the category details below. Changes will be saved immediately.",
+		"categories.modal.createDescription":
+			"Add a new category to organize your products. Fill in the details below.",
+		"customers.list.title": "Customers",
+		"customers.list.description":
+			"Manage your customers and their accounts",
+		"customers.list.searchPlaceholder":
+			"Search by email, mobile, or name...",
+		"customers.list.empty": "No customers found",
+		"customers.list.verified": "Verified",
+		"customers.list.unverified": "Unverified",
+		"customers.list.table.name": "Name",
+		"customers.list.table.email": "Email",
+		"customers.list.table.mobile": "Mobile",
+		"customers.list.table.emailVerified": "Email Verified",
+		"customers.list.table.mobileVerified": "Mobile Verified",
+		"customers.list.table.status": "Status",
+		"customers.list.table.joined": "Joined",
+		"customers.list.actions.label": "Actions",
+		"customers.list.actions.activate": "Activate",
+		"customers.list.actions.deactivate": "Deactivate",
+		"customers.list.status.active": "Active",
+		"customers.list.status.inactive": "Inactive",
+		"customers.list.status.activated": "activated",
+		"customers.list.status.deactivated": "deactivated",
+		"customers.list.status.confirm":
+			'Are you sure you want to {action} "{name}"?',
+		"customers.list.status.success":
+			"Customer {status} successfully",
+		"customers.list.status.failed":
+			"Failed to update customer status",
+		"customers.filter.title": "Filters",
+		"customers.filter.description":
+			"Apply filters to refine your customer list",
+		"customers.filter.accountStatus": "Account Status",
+		"customers.filter.mobileVerified": "Mobile Verified",
+		"customers.filter.notVerified": "Not Verified",
+		"customers.filter.reset": "Reset",
+		"customers.filter.apply": "Apply Filters",
+		"customers.details.title": "Customer",
+		"customers.details.missingId": "Missing customer id.",
+		"customers.details.loadFailed": "Failed to load customer.",
+		"customers.details.loading": "Loading...",
+		"customers.details.loadingInfo": "Loading user info...",
+		"customers.details.noData": "No customer data.",
+		"customers.details.emptyValue": "-",
+		"customers.details.tabs.info": "User Info",
+		"customers.details.tabs.orders": "Orders",
+		"customers.details.tabs.reviews": "Review",
+		"customers.details.info.name": "Name",
+		"customers.details.info.email": "Email",
+		"customers.details.info.mobile": "Mobile",
+		"customers.details.info.joined": "Joined",
+		"customers.details.info.defaultAddress": "Default Address",
+		"customers.details.info.noDefaultAddress": "No default address.",
+		"customers.details.table.date": "Date",
+		"customers.details.orders.table.order": "Order",
+		"customers.details.orders.table.status": "Status",
+		"customers.details.orders.table.payment": "Payment",
+		"customers.details.orders.table.total": "Total",
+		"customers.details.orders.empty":
+			"No orders found for this customer",
+		"customers.details.orderStatus.pending": "Pending",
+		"customers.details.orderStatus.confirmed": "Confirmed",
+		"customers.details.orderStatus.processing": "Processing",
+		"customers.details.orderStatus.shipped": "Shipped",
+		"customers.details.orderStatus.delivered": "Delivered",
+		"customers.details.orderStatus.cancelled": "Cancelled",
+		"customers.details.orderStatus.returned": "Returned",
+		"customers.details.paymentStatus.pending": "Pending",
+		"customers.details.paymentStatus.paid": "Paid",
+		"customers.details.paymentStatus.failed": "Failed",
+		"customers.details.paymentStatus.refunded": "Refunded",
+		"customers.details.reviews.table.product": "Product",
+		"customers.details.reviews.table.rating": "Rating",
+		"customers.details.reviews.table.status": "Status",
+		"customers.details.reviews.table.review": "Review",
+		"customers.details.reviews.status.approved": "Approved",
+		"customers.details.reviews.status.pending": "Pending",
+		"customers.details.reviews.empty":
+			"No reviews found for this customer",
+		"coupons.list.title": "Coupons",
+		"coupons.list.description":
+			"Manage discount coupons for your store",
+		"coupons.list.add": "Add Coupon",
+		"coupons.list.searchPlaceholder": "Search coupons by code...",
+		"coupons.list.loading": "Loading coupons...",
+		"coupons.list.error": "Error loading coupons",
+		"coupons.list.empty": "No coupons found",
+		"coupons.list.deleteConfirm":
+			'Are you sure you want to delete coupon "{code}"?',
+		"coupons.list.deleteSuccess": "Coupon deleted successfully",
+		"coupons.list.deleteFailed": "Failed to delete coupon",
+		"coupons.list.table.code": "Code",
+		"coupons.list.table.discount": "Discount",
+		"coupons.list.table.minOrder": "Min Order",
+		"coupons.list.table.usage": "Usage",
+		"coupons.list.table.validity": "Valid Period",
+		"coupons.list.table.status": "Status",
+		"coupons.list.table.empty": "-",
+		"coupons.list.status.active": "Active",
+		"coupons.list.status.inactive": "Inactive",
+		"coupons.list.status.expired": "Expired",
+		"coupons.list.actions.label": "Actions",
+		"coupons.list.actions.edit": "Edit",
+		"coupons.list.actions.delete": "Delete",
+		"coupons.filter.title": "Filters",
+		"coupons.filter.description":
+			"Apply filters to refine your coupon list",
+		"coupons.filter.status": "Status",
+		"coupons.filter.discountType": "Discount Type",
+		"coupons.filter.type.percentage": "Percentage",
+		"coupons.filter.type.fixedAmount": "Fixed Amount",
+		"coupons.filter.reset": "Reset",
+		"coupons.filter.apply": "Apply Filters",
+		"coupons.modal.editTitle": "Edit Coupon",
+		"coupons.modal.createTitle": "Create New Coupon",
+		"coupons.modal.editDescription": "Update the coupon details below.",
+		"coupons.modal.createDescription":
+			"Create a new discount coupon for your customers.",
+		"dashboard.error": "Failed to load dashboard metrics.",
+		"dashboard.change.noChange": "No change",
+		"dashboard.change.fromLastMonth": "{value}% from last month",
+		"dashboard.status.pending": "Pending",
+		"dashboard.status.confirmed": "Confirmed",
+		"dashboard.status.processing": "Processing",
+		"dashboard.status.shipped": "Shipped",
+		"dashboard.status.delivered": "Delivered",
+		"dashboard.status.cancelled": "Cancelled",
+		"dashboard.status.refunded": "Refunded",
+		"dashboard.payment.pending": "Pending",
+		"dashboard.payment.paid": "Paid",
+		"dashboard.payment.failed": "Failed",
+		"dashboard.payment.refunded": "Refunded",
+		"dashboard.metrics.totalRevenue": "Total Revenue",
+		"dashboard.metrics.orders": "Orders",
+		"dashboard.metrics.customers": "Customers",
+		"dashboard.metrics.products": "Products",
+		"dashboard.metrics.outOfStock": "{count} out of stock",
+		"dashboard.recentOrders.title": "Recent Orders",
+		"dashboard.recentOrders.description":
+			"Latest orders from your store",
+		"dashboard.recentOrders.viewAll": "View all",
+		"dashboard.recentOrders.empty": "No orders yet.",
+		"dashboard.lowStock.title": "Low Stock Alerts",
+		"dashboard.lowStock.description":
+			"Products running low on inventory",
+		"dashboard.lowStock.variantLine": "{variant} · SKU: {sku}",
+		"dashboard.lowStock.left": "{count} left",
+		"dashboard.lowStock.empty": "All products are well-stocked.",
+		"dashboard.summary.avgOrderValue": "Avg Order Value",
+		"dashboard.summary.thisMonthRevenue": "This Month Revenue",
+		"dashboard.summary.ordersThisMonth": "{count} orders this month",
+		"dashboard.summary.newCustomersThisMonth":
+			"New Customers This Month",
 		"passwordField.forgotPassword": "Forgot Password?",
 		"passwordField.hidePassword": "Hide password",
 		"passwordField.showPassword": "Show password",
@@ -750,6 +1308,595 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 		"expenses.reports.table.amount": "পরিমাণ (৳)",
 		"expenses.reports.table.percent": "মোটের %",
 		"expenses.reports.table.total": "মোট",
+		"inventory.common.empty": "—",
+		"inventory.actions.label": "অ্যাকশন",
+		"inventory.actions.viewDetails": "বিস্তারিত দেখুন",
+		"inventory.actions.edit": "সম্পাদনা",
+		"inventory.actions.delete": "মুছুন",
+		"inventory.status.active": "সক্রিয়",
+		"inventory.status.inactive": "নিষ্ক্রিয়",
+		"inventory.mode.manufacturing": "ম্যানুফ্যাকচারিং",
+		"inventory.mode.trading": "ট্রেডিং",
+		"inventory.transactionType.purchaseReceipt": "ক্রয়",
+		"inventory.transactionType.productionReceipt": "প্রোডাকশন",
+		"inventory.transactionType.adjustmentIn": "সমন্বয় ইন",
+		"inventory.transactionType.adjustmentOut": "সমন্বয় আউট",
+		"inventory.transactionType.orderSale": "বিক্রয়",
+		"inventory.transactionType.orderCancelReturn": "রিটার্ন",
+		"inventory.materialTransactionType.purchase": "ক্রয়",
+		"inventory.materialTransactionType.adjustmentIn": "সমন্বয় ইন",
+		"inventory.materialTransactionType.adjustmentOut": "সমন্বয় আউট",
+		"inventory.materialTransactionType.issueToBatch": "ব্যাচে ইস্যু",
+		"inventory.materialTransactionType.returnFromBatch": "ব্যাচ থেকে ফেরত",
+		"inventory.batchStatus.draft": "ড্রাফট",
+		"inventory.batchStatus.inProgress": "চলমান",
+		"inventory.batchStatus.completed": "সম্পন্ন",
+		"inventory.batchStatus.cancelled": "বাতিল",
+		"inventory.dashboard.title": "ইনভেন্টরি",
+		"inventory.dashboard.description.manufacturing":
+			"আপনার স্টক লেভেল, ক্রয়, কাঁচামাল এবং প্রোডাকশন রান ট্র্যাক করুন।",
+		"inventory.dashboard.description.trading":
+			"আপনার স্টক লেভেল, ক্রয় এবং রিসিপ্ট ট্র্যাক করুন।",
+		"inventory.dashboard.modeBadge": "{mode} মোড",
+		"inventory.dashboard.currentMode":
+			"আপনার বর্তমান মোড হলো {mode}, যা আপনার অ্যাডমিনিস্ট্রেটর কনফিগার করেছেন।",
+		"inventory.dashboard.summary.totalMaterials": "মোট কাঁচামাল",
+		"inventory.dashboard.summary.lowStockMaterials":
+			"কম স্টকের কাঁচামাল",
+		"inventory.dashboard.summary.needsRestocking":
+			"পুনরায় মজুত করা দরকার",
+		"inventory.dashboard.summary.activeBatches": "সক্রিয় ব্যাচ",
+		"inventory.dashboard.summary.draftOrInProgress":
+			"ড্রাফট বা চলমান",
+		"inventory.dashboard.cards.materials.title": "কাঁচামাল",
+		"inventory.dashboard.cards.materials.description":
+			"কাঁচামাল পরিচালনা করুন, স্টক লেভেল ট্র্যাক করুন, ক্রয় রেকর্ড করুন এবং রিঅর্ডার অ্যালার্ট সেট করুন।",
+		"inventory.dashboard.cards.materials.cta":
+			"কাঁচামাল পেইজে যান",
+		"inventory.dashboard.cards.batches.title": "প্রোডাকশন ব্যাচ",
+		"inventory.dashboard.cards.batches.description":
+			"প্রোডাকশন ব্যাচ তৈরি ও পরিচালনা করুন। ব্যবহৃত কাঁচামাল ও উৎপাদিত পণ্য ট্র্যাক করুন।",
+		"inventory.dashboard.cards.batches.cta": "ব্যাচ পেইজে যান",
+		"inventory.dashboard.cards.receipts.title":
+			"ফিনিশড গুডস রিসিপ্ট",
+		"inventory.dashboard.cards.receipts.description":
+			"সরবরাহকারীর কাছ থেকে প্রাপ্ত স্টক রেকর্ড করুন। প্রতিটি রিসিপ্ট স্বয়ংক্রিয়ভাবে ভ্যারিয়েন্টের স্টক ও কস্ট প্রাইস আপডেট করে।",
+		"inventory.dashboard.cards.receipts.cta": "রিসিপ্ট পেইজে যান",
+		"inventory.dashboard.recent.title": "সাম্প্রতিক স্টক কার্যকলাপ",
+		"inventory.dashboard.recent.empty": "এখনও কোনো স্টক মুভমেন্ট নেই।",
+		"inventory.dashboard.table.date": "তারিখ",
+		"inventory.dashboard.table.product": "পণ্য",
+		"inventory.dashboard.table.variant": "ভ্যারিয়েন্ট",
+		"inventory.dashboard.table.type": "ধরণ",
+		"inventory.dashboard.table.change": "পরিবর্তন",
+		"inventory.dashboard.table.balance": "ব্যালেন্স",
+		"inventory.materials.title": "কাঁচামাল",
+		"inventory.materials.description":
+			"কাঁচামাল হলো আপনার প্রোডাকশন ব্যাচের ইনপুট। বর্তমান স্টক, খরচ এবং রিঅর্ডার অ্যালার্ট ট্র্যাক করুন।",
+		"inventory.materials.add": "কাঁচামাল যোগ করুন",
+		"inventory.materials.searchPlaceholder":
+			"নাম বা SKU দিয়ে কাঁচামাল খুঁজুন...",
+		"inventory.materials.error": "কাঁচামাল লোড করতে সমস্যা হয়েছে",
+		"inventory.materials.empty.search":
+			'"{query}" এর জন্য কোনো কাঁচামাল পাওয়া যায়নি',
+		"inventory.materials.empty.default":
+			"এখনও কোনো কাঁচামাল নেই। প্রোডাকশন ব্যাচের স্টক ট্র্যাকিং শুরু করতে প্রথম কাঁচামালটি যোগ করুন।",
+		"inventory.materials.deleteTitle": "কাঁচামাল মুছুন",
+		"inventory.materials.deleteDescription":
+			'আপনি কি নিশ্চিত যে "{name}" মুছতে চান? এই কাজটি আর পূর্বাবস্থায় ফেরানো যাবে না।',
+		"inventory.materials.deleteSuccess": "কাঁচামাল মুছে ফেলা হয়েছে",
+		"inventory.materials.deleteFailed":
+			"কাঁচামাল মুছতে ব্যর্থ হয়েছে",
+		"inventory.materials.lowStock": "কম স্টক",
+		"inventory.materials.table.name": "নাম",
+		"inventory.materials.table.sku": "SKU",
+		"inventory.materials.table.category": "ক্যাটাগরি",
+		"inventory.materials.table.currentStock": "বর্তমান স্টক",
+		"inventory.materials.table.reorderLevel": "রিঅর্ডার লেভেল",
+		"inventory.materials.table.avgCost": "গড় খরচ",
+		"inventory.materials.table.status": "স্ট্যাটাস",
+		"inventory.materialModal.editTitle": "কাঁচামাল সম্পাদনা করুন",
+		"inventory.materialModal.createTitle": "কাঁচামাল যোগ করুন",
+		"inventory.materialModal.editDescription":
+			"কাঁচামালের তথ্য হালনাগাদ করুন। স্টক পরিমাণ ও খরচ ট্রানজ্যাকশনের মাধ্যমে পরিচালিত হয়।",
+		"inventory.materialModal.createDescription":
+			"আপনার প্রোডাকশন প্রক্রিয়ায় ট্র্যাক করার জন্য একটি নতুন কাঁচামাল যোগ করুন।",
+		"inventory.materialForm.validation.name": "নাম আবশ্যক",
+		"inventory.materialForm.validation.sku": "SKU আবশ্যক",
+		"inventory.materialForm.validation.unit": "ইউনিট আবশ্যক",
+		"inventory.materialForm.validation.reorderLevel":
+			"রিঅর্ডার লেভেল ০ বা তার বেশি হতে হবে",
+		"inventory.materialForm.name": "কাঁচামালের নাম",
+		"inventory.materialForm.namePlaceholder": "যেমন, Cotton Fabric",
+		"inventory.materialForm.nameHelp":
+			"এই কাঁচামালের জন্য একটি বর্ণনামূলক নাম দিন।",
+		"inventory.materialForm.sku": "SKU",
+		"inventory.materialForm.skuPlaceholder": "যেমন, FAB-001",
+		"inventory.materialForm.skuHelp.edit":
+			"তৈরি হওয়ার পরে SKU পরিবর্তন করা যাবে না।",
+		"inventory.materialForm.skuHelp.create":
+			"এই কাঁচামালের জন্য একটি ইউনিক আইডেন্টিফায়ার। পরে পরিবর্তন করা যাবে না।",
+		"inventory.materialForm.unit": "ইউনিট",
+		"inventory.materialForm.unitPlaceholder":
+			"যেমন, কেজি, মিটার, পিস, লিটার",
+		"inventory.materialForm.unitHelp":
+			"স্টক ও ট্রানজ্যাকশনের পরিমাণ মাপার জন্য ব্যবহৃত একক।",
+		"inventory.materialForm.reorderLevel": "রিঅর্ডার লেভেল",
+		"inventory.materialForm.reorderLevelHelp":
+			"বর্তমান পরিমাণ এই লেভেল বা এর নিচে নামলে আপনি লো-স্টক অ্যালার্ট দেখবেন।",
+		"inventory.materialForm.active": "সক্রিয়",
+		"inventory.materialForm.activeHelp":
+			"নিষ্ক্রিয় কাঁচামাল প্রোডাকশন ব্যাচ ফর্মে দেখানো হবে না।",
+		"inventory.materialForm.update": "কাঁচামাল হালনাগাদ করুন",
+		"inventory.materialForm.create": "কাঁচামাল তৈরি করুন",
+		"inventory.materialForm.updateSuccess":
+			"কাঁচামাল হালনাগাদ হয়েছে",
+		"inventory.materialForm.updateFailed":
+			"কাঁচামাল হালনাগাদ করতে ব্যর্থ হয়েছে",
+		"inventory.materialForm.createSuccess": "কাঁচামাল তৈরি হয়েছে",
+		"inventory.materialForm.createFailed":
+			"কাঁচামাল তৈরি করতে ব্যর্থ হয়েছে",
+		"inventory.materialDetail.notFound": "কাঁচামাল পাওয়া যায়নি।",
+		"inventory.materialDetail.tabs.details": "বিস্তারিত",
+		"inventory.materialDetail.tabs.transactions":
+			"স্টক ট্রানজ্যাকশন",
+		"inventory.materialDetail.stats.currentStock": "বর্তমান স্টক",
+		"inventory.materialDetail.stats.avgUnitCost": "গড় ইউনিট খরচ",
+		"inventory.materialDetail.stats.totalValue": "মোট মূল্য",
+		"inventory.materialDetail.transactions.description":
+			"এই কাঁচামালের সব স্টক মুভমেন্টের পূর্ণ ইতিহাস।",
+		"inventory.materialDetail.transactions.record":
+			"ট্রানজ্যাকশন রেকর্ড করুন",
+		"inventory.materialDetail.transactions.empty":
+			"এখনও কোনো ট্রানজ্যাকশন নেই। উপর থেকে প্রথম স্টক মুভমেন্ট রেকর্ড করুন।",
+		"inventory.materialDetail.table.date": "তারিখ",
+		"inventory.materialDetail.table.type": "ধরণ",
+		"inventory.materialDetail.table.quantity": "পরিমাণ",
+		"inventory.materialDetail.table.unitCost": "ইউনিট খরচ",
+		"inventory.materialDetail.table.balanceAfter": "পরবর্তী ব্যালেন্স",
+		"inventory.materialDetail.table.note": "নোট",
+		"inventory.materialDetail.info.title": "কাঁচামালের তথ্য",
+		"inventory.materialDetail.info.sku": "SKU",
+		"inventory.materialDetail.info.unit": "ইউনিট",
+		"inventory.materialDetail.info.category": "ক্যাটাগরি",
+		"inventory.materialDetail.info.reorderLevel": "রিঅর্ডার লেভেল",
+		"inventory.materialDetail.info.lastUpdated": "সর্বশেষ আপডেট",
+		"inventory.transactionForm.title": "ট্রানজ্যাকশন রেকর্ড করুন",
+		"inventory.transactionForm.description":
+			"{materialName}-এর জন্য একটি স্টক মুভমেন্ট রেকর্ড করুন।",
+		"inventory.transactionForm.validation.quantity":
+			"পরিমাণ অবশ্যই ০ এর বেশি হতে হবে",
+		"inventory.transactionForm.transactionType": "ট্রানজ্যাকশনের ধরণ",
+		"inventory.transactionForm.transactionTypeHelp":
+			"এই স্টক মুভমেন্টের কারণ নির্বাচন করুন।",
+		"inventory.transactionForm.type.purchase":
+			"ক্রয় — সরবরাহকারীর কাছ থেকে প্রাপ্ত স্টক রেকর্ড করুন",
+		"inventory.transactionForm.type.adjustmentIn":
+			"সমন্বয় ইন — স্টক বাড়িয়ে সংশোধন করুন (যেমন পুনরায় গণনার পরে)",
+		"inventory.transactionForm.type.adjustmentOut":
+			"সমন্বয় আউট — স্টক কমিয়ে সংশোধন করুন (যেমন ক্ষতি বা নষ্ট হওয়া)",
+		"inventory.transactionForm.quantity": "পরিমাণ ({unit})",
+		"inventory.transactionForm.quantityHelp":
+			"যতটা যোগ বা বিয়োগ হবে তা লিখুন। সবসময় একটি ধনাত্মক সংখ্যা দিন; দিকটি ট্রানজ্যাকশনের ধরণ থেকে নির্ধারিত হবে।",
+		"inventory.transactionForm.unitCost": "ইউনিট খরচ (৳)",
+		"inventory.transactionForm.unitCostHelp":
+			"প্রতি ইউনিট খরচ। ক্রয়ের ক্ষেত্রে এটি weighted average cost আপডেট করে।",
+		"inventory.transactionForm.note": "নোট",
+		"inventory.transactionForm.notePlaceholder":
+			"এই সমন্বয়ের কারণ বা রেফারেন্স...",
+		"inventory.transactionForm.noteHelp":
+			"ঐচ্ছিক; অডিট ট্রেইলের জন্য সহায়ক।",
+		"inventory.transactionForm.optional": "ঐচ্ছিক",
+		"inventory.transactionForm.submit": "ট্রানজ্যাকশন রেকর্ড করুন",
+		"inventory.transactionForm.createSuccess":
+			"ট্রানজ্যাকশন রেকর্ড হয়েছে",
+		"inventory.transactionForm.createFailed":
+			"ট্রানজ্যাকশন রেকর্ড করতে ব্যর্থ হয়েছে",
+		"inventory.batches.title": "প্রোডাকশন ব্যাচ",
+		"inventory.batches.description":
+			"একটি প্রোডাকশন ব্যাচে একক উৎপাদন রানে ব্যবহৃত কাঁচামাল ও উৎপাদিত পণ্য ট্র্যাক করা হয়।",
+		"inventory.batches.add": "নতুন ব্যাচ",
+		"inventory.batches.error": "ব্যাচ লোড করতে সমস্যা হয়েছে",
+		"inventory.batches.empty":
+			"এখনও কোনো প্রোডাকশন ব্যাচ নেই। একটি উৎপাদন রান রেকর্ড করতে ব্যাচ তৈরি করুন।",
+		"inventory.batches.deleteTitle": "ব্যাচ মুছুন",
+		"inventory.batches.deleteDescription":
+			'আপনি কি নিশ্চিত যে "{code}" ব্যাচটি মুছতে চান? শুধু ড্রাফট ব্যাচ মুছে ফেলা যায়।',
+		"inventory.batches.deleteSuccess": "ব্যাচ মুছে ফেলা হয়েছে",
+		"inventory.batches.deleteFailed":
+			"ব্যাচ মুছতে ব্যর্থ হয়েছে। শুধু ড্রাফট ব্যাচ মুছে ফেলা যায়।",
+		"inventory.batches.table.code": "ব্যাচ কোড",
+		"inventory.batches.table.status": "স্ট্যাটাস",
+		"inventory.batches.table.materials": "কাঁচামাল",
+		"inventory.batches.table.outputs": "আউটপুট",
+		"inventory.batches.table.started": "শুরু",
+		"inventory.batches.table.completed": "সম্পন্ন",
+		"inventory.createBatch.title": "নতুন প্রোডাকশন ব্যাচ",
+		"inventory.createBatch.description":
+			"কোন কাঁচামাল ব্যবহার হবে এবং কোন পণ্য তৈরি হবে তা নির্ধারণ করুন। সম্পন্ন করার আগে ড্রাফট হিসেবে সংরক্ষণ করে পরিমাণ আপডেট করতে পারবেন।",
+		"inventory.createBatch.validation.code": "ব্যাচ কোড আবশ্যক",
+		"inventory.createBatch.validation.materials":
+			"কমপক্ষে একটি কাঁচামাল যোগ করুন",
+		"inventory.createBatch.validation.outputs":
+			"কমপক্ষে একটি আউটপুট যোগ করুন",
+		"inventory.createBatch.status.draft":
+			"ড্রাফট — পরে সংরক্ষণ করুন",
+		"inventory.createBatch.status.inProgress":
+			"চলমান — উৎপাদন শুরু হয়েছে",
+		"inventory.createBatch.info.title": "ব্যাচের তথ্য",
+		"inventory.createBatch.info.code": "ব্যাচ কোড",
+		"inventory.createBatch.info.codePlaceholder":
+			"যেমন, BATCH-2026-001",
+		"inventory.createBatch.info.codeHelp":
+			"এই উৎপাদন রানের জন্য একটি ইউনিক আইডেন্টিফায়ার।",
+		"inventory.createBatch.info.status": "স্ট্যাটাস",
+		"inventory.createBatch.info.statusHelp":
+			"পরে সংরক্ষণ করতে ড্রাফট; উৎপাদন শুরু হলে চলমান নির্বাচন করুন।",
+		"inventory.createBatch.info.startedOn": "শুরু হয়েছে",
+		"inventory.createBatch.info.startedOnHelp":
+			"ঐচ্ছিক; কবে উৎপাদন শুরু হয়েছে।",
+		"inventory.createBatch.info.notes": "নোট",
+		"inventory.createBatch.info.notesPlaceholder":
+			"এই ব্যাচ সম্পর্কে কোনো নোট...",
+		"inventory.createBatch.info.optional": "ঐচ্ছিক",
+		"inventory.createBatch.materials.title": "কাঁচামাল",
+		"inventory.createBatch.materials.optionalNote":
+			"প্ল্যানড qty ঐচ্ছিক",
+		"inventory.createBatch.materials.description":
+			"এই ব্যাচে ব্যবহৃত প্রতিটি কাঁচামাল যোগ করুন। প্ল্যানড quantity ঐচ্ছিক।",
+		"inventory.createBatch.materials.selectMaterial":
+			"কাঁচামাল নির্বাচন করুন...",
+		"inventory.createBatch.materials.planned": "প্ল্যানড",
+		"inventory.createBatch.materials.actual": "আসল *",
+		"inventory.createBatch.materials.header.material": "কাঁচামাল",
+		"inventory.createBatch.materials.header.plannedQty":
+			"প্ল্যানড qty",
+		"inventory.createBatch.materials.header.actualQty":
+			"আসল qty",
+		"inventory.createBatch.materials.add": "কাঁচামাল যোগ করুন",
+		"inventory.createBatch.outputs.title": "ফিনিশড আউটপুট",
+		"inventory.createBatch.outputs.description":
+			"এই ব্যাচে যে পণ্যগুলো উৎপাদনের আশা করছেন সেগুলো যোগ করুন।",
+		"inventory.createBatch.outputs.add": "আউটপুট যোগ করুন",
+		"inventory.createBatch.outputs.selectProduct":
+			"পণ্য নির্বাচন করুন...",
+		"inventory.createBatch.outputs.selectVariant":
+			"ভ্যারিয়েন্ট নির্বাচন করুন...",
+		"inventory.createBatch.outputs.selectProductFirst":
+			"প্রথমে পণ্য নির্বাচন করুন",
+		"inventory.createBatch.outputs.quantity": "Qty *",
+		"inventory.createBatch.submit": "ব্যাচ তৈরি করুন",
+		"inventory.createBatch.createSuccess": "ব্যাচ তৈরি হয়েছে",
+		"inventory.createBatch.createFailed":
+			"ব্যাচ তৈরি করতে ব্যর্থ হয়েছে",
+		"inventory.batchDetail.notFound": "ব্যাচ পাওয়া যায়নি।",
+		"inventory.batchDetail.markInProgress": "চলমান হিসেবে চিহ্নিত করুন",
+		"inventory.batchDetail.complete": "ব্যাচ সম্পন্ন করুন",
+		"inventory.batchDetail.completeSuccess":
+			"ব্যাচ সম্পন্ন হয়েছে। স্টক ও খরচ আপডেট হয়েছে।",
+		"inventory.batchDetail.completeFailed":
+			"ব্যাচ সম্পন্ন করতে ব্যর্থ হয়েছে। কাঁচামাল ও আউটপুট পরীক্ষা করুন।",
+		"inventory.batchDetail.inProgressSuccess":
+			"ব্যাচ চলমান হিসেবে চিহ্নিত হয়েছে",
+		"inventory.batchDetail.inProgressFailed":
+			"ব্যাচের স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে",
+		"inventory.batchDetail.cancelSuccess": "ব্যাচ বাতিল হয়েছে",
+		"inventory.batchDetail.cancelFailed":
+			"ব্যাচ বাতিল করতে ব্যর্থ হয়েছে",
+		"inventory.batchDetail.materials.title": "ব্যবহৃত কাঁচামাল",
+		"inventory.batchDetail.materials.description":
+			"এই উৎপাদন রানে ব্যবহৃত কাঁচামাল।",
+		"inventory.batchDetail.materials.empty":
+			"কোনো কাঁচামাল যোগ করা হয়নি।",
+		"inventory.batchDetail.materials.table.material": "কাঁচামাল",
+		"inventory.batchDetail.materials.table.planned": "প্ল্যানড",
+		"inventory.batchDetail.materials.table.actual": "আসল",
+		"inventory.batchDetail.materials.table.unitCost": "ইউনিট খরচ",
+		"inventory.batchDetail.materials.table.totalCost": "মোট খরচ",
+		"inventory.batchDetail.outputs.title": "ফিনিশড আউটপুট",
+		"inventory.batchDetail.outputs.description":
+			"এই ব্যাচে উৎপাদিত পণ্যসমূহ।",
+		"inventory.batchDetail.outputs.empty":
+			"কোনো আউটপুট যোগ করা হয়নি।",
+		"inventory.batchDetail.outputs.table.product": "পণ্য",
+		"inventory.batchDetail.outputs.table.variant": "ভ্যারিয়েন্ট",
+		"inventory.batchDetail.outputs.table.quantity": "পরিমাণ",
+		"inventory.batchDetail.outputs.table.unitCost": "ইউনিট খরচ",
+		"inventory.batchDetail.outputs.table.totalCost": "মোট খরচ",
+		"inventory.batchDetail.costing.title": "ব্যাচ কস্টিং",
+		"inventory.batchDetail.costing.totalMaterialCost":
+			"মোট কাঁচামালের খরচ",
+		"inventory.batchDetail.costing.totalOutputCost":
+			"মোট আউটপুট খরচ",
+		"inventory.batchDetail.info.title": "ব্যাচের তথ্য",
+		"inventory.batchDetail.info.status": "স্ট্যাটাস",
+		"inventory.batchDetail.info.started": "শুরু",
+		"inventory.batchDetail.info.completed": "সম্পন্ন",
+		"inventory.batchDetail.info.notes": "নোট",
+		"inventory.batchDetail.completeDialog.title":
+			"প্রোডাকশন ব্যাচ সম্পন্ন করুন",
+		"inventory.batchDetail.completeDialog.description":
+			"এই ব্যাচ সম্পন্ন করলে তালিকাভুক্ত পরিমাণ অনুযায়ী কাঁচামালের স্টক কমবে, প্রতিটি ভ্যারিয়েন্টের স্টকে উৎপাদিত পরিমাণ যোগ হবে এবং ভ্যারিয়েন্টের কস্ট প্রাইস আপডেট হবে। এটি আর পূর্বাবস্থায় ফেরানো যাবে না।",
+		"inventory.batchDetail.completeDialog.confirm":
+			"নিশ্চিত করুন ও সম্পন্ন করুন",
+		"inventory.batchDetail.cancelDialog.title": "ব্যাচ বাতিল করুন",
+		"inventory.batchDetail.cancelDialog.description":
+			'আপনি কি নিশ্চিত যে "{code}" ব্যাচটি বাতিল করতে চান? এই কাজটি আর পূর্বাবস্থায় ফেরানো যাবে না।',
+		"inventory.batchDetail.cancelDialog.confirm": "ব্যাচ বাতিল করুন",
+		"inventory.batchDetail.cancelDialog.keep": "ব্যাচটি রাখুন",
+		"inventory.receipts.title": "ফিনিশড গুডস রিসিপ্ট",
+		"inventory.receipts.description":
+			"সরবরাহকারীর কাছ থেকে প্রাপ্ত স্টক রেকর্ড করুন। প্রতিটি রিসিপ্ট স্বয়ংক্রিয়ভাবে ভ্যারিয়েন্টের স্টক ও কস্ট প্রাইস আপডেট করে।",
+		"inventory.receipts.add": "রিসিপ্ট রেকর্ড করুন",
+		"inventory.receipts.error": "রিসিপ্ট লোড করতে সমস্যা হয়েছে",
+		"inventory.receipts.empty":
+			"এখনও কোনো রিসিপ্ট রেকর্ড করা হয়নি। একটি পণ্যের ভ্যারিয়েন্টে স্টক যোগ করতে প্রথম গুডস রিসিপ্টটি রেকর্ড করুন।",
+		"inventory.receipts.table.date": "তারিখ",
+		"inventory.receipts.table.product": "পণ্য",
+		"inventory.receipts.table.variant": "ভ্যারিয়েন্ট",
+		"inventory.receipts.table.supplier": "সরবরাহকারী",
+		"inventory.receipts.table.quantity": "পরিমাণ",
+		"inventory.receipts.table.unitCost": "ইউনিট খরচ",
+		"inventory.receipts.table.totalCost": "মোট খরচ",
+		"inventory.receipts.table.reference": "রেফারেন্স",
+		"inventory.receiptModal.title": "গুডস রিসিপ্ট রেকর্ড করুন",
+		"inventory.receiptModal.description":
+			"সরবরাহকারীর কাছ থেকে প্রাপ্ত স্টক রেকর্ড করুন। সংরক্ষণ করলে ভ্যারিয়েন্টের স্টক ও কস্ট প্রাইস স্বয়ংক্রিয়ভাবে আপডেট হবে।",
+		"inventory.receiptForm.validation.product":
+			"অনুগ্রহ করে একটি পণ্য নির্বাচন করুন",
+		"inventory.receiptForm.validation.variant":
+			"অনুগ্রহ করে একটি ভ্যারিয়েন্ট নির্বাচন করুন",
+		"inventory.receiptForm.validation.receivedAt":
+			"প্রাপ্তির তারিখ আবশ্যক",
+		"inventory.receiptForm.validation.quantity":
+			"পরিমাণ কমপক্ষে ১ হতে হবে",
+		"inventory.receiptForm.validation.unitCost":
+			"খরচ ০ বা তার বেশি হতে হবে",
+		"inventory.receiptForm.product": "পণ্য",
+		"inventory.receiptForm.productPlaceholder":
+			"একটি পণ্য নির্বাচন করুন...",
+		"inventory.receiptForm.variant": "ভ্যারিয়েন্ট",
+		"inventory.receiptForm.variantPlaceholder.noProduct":
+			"প্রথমে একটি পণ্য নির্বাচন করুন",
+		"inventory.receiptForm.variantPlaceholder.loading":
+			"ভ্যারিয়েন্ট লোড হচ্ছে...",
+		"inventory.receiptForm.variantPlaceholder.ready":
+			"একটি ভ্যারিয়েন্ট নির্বাচন করুন...",
+		"inventory.receiptForm.variantHelp":
+			"এই ভ্যারিয়েন্টের স্টক পরিমাণ ও কস্ট প্রাইস আপডেট হবে।",
+		"inventory.receiptForm.supplierName": "সরবরাহকারীর নাম",
+		"inventory.receiptForm.supplierNamePlaceholder":
+			"যেমন, ABC Suppliers",
+		"inventory.receiptForm.supplierNameHelp":
+			"ঐচ্ছিক; সরবরাহকারীর নাম।",
+		"inventory.receiptForm.reference": "রেফারেন্স",
+		"inventory.receiptForm.referencePlaceholder":
+			"যেমন, INV-2026-001",
+		"inventory.receiptForm.referenceHelp":
+			"ঐচ্ছিক; ইনভয়েস বা ডেলিভারি নোট নম্বর।",
+		"inventory.receiptForm.receivedOn": "প্রাপ্তির তারিখ",
+		"inventory.receiptForm.receivedOnHelp":
+			"কবে স্টকটি বাস্তবে গ্রহণ করা হয়েছে।",
+		"inventory.receiptForm.quantity": "পরিমাণ",
+		"inventory.receiptForm.quantityHelp":
+			"প্রাপ্ত ইউনিটের সংখ্যা।",
+		"inventory.receiptForm.unitCost": "ইউনিট খরচ (৳)",
+		"inventory.receiptForm.unitCostHelp":
+			"সরবরাহকারীর কাছ থেকে প্রতি ইউনিটের খরচ।",
+		"inventory.receiptForm.landedCost": "ল্যান্ডেড কস্ট (৳)",
+		"inventory.receiptForm.landedCostHelp":
+			"শিপিং, কাস্টমস, হ্যান্ডলিং (মোট অতিরিক্ত খরচ)।",
+		"inventory.receiptForm.calculatedUnitCost":
+			"গণনা করা ইউনিট খরচ",
+		"inventory.receiptForm.totalCost": "মোট খরচ",
+		"inventory.receiptForm.landedCostNote":
+			"৳{cost} ল্যান্ডেড কস্ট {quantity} ইউনিটে ভাগ করা হয়েছে।",
+		"inventory.receiptForm.note": "নোট",
+		"inventory.receiptForm.notePlaceholder":
+			"অতিরিক্ত কোনো বিস্তারিত...",
+		"inventory.receiptForm.optional": "ঐচ্ছিক",
+		"inventory.receiptForm.submit": "রিসিপ্ট রেকর্ড করুন",
+		"inventory.receiptForm.createSuccess":
+			"রিসিপ্ট রেকর্ড হয়েছে। স্টক আপডেট হয়েছে।",
+		"inventory.receiptForm.createFailed":
+			"রিসিপ্ট রেকর্ড করতে ব্যর্থ হয়েছে",
+		"categories.list.title": "ক্যাটাগরি",
+		"categories.list.description": "আপনার পণ্যের ক্যাটাগরি পরিচালনা করুন",
+		"categories.list.add": "ক্যাটাগরি যোগ করুন",
+		"categories.list.searchPlaceholder":
+			"নাম বা slug দিয়ে ক্যাটাগরি খুঁজুন...",
+		"categories.list.reorderHint":
+			"ডিফল্ট ক্যাটাগরি তালিকায় drag and drop ব্যবহার করা যায়। ক্যাটাগরি পুনরায় সাজাতে সার্চ বা ফিল্টার মুছে দিন।",
+		"categories.list.loading": "ক্যাটাগরি লোড হচ্ছে...",
+		"categories.list.error": "ক্যাটাগরি লোড করতে সমস্যা হয়েছে",
+		"categories.list.empty": "কোনো ক্যাটাগরি পাওয়া যায়নি",
+		"categories.list.deleteConfirm":
+			'আপনি কি নিশ্চিত যে "{name}" মুছতে চান?',
+		"categories.list.deleteSuccess":
+			"ক্যাটাগরি সফলভাবে মুছে ফেলা হয়েছে",
+		"categories.list.deleteFailed": "ক্যাটাগরি মুছতে ব্যর্থ হয়েছে",
+		"categories.list.reorderSuccess":
+			"ক্যাটাগরির ক্রম সফলভাবে আপডেট হয়েছে",
+		"categories.list.table.image": "ছবি",
+		"categories.list.table.imageEmpty": "N/A",
+		"categories.list.table.name": "ক্যাটাগরির নাম",
+		"categories.list.table.inParent": "{parent} এর মধ্যে",
+		"categories.list.table.slug": "Slug",
+		"categories.list.table.description": "বিবরণ",
+		"categories.list.table.empty": "-",
+		"categories.list.table.order": "ক্রম",
+		"categories.list.table.status": "স্ট্যাটাস",
+		"categories.list.status.active": "সক্রিয়",
+		"categories.list.status.inactive": "নিষ্ক্রিয়",
+		"categories.list.actions.label": "অ্যাকশন",
+		"categories.list.actions.edit": "সম্পাদনা",
+		"categories.list.actions.delete": "মুছুন",
+		"categories.filter.title": "ফিল্টার",
+		"categories.filter.description":
+			"আপনার ক্যাটাগরি তালিকা পরিশোধিত করতে ফিল্টার প্রয়োগ করুন",
+		"categories.filter.status": "স্ট্যাটাস",
+		"categories.filter.reset": "রিসেট",
+		"categories.filter.apply": "ফিল্টার প্রয়োগ করুন",
+		"categories.modal.editTitle": "ক্যাটাগরি সম্পাদনা করুন",
+		"categories.modal.createTitle": "নতুন ক্যাটাগরি তৈরি করুন",
+		"categories.modal.editDescription":
+			"নিচের ক্যাটাগরির তথ্য হালনাগাদ করুন। পরিবর্তনগুলো সঙ্গে সঙ্গে সংরক্ষিত হবে।",
+		"categories.modal.createDescription":
+			"আপনার পণ্য সাজাতে একটি নতুন ক্যাটাগরি যোগ করুন। নিচের তথ্য পূরণ করুন।",
+		"customers.list.title": "গ্রাহক",
+		"customers.list.description":
+			"আপনার গ্রাহক এবং তাদের অ্যাকাউন্ট পরিচালনা করুন",
+		"customers.list.searchPlaceholder":
+			"ইমেইল, মোবাইল বা নাম দিয়ে খুঁজুন...",
+		"customers.list.empty": "কোনো গ্রাহক পাওয়া যায়নি",
+		"customers.list.verified": "ভেরিফাইড",
+		"customers.list.unverified": "আনভেরিফাইড",
+		"customers.list.table.name": "নাম",
+		"customers.list.table.email": "ইমেইল",
+		"customers.list.table.mobile": "মোবাইল",
+		"customers.list.table.emailVerified": "ইমেইল ভেরিফাইড",
+		"customers.list.table.mobileVerified": "মোবাইল ভেরিফাইড",
+		"customers.list.table.status": "স্ট্যাটাস",
+		"customers.list.table.joined": "যোগ দিয়েছেন",
+		"customers.list.actions.label": "অ্যাকশন",
+		"customers.list.actions.activate": "সক্রিয় করুন",
+		"customers.list.actions.deactivate": "নিষ্ক্রিয় করুন",
+		"customers.list.status.active": "সক্রিয়",
+		"customers.list.status.inactive": "নিষ্ক্রিয়",
+		"customers.list.status.activated": "সক্রিয় হয়েছে",
+		"customers.list.status.deactivated": "নিষ্ক্রিয় হয়েছে",
+		"customers.list.status.confirm":
+			'আপনি কি নিশ্চিত যে "{name}"-কে {action} করতে চান?',
+		"customers.list.status.success":
+			"গ্রাহক সফলভাবে {status}",
+		"customers.list.status.failed":
+			"গ্রাহকের স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে",
+		"customers.filter.title": "ফিল্টার",
+		"customers.filter.description":
+			"আপনার গ্রাহক তালিকা পরিশোধিত করতে ফিল্টার প্রয়োগ করুন",
+		"customers.filter.accountStatus": "অ্যাকাউন্ট স্ট্যাটাস",
+		"customers.filter.mobileVerified": "মোবাইল ভেরিফাইড",
+		"customers.filter.notVerified": "ভেরিফাইড নয়",
+		"customers.filter.reset": "রিসেট",
+		"customers.filter.apply": "ফিল্টার প্রয়োগ করুন",
+		"customers.details.title": "গ্রাহক",
+		"customers.details.missingId": "গ্রাহকের আইডি পাওয়া যায়নি।",
+		"customers.details.loadFailed": "গ্রাহক লোড করতে ব্যর্থ হয়েছে।",
+		"customers.details.loading": "লোড হচ্ছে...",
+		"customers.details.loadingInfo": "গ্রাহকের তথ্য লোড হচ্ছে...",
+		"customers.details.noData": "কোনো গ্রাহক তথ্য নেই।",
+		"customers.details.emptyValue": "-",
+		"customers.details.tabs.info": "ব্যবহারকারীর তথ্য",
+		"customers.details.tabs.orders": "অর্ডার",
+		"customers.details.tabs.reviews": "রিভিউ",
+		"customers.details.info.name": "নাম",
+		"customers.details.info.email": "ইমেইল",
+		"customers.details.info.mobile": "মোবাইল",
+		"customers.details.info.joined": "যোগ দিয়েছেন",
+		"customers.details.info.defaultAddress": "ডিফল্ট ঠিকানা",
+		"customers.details.info.noDefaultAddress": "কোনো ডিফল্ট ঠিকানা নেই।",
+		"customers.details.table.date": "তারিখ",
+		"customers.details.orders.table.order": "অর্ডার",
+		"customers.details.orders.table.status": "স্ট্যাটাস",
+		"customers.details.orders.table.payment": "পেমেন্ট",
+		"customers.details.orders.table.total": "মোট",
+		"customers.details.orders.empty":
+			"এই গ্রাহকের জন্য কোনো অর্ডার পাওয়া যায়নি",
+		"customers.details.orderStatus.pending": "পেন্ডিং",
+		"customers.details.orderStatus.confirmed": "কনফার্মড",
+		"customers.details.orderStatus.processing": "প্রসেসিং",
+		"customers.details.orderStatus.shipped": "শিপড",
+		"customers.details.orderStatus.delivered": "ডেলিভারড",
+		"customers.details.orderStatus.cancelled": "বাতিল",
+		"customers.details.orderStatus.returned": "রিটার্নড",
+		"customers.details.paymentStatus.pending": "পেন্ডিং",
+		"customers.details.paymentStatus.paid": "পেইড",
+		"customers.details.paymentStatus.failed": "ফেইলড",
+		"customers.details.paymentStatus.refunded": "রিফান্ডেড",
+		"customers.details.reviews.table.product": "পণ্য",
+		"customers.details.reviews.table.rating": "রেটিং",
+		"customers.details.reviews.table.status": "স্ট্যাটাস",
+		"customers.details.reviews.table.review": "রিভিউ",
+		"customers.details.reviews.status.approved": "অনুমোদিত",
+		"customers.details.reviews.status.pending": "পেন্ডিং",
+		"customers.details.reviews.empty":
+			"এই গ্রাহকের জন্য কোনো রিভিউ পাওয়া যায়নি",
+		"coupons.list.title": "কুপন",
+		"coupons.list.description":
+			"আপনার স্টোরের ডিসকাউন্ট কুপন পরিচালনা করুন",
+		"coupons.list.add": "কুপন যোগ করুন",
+		"coupons.list.searchPlaceholder": "কোড দিয়ে কুপন খুঁজুন...",
+		"coupons.list.loading": "কুপন লোড হচ্ছে...",
+		"coupons.list.error": "কুপন লোড করতে সমস্যা হয়েছে",
+		"coupons.list.empty": "কোনো কুপন পাওয়া যায়নি",
+		"coupons.list.deleteConfirm":
+			'আপনি কি নিশ্চিত যে "{code}" কুপনটি মুছতে চান?',
+		"coupons.list.deleteSuccess": "কুপন সফলভাবে মুছে ফেলা হয়েছে",
+		"coupons.list.deleteFailed": "কুপন মুছতে ব্যর্থ হয়েছে",
+		"coupons.list.table.code": "কোড",
+		"coupons.list.table.discount": "ডিসকাউন্ট",
+		"coupons.list.table.minOrder": "ন্যূনতম অর্ডার",
+		"coupons.list.table.usage": "ব্যবহার",
+		"coupons.list.table.validity": "বৈধ সময়সীমা",
+		"coupons.list.table.status": "স্ট্যাটাস",
+		"coupons.list.table.empty": "-",
+		"coupons.list.status.active": "সক্রিয়",
+		"coupons.list.status.inactive": "নিষ্ক্রিয়",
+		"coupons.list.status.expired": "মেয়াদোত্তীর্ণ",
+		"coupons.list.actions.label": "অ্যাকশন",
+		"coupons.list.actions.edit": "সম্পাদনা",
+		"coupons.list.actions.delete": "মুছুন",
+		"coupons.filter.title": "ফিল্টার",
+		"coupons.filter.description":
+			"আপনার কুপন তালিকা পরিশোধিত করতে ফিল্টার প্রয়োগ করুন",
+		"coupons.filter.status": "স্ট্যাটাস",
+		"coupons.filter.discountType": "ডিসকাউন্টের ধরন",
+		"coupons.filter.type.percentage": "শতকরা",
+		"coupons.filter.type.fixedAmount": "নির্দিষ্ট পরিমাণ",
+		"coupons.filter.reset": "রিসেট",
+		"coupons.filter.apply": "ফিল্টার প্রয়োগ করুন",
+		"coupons.modal.editTitle": "কুপন সম্পাদনা করুন",
+		"coupons.modal.createTitle": "নতুন কুপন তৈরি করুন",
+		"coupons.modal.editDescription":
+			"নিচের কুপনের তথ্য হালনাগাদ করুন।",
+		"coupons.modal.createDescription":
+			"আপনার গ্রাহকদের জন্য একটি নতুন ডিসকাউন্ট কুপন তৈরি করুন।",
+		"dashboard.error": "ড্যাশবোর্ড মেট্রিকস লোড করতে ব্যর্থ হয়েছে।",
+		"dashboard.change.noChange": "কোনো পরিবর্তন নেই",
+		"dashboard.change.fromLastMonth": "গত মাস থেকে {value}%",
+		"dashboard.status.pending": "পেন্ডিং",
+		"dashboard.status.confirmed": "কনফার্মড",
+		"dashboard.status.processing": "প্রসেসিং",
+		"dashboard.status.shipped": "শিপড",
+		"dashboard.status.delivered": "ডেলিভারড",
+		"dashboard.status.cancelled": "বাতিল",
+		"dashboard.status.refunded": "রিফান্ডেড",
+		"dashboard.payment.pending": "পেন্ডিং",
+		"dashboard.payment.paid": "পেইড",
+		"dashboard.payment.failed": "ফেইলড",
+		"dashboard.payment.refunded": "রিফান্ডেড",
+		"dashboard.metrics.totalRevenue": "মোট আয়",
+		"dashboard.metrics.orders": "অর্ডার",
+		"dashboard.metrics.customers": "গ্রাহক",
+		"dashboard.metrics.products": "পণ্য",
+		"dashboard.metrics.outOfStock": "{count} টি স্টক-আউট",
+		"dashboard.recentOrders.title": "সাম্প্রতিক অর্ডার",
+		"dashboard.recentOrders.description":
+			"আপনার স্টোরের সর্বশেষ অর্ডারসমূহ",
+		"dashboard.recentOrders.viewAll": "সব দেখুন",
+		"dashboard.recentOrders.empty": "এখনও কোনো অর্ডার নেই।",
+		"dashboard.lowStock.title": "লো স্টক অ্যালার্ট",
+		"dashboard.lowStock.description":
+			"যেসব পণ্যের স্টক কমে এসেছে",
+		"dashboard.lowStock.variantLine": "{variant} · SKU: {sku}",
+		"dashboard.lowStock.left": "{count} বাকি",
+		"dashboard.lowStock.empty":
+			"সব পণ্যের স্টক ভালো অবস্থায় আছে।",
+		"dashboard.summary.avgOrderValue": "গড় অর্ডার মূল্য",
+		"dashboard.summary.thisMonthRevenue": "এই মাসের আয়",
+		"dashboard.summary.ordersThisMonth": "এই মাসে {count} টি অর্ডার",
+		"dashboard.summary.newCustomersThisMonth":
+			"এই মাসে নতুন গ্রাহক",
 		"passwordField.forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
 		"passwordField.hidePassword": "পাসওয়ার্ড লুকান",
 		"passwordField.showPassword": "পাসওয়ার্ড দেখান",

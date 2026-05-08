@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import { type CouponListItem } from "@/lib/api/coupon";
 import { CouponForm } from "./CouponForm";
 
@@ -32,12 +33,29 @@ export function CouponFormModal({
 			<DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
-						{isEditMode ? "Edit Coupon" : "Create New Coupon"}
+						{isEditMode ? (
+							<T id="coupons.modal.editTitle" defaultMessage="Edit Coupon" />
+						) : (
+							<T
+								id="coupons.modal.createTitle"
+								defaultMessage="Create New Coupon"
+							/>
+						)}
 					</DialogTitle>
 					<DialogDescription>
 						{isEditMode
-							? "Update the coupon details below."
-							: "Create a new discount coupon for your customers."}
+							? (
+								<T
+									id="coupons.modal.editDescription"
+									defaultMessage="Update the coupon details below."
+								/>
+							)
+							: (
+								<T
+									id="coupons.modal.createDescription"
+									defaultMessage="Create a new discount coupon for your customers."
+								/>
+							)}
 					</DialogDescription>
 				</DialogHeader>
 

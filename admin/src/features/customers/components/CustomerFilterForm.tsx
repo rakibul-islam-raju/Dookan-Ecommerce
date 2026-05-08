@@ -1,6 +1,8 @@
 import { RadioField } from "@/components/ui/@form/RadioField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import type { CustomerFilter } from "@/lib/api/customer";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -16,6 +18,7 @@ export const CustomerFilterForm = ({
 	onFilter,
 	onReset,
 }: CustomerFilterFormProps) => {
+	const t = useT();
 	const form = useForm<CustomerFilter>({
 		defaultValues: initialFilter,
 	});
@@ -39,21 +42,33 @@ export const CustomerFilterForm = ({
 				<div className="flex h-[calc(100vh-130px)] w-full flex-col items-start justify-between gap-4 overflow-y-auto">
 					<div className="w-full space-y-6">
 						<RadioField<CustomerFilter>
-							label="Account Status"
+							label={t("customers.filter.accountStatus", "Account Status")}
 							name="is_active"
 							orientation="vertical"
 							options={[
-								{ value: "true", label: "Active" },
-								{ value: "false", label: "Inactive" },
+								{
+									value: "true",
+									label: t("customers.list.status.active", "Active"),
+								},
+								{
+									value: "false",
+									label: t("customers.list.status.inactive", "Inactive"),
+								},
 							]}
 						/>
 						<RadioField<CustomerFilter>
-							label="Mobile Verified"
+							label={t("customers.filter.mobileVerified", "Mobile Verified")}
 							name="is_mobile_verified"
 							orientation="vertical"
 							options={[
-								{ value: "true", label: "Verified" },
-								{ value: "false", label: "Not Verified" },
+								{
+									value: "true",
+									label: t("customers.list.verified", "Verified"),
+								},
+								{
+									value: "false",
+									label: t("customers.filter.notVerified", "Not Verified"),
+								},
 							]}
 						/>
 					</div>
@@ -64,9 +79,14 @@ export const CustomerFilterForm = ({
 							onClick={handleResetFilter}
 							variant="outline"
 						>
-							Reset
+							<T id="customers.filter.reset" defaultMessage="Reset" />
 						</Button>
-						<Button type="submit">Apply Filters</Button>
+						<Button type="submit">
+							<T
+								id="customers.filter.apply"
+								defaultMessage="Apply Filters"
+							/>
+						</Button>
 					</div>
 				</div>
 			</form>

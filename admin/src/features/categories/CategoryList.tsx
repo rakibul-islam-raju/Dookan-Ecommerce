@@ -3,6 +3,9 @@ import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -39,6 +42,8 @@ const initialParams: CategoryFilter = {
 };
 
 export function CategoryList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { params, handleChangeParams, resetParams } = useFilterParams({
 		initialParams,
 	});
@@ -76,15 +81,27 @@ export function CategoryList() {
 	};
 
 	const handleDelete = async (category: CategoryListItem) => {
-		if (!confirm(`Are you sure you want to delete "${category.name}"?`)) {
+		if (
+			!confirm(
+				t(
+					"categories.list.deleteConfirm",
+					'Are you sure you want to delete "{name}"?',
+					{ name: category.name },
+				),
+			)
+		) {
 			return;
 		}
 
 		try {
 			await deleteMutation.mutateAsync(category.id);
-			toast.success("Category deleted successfully");
+			toast.success(
+				t("categories.list.deleteSuccess", "Category deleted successfully"),
+			);
 		} catch (error) {
-			toast.error("Failed to delete category");
+			toast.error(
+				t("categories.list.deleteFailed", "Failed to delete category"),
+			);
 			console.error("Delete error:", error);
 		}
 	};
@@ -176,7 +193,12 @@ export function CategoryList() {
 			nextWithOrder,
 			{
 				onSuccess: () => {
-					toast.success("Category order updated successfully");
+					toast.success(
+						t(
+							"categories.list.reorderSuccess",
+							"Category order updated successfully",
+						),
+					);
 				},
 				onError: () => {
 					setOrderOverride(null);
@@ -204,7 +226,7 @@ export function CategoryList() {
 		},
 		{
 			key: "image",
-			header: "Image",
+			header: t("categories.list.table.image", "Image"),
 			render: (category) =>
 				category.image ? (
 					<img
@@ -214,20 +236,22 @@ export function CategoryList() {
 					/>
 				) : (
 					<div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">
-						N/A
+						{t("categories.list.table.imageEmpty", "N/A")}
 					</div>
 				),
 			className: "w-[60px]",
 		},
 		{
 			key: "name",
-			header: "Category Name",
+			header: t("categories.list.table.name", "Category Name"),
 			render: (category) => (
 				<div>
 					<div className="font-medium">{category.name}</div>
 					{category.parent_name && (
 						<span className="text-xs text-muted-foreground">
-							in {category.parent_name}
+							{t("categories.list.table.inParent", "in {parent}", {
+								parent: category.parent_name,
+							})}
 						</span>
 					)}
 				</div>
@@ -235,32 +259,40 @@ export function CategoryList() {
 		},
 		{
 			key: "slug",
-			header: "Slug",
+			header: t("categories.list.table.slug", "Slug"),
 			render: (category) => (
 				<span className="text-muted-foreground">{category.slug}</span>
 			),
 		},
 		{
 			key: "description",
-			header: "Description",
+			header: t("categories.list.table.description", "Description"),
 			render: (category) => (
 				<span className="text-muted-foreground truncate max-w-xs block">
-					{category.description || "-"}
+					{category.description || t("categories.list.table.empty", "-")}
 				</span>
 			),
 		},
 		{
 			key: "display_order",
-			header: "Order",
-			render: (category) => <span>{category.display_order}</span>,
+			header: t("categories.list.table.order", "Order"),
+			render: (category) => (
+				<span>
+					{category.display_order.toLocaleString(
+						locale === "bn" ? "bn-BD" : "en-IN",
+					)}
+				</span>
+			),
 			className: "text-center",
 		},
 		{
 			key: "is_active",
-			header: "Status",
+			header: t("categories.list.table.status", "Status"),
 			render: (category) => (
 				<Badge variant={getStatusBadgeVariant(category.is_active)}>
-					{category.is_active ? "Active" : "Inactive"}
+					{category.is_active
+						? t("categories.list.status.active", "Active")
+						: t("categories.list.status.inactive", "Inactive")}
 				</Badge>
 			),
 		},
@@ -275,11 +307,13 @@ export function CategoryList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="categories.list.actions.label" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => handleEdit(category)}>
 							<Pencil className="h-4 w-4 mr-2" />
-							Edit
+							<T id="categories.list.actions.edit" defaultMessage="Edit" />
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleDelete(category)}
@@ -287,7 +321,7 @@ export function CategoryList() {
 							disabled={deleteMutation.isPending}
 						>
 							<Trash2 className="h-4 w-4 mr-2" />
-							Delete
+							<T id="categories.list.actions.delete" defaultMessage="Delete" />
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -321,9 +355,14 @@ export function CategoryList() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Categories</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="categories.list.title" defaultMessage="Categories" />
+					</h1>
 					<p className="text-muted-foreground">
-						Manage your product categories
+						<T
+							id="categories.list.description"
+							defaultMessage="Manage your product categories"
+						/>
 					</p>
 				</div>
 				<Button
@@ -334,7 +373,7 @@ export function CategoryList() {
 					}}
 				>
 					<Plus className="h-4 w-4 mr-2" />
-					Add Category
+					<T id="categories.list.add" defaultMessage="Add Category" />
 				</Button>
 			</div>
 
@@ -343,10 +382,21 @@ export function CategoryList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search categories by name or slug..."
+					placeholder={t(
+						"categories.list.searchPlaceholder",
+						"Search categories by name or slug...",
+					)}
 					className="flex-1"
 				/>
-				<FilterDrawer open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+				<FilterDrawer
+					open={isFilterOpen}
+					onOpenChange={setIsFilterOpen}
+					title={t("categories.filter.title", "Filters")}
+					description={t(
+						"categories.filter.description",
+						"Apply filters to refine your category list",
+					)}
+				>
 					<CategoryFilterForm
 						initialFilter={params}
 						onFilter={handleApplyFilters}
@@ -357,8 +407,10 @@ export function CategoryList() {
 
 			{isFilteredView && (
 				<p className="text-sm text-muted-foreground">
-					Drag and drop is available on the default category list. Clear search
-					or filters to reorder categories.
+					<T
+						id="categories.list.reorderHint"
+						defaultMessage="Drag and drop is available on the default category list. Clear search or filters to reorder categories."
+					/>
 				</p>
 			)}
 
@@ -381,10 +433,10 @@ export function CategoryList() {
 				}
 				emptyMessage={
 					isLoading
-						? "Loading categories..."
+						? t("categories.list.loading", "Loading categories...")
 						: error
-							? "Error loading categories"
-							: "No categories found"
+							? t("categories.list.error", "Error loading categories")
+							: t("categories.list.empty", "No categories found")
 				}
 				pagination={{
 					currentPage,

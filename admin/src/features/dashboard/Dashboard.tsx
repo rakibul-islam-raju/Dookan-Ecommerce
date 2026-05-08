@@ -19,61 +19,25 @@ import {
 	AlertTriangle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 
-const STATUS_BADGE_MAP: Record<
-	string,
-	{
-		label: string;
-		variant:
-			| "default"
-			| "secondary"
-			| "destructive"
-			| "success"
-			| "warning"
-			| "info"
-			| "purple"
-			| "cyan";
-	}
-> = {
-	pending: { label: "Pending", variant: "warning" },
-	confirmed: { label: "Confirmed", variant: "info" },
-	processing: { label: "Processing", variant: "purple" },
-	shipped: { label: "Shipped", variant: "cyan" },
-	delivered: { label: "Delivered", variant: "success" },
-	cancelled: { label: "Cancelled", variant: "destructive" },
-	refunded: { label: "Refunded", variant: "secondary" },
-};
-
-const PAYMENT_BADGE_MAP: Record<
-	string,
-	{
-		label: string;
-		variant: "default" | "secondary" | "destructive" | "success" | "warning";
-	}
-> = {
-	pending: { label: "Pending", variant: "warning" },
-	paid: { label: "Paid", variant: "success" },
-	failed: { label: "Failed", variant: "destructive" },
-	refunded: { label: "Refunded", variant: "secondary" },
-};
-
-function formatCurrency(value: string | number) {
-	const num = typeof value === "string" ? parseFloat(value) : value;
-	return `৳${num.toLocaleString("en-BD", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
-
-function formatDate(dateStr: string) {
-	return new Date(dateStr).toLocaleDateString("en-BD", {
-		month: "short",
-		day: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	});
-}
-
-function ChangeIndicator({ value }: { value: number }) {
+function ChangeIndicator({
+	value,
+	formatNumber,
+	t,
+}: {
+	value: number;
+	formatNumber: (value: number) => string;
+	t: ReturnType<typeof useT>;
+}) {
 	if (value === 0)
-		return <span className="text-xs text-muted-foreground">No change</span>;
+		return (
+			<span className="text-xs text-muted-foreground">
+				{t("dashboard.change.noChange", "No change")}
+			</span>
+		);
 	const isPositive = value > 0;
 	return (
 		<span
@@ -84,7 +48,9 @@ function ChangeIndicator({ value }: { value: number }) {
 			) : (
 				<ArrowDown className="h-3 w-3" />
 			)}
-			{Math.abs(value)}% from last month
+			{t("dashboard.change.fromLastMonth", "{value}% from last month", {
+				value: formatNumber(Math.abs(value)),
+			})}
 		</span>
 	);
 }
@@ -105,13 +71,109 @@ function MetricCardSkeleton() {
 }
 
 export function Dashboard() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { data: metrics, isLoading, isError } = useQuery(getDashboardMetrics());
+
+	const formatCurrency = (value: string | number) => {
+		const num = typeof value === "string" ? parseFloat(value) : value;
+		return `৳${num.toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0,
+		})}`;
+	};
+
+	const formatDate = (dateStr: string) =>
+		new Date(dateStr).toLocaleDateString(locale === "bn" ? "bn-BD" : "en-BD", {
+			month: "short",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+
+	const formatNumber = (value: number) =>
+		value.toLocaleString(locale === "bn" ? "bn-BD" : "en-IN");
+
+	const statusBadgeMap: Record<
+		string,
+		{
+			label: string;
+			variant:
+				| "default"
+				| "secondary"
+				| "destructive"
+				| "success"
+				| "warning"
+				| "info"
+				| "purple"
+				| "cyan";
+		}
+	> = {
+		pending: {
+			label: t("dashboard.status.pending", "Pending"),
+			variant: "warning",
+		},
+		confirmed: {
+			label: t("dashboard.status.confirmed", "Confirmed"),
+			variant: "info",
+		},
+		processing: {
+			label: t("dashboard.status.processing", "Processing"),
+			variant: "purple",
+		},
+		shipped: {
+			label: t("dashboard.status.shipped", "Shipped"),
+			variant: "cyan",
+		},
+		delivered: {
+			label: t("dashboard.status.delivered", "Delivered"),
+			variant: "success",
+		},
+		cancelled: {
+			label: t("dashboard.status.cancelled", "Cancelled"),
+			variant: "destructive",
+		},
+		refunded: {
+			label: t("dashboard.status.refunded", "Refunded"),
+			variant: "secondary",
+		},
+	};
+
+	const paymentBadgeMap: Record<
+		string,
+		{
+			label: string;
+			variant:
+				| "default"
+				| "secondary"
+				| "destructive"
+				| "success"
+				| "warning";
+		}
+	> = {
+		pending: {
+			label: t("dashboard.payment.pending", "Pending"),
+			variant: "warning",
+		},
+		paid: { label: t("dashboard.payment.paid", "Paid"), variant: "success" },
+		failed: {
+			label: t("dashboard.payment.failed", "Failed"),
+			variant: "destructive",
+		},
+		refunded: {
+			label: t("dashboard.payment.refunded", "Refunded"),
+			variant: "secondary",
+		},
+	};
 
 	if (isError) {
 		return (
 			<div className="flex items-center justify-center h-64">
 				<p className="text-muted-foreground">
-					Failed to load dashboard metrics.
+					<T
+						id="dashboard.error"
+						defaultMessage="Failed to load dashboard metrics."
+					/>
 				</p>
 			</div>
 		);
@@ -133,7 +195,10 @@ export function Dashboard() {
 						<Card>
 							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 								<CardTitle className="text-sm font-medium">
-									Total Revenue
+									<T
+										id="dashboard.metrics.totalRevenue"
+										defaultMessage="Total Revenue"
+									/>
 								</CardTitle>
 								<DollarSign className="h-4 w-4 text-muted-foreground" />
 							</CardHeader>
@@ -141,42 +206,69 @@ export function Dashboard() {
 								<div className="text-2xl font-bold">
 									{formatCurrency(metrics.revenue.total)}
 								</div>
-								<ChangeIndicator value={metrics.revenue.change_percent} />
+								<ChangeIndicator
+									value={metrics.revenue.change_percent}
+									formatNumber={formatNumber}
+									t={t}
+								/>
 							</CardContent>
 						</Card>
 						<Card>
 							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<CardTitle className="text-sm font-medium">Orders</CardTitle>
+								<CardTitle className="text-sm font-medium">
+									<T id="dashboard.metrics.orders" defaultMessage="Orders" />
+								</CardTitle>
 								<ShoppingCart className="h-4 w-4 text-muted-foreground" />
 							</CardHeader>
 							<CardContent>
-								<div className="text-2xl font-bold">{metrics.orders.total}</div>
-								<ChangeIndicator value={metrics.orders.change_percent} />
+								<div className="text-2xl font-bold">
+									{formatNumber(metrics.orders.total)}
+								</div>
+								<ChangeIndicator
+									value={metrics.orders.change_percent}
+									formatNumber={formatNumber}
+									t={t}
+								/>
 							</CardContent>
 						</Card>
 						<Card>
 							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<CardTitle className="text-sm font-medium">Customers</CardTitle>
+								<CardTitle className="text-sm font-medium">
+									<T
+										id="dashboard.metrics.customers"
+										defaultMessage="Customers"
+									/>
+								</CardTitle>
 								<Users className="h-4 w-4 text-muted-foreground" />
 							</CardHeader>
 							<CardContent>
 								<div className="text-2xl font-bold">
-									{metrics.customers.total}
+									{formatNumber(metrics.customers.total)}
 								</div>
-								<ChangeIndicator value={metrics.customers.change_percent} />
+								<ChangeIndicator
+									value={metrics.customers.change_percent}
+									formatNumber={formatNumber}
+									t={t}
+								/>
 							</CardContent>
 						</Card>
 						<Card>
 							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<CardTitle className="text-sm font-medium">Products</CardTitle>
+								<CardTitle className="text-sm font-medium">
+									<T id="dashboard.metrics.products" defaultMessage="Products" />
+								</CardTitle>
 								<Package className="h-4 w-4 text-muted-foreground" />
 							</CardHeader>
 							<CardContent>
 								<div className="text-2xl font-bold">
-									{metrics.products.total}
+									{formatNumber(metrics.products.total)}
 								</div>
 								<p className="text-xs text-muted-foreground">
-									{metrics.products.out_of_stock} out of stock
+									{t(
+										"dashboard.metrics.outOfStock",
+										"{count} out of stock",
+										{ count: formatNumber(metrics.products.out_of_stock) },
+									)}
 								</p>
 							</CardContent>
 						</Card>
@@ -188,11 +280,13 @@ export function Dashboard() {
 			{metrics && Object.keys(metrics.orders.by_status).length > 0 && (
 				<div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
 					{Object.entries(metrics.orders.by_status).map(([status, count]) => {
-						const badge = STATUS_BADGE_MAP[status];
+						const badge = statusBadgeMap[status];
 						return (
 							<Card key={status} className="py-3">
 								<CardContent className="px-4 py-0 flex flex-col items-center gap-1">
-									<span className="text-lg font-semibold">{count}</span>
+									<span className="text-lg font-semibold">
+										{formatNumber(count)}
+									</span>
 									<Badge
 										variant={badge?.variant ?? "secondary"}
 										className="text-[10px]"
@@ -212,14 +306,24 @@ export function Dashboard() {
 				<Card className="xl:col-span-2">
 					<CardHeader className="flex flex-row items-center justify-between">
 						<div className="grid gap-1">
-							<CardTitle>Recent Orders</CardTitle>
-							<CardDescription>Latest orders from your store</CardDescription>
+							<CardTitle>
+								<T
+									id="dashboard.recentOrders.title"
+									defaultMessage="Recent Orders"
+								/>
+							</CardTitle>
+							<CardDescription>
+								<T
+									id="dashboard.recentOrders.description"
+									defaultMessage="Latest orders from your store"
+								/>
+							</CardDescription>
 						</div>
 						<Link
 							to="/orders"
 							className="text-sm text-primary underline-offset-4 hover:underline"
 						>
-							View all
+							<T id="dashboard.recentOrders.viewAll" defaultMessage="View all" />
 						</Link>
 					</CardHeader>
 					<CardContent>
@@ -238,8 +342,8 @@ export function Dashboard() {
 						) : metrics?.recent_orders.length ? (
 							<div className="space-y-4">
 								{metrics.recent_orders.map((order) => {
-									const statusBadge = STATUS_BADGE_MAP[order.status];
-									const paymentBadge = PAYMENT_BADGE_MAP[order.payment_status];
+									const statusBadge = statusBadgeMap[order.status];
+									const paymentBadge = paymentBadgeMap[order.payment_status];
 									return (
 										<Link
 											key={order.id}
@@ -277,7 +381,12 @@ export function Dashboard() {
 								})}
 							</div>
 						) : (
-							<p className="text-sm text-muted-foreground">No orders yet.</p>
+							<p className="text-sm text-muted-foreground">
+								<T
+									id="dashboard.recentOrders.empty"
+									defaultMessage="No orders yet."
+								/>
+							</p>
 						)}
 					</CardContent>
 				</Card>
@@ -288,10 +397,16 @@ export function Dashboard() {
 						<div className="grid gap-1">
 							<CardTitle className="flex items-center gap-2">
 								<AlertTriangle className="h-4 w-4 text-yellow-500" />
-								Low Stock Alerts
+								<T
+									id="dashboard.lowStock.title"
+									defaultMessage="Low Stock Alerts"
+								/>
 							</CardTitle>
 							<CardDescription>
-								Products running low on inventory
+								<T
+									id="dashboard.lowStock.description"
+									defaultMessage="Products running low on inventory"
+								/>
 							</CardDescription>
 						</div>
 					</CardHeader>
@@ -318,7 +433,10 @@ export function Dashboard() {
 												{variant["product__name"]}
 											</p>
 											<p className="text-xs text-muted-foreground truncate">
-												{variant.name} &middot; SKU: {variant.sku}
+												{t("dashboard.lowStock.variantLine", "{variant} · SKU: {sku}", {
+													variant: variant.name,
+													sku: variant.sku,
+												})}
 											</p>
 										</div>
 										<Badge
@@ -326,14 +444,19 @@ export function Dashboard() {
 												variant.stock_quantity <= 3 ? "destructive" : "warning"
 											}
 										>
-											{variant.stock_quantity} left
+											{t("dashboard.lowStock.left", "{count} left", {
+												count: formatNumber(variant.stock_quantity),
+											})}
 										</Badge>
 									</Link>
 								))}
 							</div>
 						) : (
 							<p className="text-sm text-muted-foreground">
-								All products are well-stocked.
+								<T
+									id="dashboard.lowStock.empty"
+									defaultMessage="All products are well-stocked."
+								/>
 							</p>
 						)}
 					</CardContent>
@@ -346,7 +469,10 @@ export function Dashboard() {
 					<Card>
 						<CardHeader className="pb-2">
 							<CardTitle className="text-sm font-medium">
-								Avg Order Value
+								<T
+									id="dashboard.summary.avgOrderValue"
+									defaultMessage="Avg Order Value"
+								/>
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
@@ -358,7 +484,10 @@ export function Dashboard() {
 					<Card>
 						<CardHeader className="pb-2">
 							<CardTitle className="text-sm font-medium">
-								This Month Revenue
+								<T
+									id="dashboard.summary.thisMonthRevenue"
+									defaultMessage="This Month Revenue"
+								/>
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
@@ -366,21 +495,32 @@ export function Dashboard() {
 								{formatCurrency(metrics.revenue.current_month)}
 							</div>
 							<p className="text-xs text-muted-foreground">
-								{metrics.orders.current_month} orders this month
+								{t(
+									"dashboard.summary.ordersThisMonth",
+									"{count} orders this month",
+									{ count: formatNumber(metrics.orders.current_month) },
+								)}
 							</p>
 						</CardContent>
 					</Card>
 					<Card>
 						<CardHeader className="pb-2">
 							<CardTitle className="text-sm font-medium">
-								New Customers This Month
+								<T
+									id="dashboard.summary.newCustomersThisMonth"
+									defaultMessage="New Customers This Month"
+								/>
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="text-2xl font-bold">
-								{metrics.customers.new_this_month}
+								{formatNumber(metrics.customers.new_this_month)}
 							</div>
-							<ChangeIndicator value={metrics.customers.change_percent} />
+							<ChangeIndicator
+								value={metrics.customers.change_percent}
+								formatNumber={formatNumber}
+								t={t}
+							/>
 						</CardContent>
 					</Card>
 				</div>

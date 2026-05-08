@@ -3,6 +3,9 @@ import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -32,6 +35,8 @@ const initialParams: CouponFilter = {
 };
 
 export function CouponList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { params, handleChangeParams, resetParams } = useFilterParams({
 		initialParams,
 	});
@@ -60,68 +65,101 @@ export function CouponList() {
 	};
 
 	const handleDelete = async (coupon: CouponListItem) => {
-		if (!confirm(`Are you sure you want to delete coupon "${coupon.code}"?`)) {
+		if (
+			!confirm(
+				t(
+					"coupons.list.deleteConfirm",
+					'Are you sure you want to delete coupon "{code}"?',
+					{ code: coupon.code },
+				),
+			)
+		) {
 			return;
 		}
 		try {
 			await deleteMutation.mutateAsync(coupon.id);
-			toast.success("Coupon deleted successfully");
+			toast.success(
+				t("coupons.list.deleteSuccess", "Coupon deleted successfully"),
+			);
 		} catch {
-			toast.error("Failed to delete coupon");
+			toast.error(t("coupons.list.deleteFailed", "Failed to delete coupon"));
 		}
 	};
 
 	const formatDate = (dateStr: string) => {
-		return new Date(dateStr).toLocaleDateString("en-US", {
+		return new Date(dateStr).toLocaleDateString(
+			locale === "bn" ? "bn-BD" : "en-US",
+			{
 			month: "short",
 			day: "numeric",
 			year: "numeric",
-		});
+			},
+		);
 	};
 
 	const columns: Column<CouponListItem>[] = [
 		{
 			key: "code",
-			header: "Code",
+			header: t("coupons.list.table.code", "Code"),
 			render: (coupon) => (
 				<span className="font-mono font-semibold">{coupon.code}</span>
 			),
 		},
 		{
 			key: "discount",
-			header: "Discount",
+			header: t("coupons.list.table.discount", "Discount"),
 			render: (coupon) => (
 				<span>
 					{coupon.discount_type === "percentage"
-						? `${coupon.discount_value}%`
-						: `৳${coupon.discount_value}`}
+						? `${Number(coupon.discount_value).toLocaleString(
+							locale === "bn" ? "bn-BD" : "en-IN",
+						)}%`
+						: `৳${Number(coupon.discount_value).toLocaleString(
+							locale === "bn" ? "bn-BD" : "en-IN",
+							{
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2,
+							},
+						)}`}
 				</span>
 			),
 		},
 		{
 			key: "min_order",
-			header: "Min Order",
+			header: t("coupons.list.table.minOrder", "Min Order"),
 			render: (coupon) => (
 				<span className="text-muted-foreground">
 					{parseFloat(coupon.min_order_amount) > 0
-						? `৳${coupon.min_order_amount}`
-						: "-"}
+						? `৳${Number(coupon.min_order_amount).toLocaleString(
+							locale === "bn" ? "bn-BD" : "en-IN",
+							{
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2,
+							},
+						)}`
+						: t("coupons.list.table.empty", "-")}
 				</span>
 			),
 		},
 		{
 			key: "usage",
-			header: "Usage",
+			header: t("coupons.list.table.usage", "Usage"),
 			render: (coupon) => (
 				<span className="text-muted-foreground">
-					{coupon.used_count}
-					{coupon.max_uses ? ` / ${coupon.max_uses}` : ""}
+					{coupon.used_count.toLocaleString(
+						locale === "bn" ? "bn-BD" : "en-IN",
+					)}
+					{coupon.max_uses
+						? ` / ${coupon.max_uses.toLocaleString(
+							locale === "bn" ? "bn-BD" : "en-IN",
+						)}`
+						: ""}
 				</span>
 			),
 		},
 		{
 			key: "validity",
-			header: "Valid Period",
+			header: t("coupons.list.table.validity", "Valid Period"),
 			render: (coupon) => (
 				<span className="text-muted-foreground text-xs">
 					{formatDate(coupon.valid_from)} - {formatDate(coupon.valid_until)}
@@ -130,14 +168,18 @@ export function CouponList() {
 		},
 		{
 			key: "status",
-			header: "Status",
+			header: t("coupons.list.table.status", "Status"),
 			render: (coupon) => (
 				<div className="flex gap-1">
 					<Badge variant={coupon.is_active ? "default" : "secondary"}>
-						{coupon.is_active ? "Active" : "Inactive"}
+						{coupon.is_active
+							? t("coupons.list.status.active", "Active")
+							: t("coupons.list.status.inactive", "Inactive")}
 					</Badge>
 					{coupon.is_active && !coupon.is_valid && (
-						<Badge variant="destructive">Expired</Badge>
+						<Badge variant="destructive">
+							<T id="coupons.list.status.expired" defaultMessage="Expired" />
+						</Badge>
 					)}
 				</div>
 			),
@@ -153,11 +195,13 @@ export function CouponList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="coupons.list.actions.label" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => handleEdit(coupon)}>
 							<Pencil className="h-4 w-4 mr-2" />
-							Edit
+							<T id="coupons.list.actions.edit" defaultMessage="Edit" />
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleDelete(coupon)}
@@ -165,7 +209,7 @@ export function CouponList() {
 							disabled={deleteMutation.isPending}
 						>
 							<Trash2 className="h-4 w-4 mr-2" />
-							Delete
+							<T id="coupons.list.actions.delete" defaultMessage="Delete" />
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -195,9 +239,14 @@ export function CouponList() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Coupons</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<T id="coupons.list.title" defaultMessage="Coupons" />
+					</h1>
 					<p className="text-muted-foreground">
-						Manage discount coupons for your store
+						<T
+							id="coupons.list.description"
+							defaultMessage="Manage discount coupons for your store"
+						/>
 					</p>
 				</div>
 				<Button
@@ -208,7 +257,7 @@ export function CouponList() {
 					}}
 				>
 					<Plus className="h-4 w-4 mr-2" />
-					Add Coupon
+					<T id="coupons.list.add" defaultMessage="Add Coupon" />
 				</Button>
 			</div>
 
@@ -217,10 +266,21 @@ export function CouponList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search coupons by code..."
+					placeholder={t(
+						"coupons.list.searchPlaceholder",
+						"Search coupons by code...",
+					)}
 					className="flex-1"
 				/>
-				<FilterDrawer open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+				<FilterDrawer
+					open={isFilterOpen}
+					onOpenChange={setIsFilterOpen}
+					title={t("coupons.filter.title", "Filters")}
+					description={t(
+						"coupons.filter.description",
+						"Apply filters to refine your coupon list",
+					)}
+				>
 					<CouponFilterForm
 						initialFilter={params}
 						onFilter={handleApplyFilters}
@@ -235,10 +295,10 @@ export function CouponList() {
 				columns={columns}
 				emptyMessage={
 					isLoading
-						? "Loading coupons..."
+						? t("coupons.list.loading", "Loading coupons...")
 						: error
-							? "Error loading coupons"
-							: "No coupons found"
+							? t("coupons.list.error", "Error loading coupons")
+							: t("coupons.list.empty", "No coupons found")
 				}
 				pagination={{
 					currentPage,

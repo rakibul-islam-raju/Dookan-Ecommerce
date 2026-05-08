@@ -6,6 +6,8 @@ import { BaseForm } from "@/components/ui/@form/BaseForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { useZodForm } from "@/hooks/useZodForm";
 import { getMaterials, useCreateBatch } from "@/lib/api/inventory";
 import { getProducts } from "@/lib/api/product";
@@ -16,15 +18,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { z } from "zod";
-
-const schema = z.object({
-	code: z.string().min(1, "Batch code is required").max(50),
-	status: z.enum(["draft", "in_progress"]).default("draft"),
-	started_at: z.string().optional(),
-	notes: z.string().optional().or(z.literal("")),
-});
-
-type FormData = z.infer<typeof schema>;
 
 interface MaterialRow {
 	material: string;
@@ -42,10 +35,21 @@ function MaterialRows({
 	rows,
 	onChange,
 	materialOptions,
+	texts,
 }: {
 	rows: MaterialRow[];
 	onChange: (rows: MaterialRow[]) => void;
 	materialOptions: { value: string; label: string }[];
+	texts: {
+		description: string;
+		selectMaterial: string;
+		planned: string;
+		actual: string;
+		material: string;
+		plannedQty: string;
+		actualQty: string;
+		addMaterial: string;
+	};
 }) {
 	const addRow = () =>
 		onChange([...rows, { material: "", planned_quantity: "", actual_quantity: "" }]);
@@ -60,9 +64,7 @@ function MaterialRows({
 
 	return (
 		<div className="space-y-3">
-			<p className="text-xs text-muted-foreground">
-				Add each raw material consumed in this batch. Planned quantity is optional.
-			</p>
+			<p className="text-xs text-muted-foreground">{texts.description}</p>
 			{rows.map((row, i) => (
 				<div key={i} className="flex items-end gap-2">
 					<div className="flex-1">
@@ -71,7 +73,7 @@ function MaterialRows({
 							onChange={(e) => updateRow(i, "material", e.target.value)}
 							className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 						>
-							<option value="">Select material...</option>
+							<option value="">{texts.selectMaterial}</option>
 							{materialOptions.map((m) => (
 								<option key={m.value} value={m.value}>
 									{m.label}
@@ -82,7 +84,7 @@ function MaterialRows({
 					<div className="w-28">
 						<input
 							type="number"
-							placeholder="Planned"
+							placeholder={texts.planned}
 							value={row.planned_quantity}
 							onChange={(e) => updateRow(i, "planned_quantity", e.target.value)}
 							className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -91,7 +93,7 @@ function MaterialRows({
 					<div className="w-28">
 						<input
 							type="number"
-							placeholder="Actual *"
+							placeholder={texts.actual}
 							value={row.actual_quantity}
 							onChange={(e) => updateRow(i, "actual_quantity", e.target.value)}
 							className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -110,15 +112,15 @@ function MaterialRows({
 			))}
 			{rows.length > 0 && (
 				<div className="flex gap-2 text-xs text-muted-foreground pl-1">
-					<span className="flex-1">Material</span>
-					<span className="w-28 text-center">Planned qty</span>
-					<span className="w-28 text-center">Actual qty</span>
+					<span className="flex-1">{texts.material}</span>
+					<span className="w-28 text-center">{texts.plannedQty}</span>
+					<span className="w-28 text-center">{texts.actualQty}</span>
 					<span className="w-9" />
 				</div>
 			)}
 			<Button type="button" variant="outline" size="sm" onClick={addRow}>
 				<Plus className="h-4 w-4 mr-1" />
-				Add Material
+				{texts.addMaterial}
 			</Button>
 		</div>
 	);
@@ -128,10 +130,19 @@ function OutputRows({
 	rows,
 	onChange,
 	productOptions,
+	texts,
 }: {
 	rows: OutputRow[];
 	onChange: (rows: OutputRow[]) => void;
 	productOptions: { value: string; label: string }[];
+	texts: {
+		description: string;
+		addOutput: string;
+		selectProduct: string;
+		selectVariant: string;
+		selectProductFirst: string;
+		quantity: string;
+	};
 }) {
 	const addRow = () => onChange([...rows, { product_id: "", variant: "", quantity: "" }]);
 	const removeRow = (i: number) => onChange(rows.filter((_, idx) => idx !== i));
@@ -144,21 +155,20 @@ function OutputRows({
 
 	return (
 		<div className="space-y-3">
-			<p className="text-xs text-muted-foreground">
-				Add the products you expect to produce in this batch.
-			</p>
+			<p className="text-xs text-muted-foreground">{texts.description}</p>
 			{rows.map((row, i) => (
 				<OutputRowItem
 					key={i}
 					row={row}
 					productOptions={productOptions}
+					texts={texts}
 					onUpdate={(field, value) => updateRow(i, field, value)}
 					onRemove={() => removeRow(i)}
 				/>
 			))}
 			<Button type="button" variant="outline" size="sm" onClick={addRow}>
 				<Plus className="h-4 w-4 mr-1" />
-				Add Output
+				{texts.addOutput}
 			</Button>
 		</div>
 	);
@@ -167,11 +177,18 @@ function OutputRows({
 function OutputRowItem({
 	row,
 	productOptions,
+	texts,
 	onUpdate,
 	onRemove,
 }: {
 	row: OutputRow;
 	productOptions: { value: string; label: string }[];
+	texts: {
+		selectProduct: string;
+		selectVariant: string;
+		selectProductFirst: string;
+		quantity: string;
+	};
 	onUpdate: (field: keyof OutputRow, value: string) => void;
 	onRemove: () => void;
 }) {
@@ -193,7 +210,7 @@ function OutputRowItem({
 					onChange={(e) => onUpdate("product_id", e.target.value)}
 					className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 				>
-					<option value="">Select product...</option>
+					<option value="">{texts.selectProduct}</option>
 					{productOptions.map((p) => (
 						<option key={p.value} value={p.value}>
 							{p.label}
@@ -209,7 +226,7 @@ function OutputRowItem({
 					className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
 				>
 					<option value="">
-						{row.product_id ? "Select variant..." : "Select product first"}
+						{row.product_id ? texts.selectVariant : texts.selectProductFirst}
 					</option>
 					{variantOptions.map((v) => (
 						<option key={v.value} value={v.value}>
@@ -221,7 +238,7 @@ function OutputRowItem({
 			<div className="w-24">
 				<input
 					type="number"
-					placeholder="Qty *"
+					placeholder={texts.quantity}
 					value={row.quantity}
 					onChange={(e) => onUpdate("quantity", e.target.value)}
 					className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -240,14 +257,19 @@ function OutputRowItem({
 	);
 }
 
-const statusOptions = [
-	{ value: "draft", label: "Draft — save for later" },
-	{ value: "in_progress", label: "In Progress — production started" },
-];
-
 export function CreateBatch() {
+	const t = useT();
 	const navigate = useNavigate();
 	const { mutate: createBatch, isPending } = useCreateBatch();
+
+	const schema = z.object({
+		code: z.string().min(1, t("inventory.createBatch.validation.code", "Batch code is required")).max(50),
+		status: z.enum(["draft", "in_progress"]).default("draft"),
+		started_at: z.string().optional(),
+		notes: z.string().optional().or(z.literal("")),
+	});
+
+	type FormData = z.infer<typeof schema>;
 
 	const [materialRows, setMaterialRows] = useState<MaterialRow[]>([
 		{ material: "", planned_quantity: "", actual_quantity: "" },
@@ -267,6 +289,20 @@ export function CreateBatch() {
 		value: p.id,
 		label: p.name,
 	}));
+
+	const statusOptions = [
+		{
+			value: "draft",
+			label: t("inventory.createBatch.status.draft", "Draft — save for later"),
+		},
+		{
+			value: "in_progress",
+			label: t(
+				"inventory.createBatch.status.inProgress",
+				"In Progress — production started",
+			),
+		},
+	];
 
 	const form = useZodForm(schema, {
 		defaultValues: {
@@ -294,11 +330,11 @@ export function CreateBatch() {
 			}));
 
 		if (materials.length === 0) {
-			toast.error("Add at least one material");
+			toast.error(t("inventory.createBatch.validation.materials", "Add at least one material"));
 			return;
 		}
 		if (outputs.length === 0) {
-			toast.error("Add at least one output");
+			toast.error(t("inventory.createBatch.validation.outputs", "Add at least one output"));
 			return;
 		}
 
@@ -313,10 +349,10 @@ export function CreateBatch() {
 			},
 			{
 				onSuccess: (batch) => {
-					toast.success("Batch created");
+					toast.success(t("inventory.createBatch.createSuccess", "Batch created"));
 					navigate(`/inventory/batches/${batch.id}`);
 				},
-				onError: () => toast.error("Failed to create batch"),
+				onError: () => toast.error(t("inventory.createBatch.createFailed", "Failed to create batch")),
 			},
 		);
 	};
@@ -325,14 +361,18 @@ export function CreateBatch() {
 		<div className="space-y-6">
 			<Button variant="ghost" size="sm" onClick={() => navigate("/inventory/batches")}>
 				<ArrowLeft className="h-4 w-4 mr-1" />
-				Production Batches
+				<T id="inventory.batches.title" defaultMessage="Production Batches" />
 			</Button>
 
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">New Production Batch</h1>
+				<h1 className="text-3xl font-bold tracking-tight">
+					<T id="inventory.createBatch.title" defaultMessage="New Production Batch" />
+				</h1>
 				<p className="text-muted-foreground mt-1">
-					Define the materials consumed and products you expect to produce. You can
-					save as a draft and update quantities before completing.
+					<T
+						id="inventory.createBatch.description"
+						defaultMessage="Define the materials consumed and products you expect to produce. You can save as a draft and update quantities before completing."
+					/>
 				</p>
 			</div>
 
@@ -342,35 +382,52 @@ export function CreateBatch() {
 					<div className="lg:col-span-2 space-y-6">
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-base">Batch Info</CardTitle>
+								<CardTitle className="text-base">
+									<T id="inventory.createBatch.info.title" defaultMessage="Batch Info" />
+								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="grid grid-cols-2 gap-4">
 									<TextField
 										name="code"
-										label="Batch Code"
-										placeholder="e.g., BATCH-2026-001"
+										label={t("inventory.createBatch.info.code", "Batch Code")}
+										placeholder={t(
+											"inventory.createBatch.info.codePlaceholder",
+											"e.g., BATCH-2026-001",
+										)}
 										required
-										helpText="Unique identifier for this production run."
+										helpText={t(
+											"inventory.createBatch.info.codeHelp",
+											"Unique identifier for this production run.",
+										)}
 									/>
 									<SelectField
 										name="status"
-										label="Status"
+										label={t("inventory.createBatch.info.status", "Status")}
 										options={statusOptions}
-										helpText="Draft to save for later; In Progress if production has started."
+										helpText={t(
+											"inventory.createBatch.info.statusHelp",
+											"Draft to save for later; In Progress if production has started.",
+										)}
 									/>
 								</div>
 								<DateField
 									name="started_at"
-									label="Started On"
-									helpText="Optional — when production started."
+									label={t("inventory.createBatch.info.startedOn", "Started On")}
+									helpText={t(
+										"inventory.createBatch.info.startedOnHelp",
+										"Optional; when production started.",
+									)}
 								/>
 								<TextareaField
 									name="notes"
-									label="Notes"
-									placeholder="Any notes about this batch..."
+									label={t("inventory.createBatch.info.notes", "Notes")}
+									placeholder={t(
+										"inventory.createBatch.info.notesPlaceholder",
+										"Any notes about this batch...",
+									)}
 									rows={2}
-									helpText="Optional."
+									helpText={t("inventory.createBatch.info.optional", "Optional")}
 								/>
 							</CardContent>
 						</Card>
@@ -378,9 +435,14 @@ export function CreateBatch() {
 						<Card>
 							<CardHeader>
 								<div className="flex items-center justify-between">
-									<CardTitle className="text-base">Materials</CardTitle>
+									<CardTitle className="text-base">
+										<T id="inventory.createBatch.materials.title" defaultMessage="Materials" />
+									</CardTitle>
 									<span className="text-xs text-muted-foreground">
-										Planned qty is optional
+										<T
+											id="inventory.createBatch.materials.optionalNote"
+											defaultMessage="Planned qty is optional"
+										/>
 									</span>
 								</div>
 							</CardHeader>
@@ -389,19 +451,69 @@ export function CreateBatch() {
 									rows={materialRows}
 									onChange={setMaterialRows}
 									materialOptions={materialOptions}
+									texts={{
+										description: t(
+											"inventory.createBatch.materials.description",
+											"Add each raw material consumed in this batch. Planned quantity is optional.",
+										),
+										selectMaterial: t(
+											"inventory.createBatch.materials.selectMaterial",
+											"Select material...",
+										),
+										planned: t("inventory.createBatch.materials.planned", "Planned"),
+										actual: t("inventory.createBatch.materials.actual", "Actual *"),
+										material: t("inventory.createBatch.materials.header.material", "Material"),
+										plannedQty: t(
+											"inventory.createBatch.materials.header.plannedQty",
+											"Planned qty",
+										),
+										actualQty: t(
+											"inventory.createBatch.materials.header.actualQty",
+											"Actual qty",
+										),
+										addMaterial: t(
+											"inventory.createBatch.materials.add",
+											"Add Material",
+										),
+									}}
 								/>
 							</CardContent>
 						</Card>
 
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-base">Finished Outputs</CardTitle>
+								<CardTitle className="text-base">
+									<T
+										id="inventory.createBatch.outputs.title"
+										defaultMessage="Finished Outputs"
+									/>
+								</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<OutputRows
 									rows={outputRows}
 									onChange={setOutputRows}
 									productOptions={productOptions}
+									texts={{
+										description: t(
+											"inventory.createBatch.outputs.description",
+											"Add the products you expect to produce in this batch.",
+										),
+										addOutput: t("inventory.createBatch.outputs.add", "Add Output"),
+										selectProduct: t(
+											"inventory.createBatch.outputs.selectProduct",
+											"Select product...",
+										),
+										selectVariant: t(
+											"inventory.createBatch.outputs.selectVariant",
+											"Select variant...",
+										),
+										selectProductFirst: t(
+											"inventory.createBatch.outputs.selectProductFirst",
+											"Select product first",
+										),
+										quantity: t("inventory.createBatch.outputs.quantity", "Qty *"),
+									}}
 								/>
 							</CardContent>
 						</Card>
@@ -416,7 +528,10 @@ export function CreateBatch() {
 									isLoading={isPending}
 									className="w-full"
 								>
-									Create Batch
+									<T
+										id="inventory.createBatch.submit"
+										defaultMessage="Create Batch"
+									/>
 								</LoadingButton>
 								<Button
 									type="button"
@@ -424,7 +539,7 @@ export function CreateBatch() {
 									className="w-full"
 									onClick={() => navigate("/inventory/batches")}
 								>
-									Cancel
+									<T id="common.cancel" defaultMessage="Cancel" />
 								</Button>
 							</CardContent>
 						</Card>

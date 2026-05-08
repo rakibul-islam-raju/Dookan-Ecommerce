@@ -5,6 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { T } from "@/i18n/translate";
 import { ReceiptForm } from "./ReceiptForm";
 
 interface ReceiptFormModalProps {
@@ -17,10 +18,17 @@ export function ReceiptFormModal({ open, onOpenChange }: ReceiptFormModalProps) 
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
-					<DialogTitle>Record Goods Receipt</DialogTitle>
+					<DialogTitle>
+						<T
+							id="inventory.receiptModal.title"
+							defaultMessage="Record Goods Receipt"
+						/>
+					</DialogTitle>
 					<DialogDescription>
-						Record stock received from a supplier. The variant's available stock and
-						cost price will be updated automatically when you save.
+						<T
+							id="inventory.receiptModal.description"
+							defaultMessage="Record stock received from a supplier. The variant's available stock and cost price will be updated automatically when you save."
+						/>
 					</DialogDescription>
 				</DialogHeader>
 				<ReceiptForm handleClose={() => onOpenChange(false)} />

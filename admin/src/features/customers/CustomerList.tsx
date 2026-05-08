@@ -3,6 +3,9 @@ import { FilterDrawer } from "@/components/common/FilterDrawer";
 import { SearchBar } from "@/components/common/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -33,6 +36,8 @@ const initialParams: CustomerFilter = {
 };
 
 export function CustomerList() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { params, handleChangeParams, resetParams } = useFilterParams({
 		initialParams,
 	});
@@ -54,10 +59,21 @@ export function CustomerList() {
 
 	const handleToggleStatus = async (customer: CustomerListItem) => {
 		const newStatus = !customer.is_active;
-		const action = newStatus ? "activate" : "deactivate";
 		if (
 			!confirm(
-				`Are you sure you want to ${action} "${customer.first_name} ${customer.last_name}"?`
+				t(
+					"customers.list.status.confirm",
+					'Are you sure you want to {action} "{name}"?',
+					{
+						action: t(
+							newStatus
+								? "customers.list.actions.activate"
+								: "customers.list.actions.deactivate",
+							newStatus ? "activate" : "deactivate",
+						).toLowerCase(),
+						name: `${customer.first_name} ${customer.last_name}`,
+					},
+				)
 			)
 		) {
 			return;
@@ -69,16 +85,32 @@ export function CustomerList() {
 				is_active: newStatus,
 			});
 			toast.success(
-				`Customer ${newStatus ? "activated" : "deactivated"} successfully`
+				t(
+					"customers.list.status.success",
+					'Customer {status} successfully',
+					{
+						status: t(
+							newStatus
+								? "customers.list.status.activated"
+								: "customers.list.status.deactivated",
+							newStatus ? "activated" : "deactivated",
+						),
+					},
+				)
 			);
 		} catch {
-			toast.error("Failed to update customer status");
+			toast.error(
+				t(
+					"customers.list.status.failed",
+					"Failed to update customer status",
+				),
+			);
 		}
 	};
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
-		return new Intl.DateTimeFormat("en-US", {
+		return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-US", {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
@@ -88,7 +120,7 @@ export function CustomerList() {
 	const columns: Column<CustomerListItem>[] = [
 		{
 			key: "name",
-			header: "Name",
+			header: t("customers.list.table.name", "Name"),
 			render: (customer) => (
 				<Link
 					to={`/customers/${customer.id}`}
@@ -100,14 +132,14 @@ export function CustomerList() {
 		},
 		{
 			key: "email",
-			header: "Email",
+			header: t("customers.list.table.email", "Email"),
 			render: (customer) => (
 				<span className="text-muted-foreground">{customer.email}</span>
 			),
 		},
 		{
 			key: "mobile_number",
-			header: "Mobile",
+			header: t("customers.list.table.mobile", "Mobile"),
 			render: (customer) => (
 				<span className="text-muted-foreground">
 					{customer.mobile_number}
@@ -116,46 +148,52 @@ export function CustomerList() {
 		},
 		{
 			key: "is_email_verified",
-			header: "Email Verified",
+			header: t("customers.list.table.emailVerified", "Email Verified"),
 			render: (customer) => (
 				<Badge
 					variant={
 						customer.is_email_verified ? "success" : "secondary"
 					}
 				>
-					{customer.is_email_verified ? "Verified" : "Unverified"}
+					{customer.is_email_verified
+						? t("customers.list.verified", "Verified")
+						: t("customers.list.unverified", "Unverified")}
 				</Badge>
 			),
 			className: "text-center",
 		},
 		{
 			key: "is_mobile_verified",
-			header: "Mobile Verified",
+			header: t("customers.list.table.mobileVerified", "Mobile Verified"),
 			render: (customer) => (
 				<Badge
 					variant={
 						customer.is_mobile_verified ? "success" : "secondary"
 					}
 				>
-					{customer.is_mobile_verified ? "Verified" : "Unverified"}
+					{customer.is_mobile_verified
+						? t("customers.list.verified", "Verified")
+						: t("customers.list.unverified", "Unverified")}
 				</Badge>
 			),
 			className: "text-center",
 		},
 		{
 			key: "is_active",
-			header: "Status",
+			header: t("customers.list.table.status", "Status"),
 			render: (customer) => (
 				<Badge
 					variant={customer.is_active ? "default" : "destructive"}
 				>
-					{customer.is_active ? "Active" : "Inactive"}
+					{customer.is_active
+						? t("customers.list.status.active", "Active")
+						: t("customers.list.status.inactive", "Inactive")}
 				</Badge>
 			),
 		},
 		{
 			key: "created_at",
-			header: "Joined",
+			header: t("customers.list.table.joined", "Joined"),
 			render: (customer) => (
 				<span className="text-muted-foreground">
 					{formatDate(customer.created_at)}
@@ -177,7 +215,9 @@ export function CustomerList() {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							<T id="customers.list.actions.label" defaultMessage="Actions" />
+						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							onClick={() => handleToggleStatus(customer)}
@@ -186,12 +226,18 @@ export function CustomerList() {
 							{customer.is_active ? (
 								<>
 									<ShieldOff className="h-4 w-4 mr-2" />
-									Deactivate
+									<T
+										id="customers.list.actions.deactivate"
+										defaultMessage="Deactivate"
+									/>
 								</>
 							) : (
 								<>
 									<ShieldCheck className="h-4 w-4 mr-2" />
-									Activate
+									<T
+										id="customers.list.actions.activate"
+										defaultMessage="Activate"
+									/>
 								</>
 							)}
 						</DropdownMenuItem>
@@ -227,10 +273,13 @@ export function CustomerList() {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
-						Customers
+						<T id="customers.list.title" defaultMessage="Customers" />
 					</h1>
 					<p className="text-muted-foreground">
-						Manage your customers and their accounts
+						<T
+							id="customers.list.description"
+							defaultMessage="Manage your customers and their accounts"
+						/>
 					</p>
 				</div>
 			</div>
@@ -240,12 +289,20 @@ export function CustomerList() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search by email, mobile, or name..."
+					placeholder={t(
+						"customers.list.searchPlaceholder",
+						"Search by email, mobile, or name...",
+					)}
 					className="flex-1"
 				/>
 				<FilterDrawer
 					open={isFilterOpen}
 					onOpenChange={setIsFilterOpen}
+					title={t("customers.filter.title", "Filters")}
+					description={t(
+						"customers.filter.description",
+						"Apply filters to refine your customer list",
+					)}
 				>
 					<CustomerFilterForm
 						initialFilter={params}
@@ -260,7 +317,7 @@ export function CustomerList() {
 				data={customers}
 				columns={columns}
 				isLoading={isFetching}
-				emptyMessage="No customers found"
+				emptyMessage={t("customers.list.empty", "No customers found")}
 				pagination={{
 					currentPage,
 					totalPages,

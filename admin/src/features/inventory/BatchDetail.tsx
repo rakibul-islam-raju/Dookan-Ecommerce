@@ -10,6 +10,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useLocale } from "@/i18n/locale-context";
+import { T } from "@/i18n/translate";
+import { useT } from "@/i18n/use-t";
 import { getBatch, useCompleteBatch, useUpdateBatch } from "@/lib/api/inventory";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
@@ -18,35 +21,29 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import type { IProductionBatch } from "@/lib/api/inventory";
 
-function BatchStatusBadge({ status }: { status: IProductionBatch["status"] }) {
+function BatchStatusBadge({
+	status,
+	labels,
+}: {
+	status: IProductionBatch["status"];
+	labels: Record<IProductionBatch["status"], string>;
+}) {
 	const map: Record<
 		IProductionBatch["status"],
 		{ label: string; variant: "default" | "secondary" | "destructive" | "outline" }
 	> = {
-		draft: { label: "Draft", variant: "secondary" },
-		in_progress: { label: "In Progress", variant: "outline" },
-		completed: { label: "Completed", variant: "default" },
-		cancelled: { label: "Cancelled", variant: "destructive" },
+		draft: { label: labels.draft, variant: "secondary" },
+		in_progress: { label: labels.in_progress, variant: "outline" },
+		completed: { label: labels.completed, variant: "default" },
+		cancelled: { label: labels.cancelled, variant: "destructive" },
 	};
 	const { label, variant } = map[status];
 	return <Badge variant={variant}>{label}</Badge>;
 }
 
-const formatAmount = (amount: string | null) =>
-	amount ? `৳${parseFloat(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "—";
-
-const formatDate = (date: string | null) =>
-	date
-		? new Date(date).toLocaleDateString("en-GB", {
-				day: "2-digit",
-				month: "short",
-				year: "numeric",
-				hour: "2-digit",
-				minute: "2-digit",
-			})
-		: "—";
-
 export function BatchDetail() {
+	const t = useT();
+	const { locale } = useLocale();
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 	const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
@@ -59,9 +56,14 @@ export function BatchDetail() {
 	const handleComplete = async () => {
 		try {
 			await completeMutation.mutateAsync(id!);
-			toast.success("Batch completed. Stock and costs updated.");
+			toast.success(t("inventory.batchDetail.completeSuccess", "Batch completed. Stock and costs updated."));
 		} catch {
-			toast.error("Failed to complete batch. Check materials and outputs.");
+			toast.error(
+				t(
+					"inventory.batchDetail.completeFailed",
+					"Failed to complete batch. Check materials and outputs.",
+				),
+			);
 		} finally {
 			setCompleteDialogOpen(false);
 		}
@@ -70,9 +72,9 @@ export function BatchDetail() {
 	const handleCancel = async () => {
 		try {
 			await updateMutation.mutateAsync({ id: id!, data: { status: "cancelled" } });
-			toast.success("Batch cancelled");
+			toast.success(t("inventory.batchDetail.cancelSuccess", "Batch cancelled"));
 		} catch {
-			toast.error("Failed to cancel batch");
+			toast.error(t("inventory.batchDetail.cancelFailed", "Failed to cancel batch"));
 		} finally {
 			setCancelDialogOpen(false);
 		}
@@ -81,10 +83,35 @@ export function BatchDetail() {
 	const handleMarkInProgress = async () => {
 		try {
 			await updateMutation.mutateAsync({ id: id!, data: { status: "in_progress" } });
-			toast.success("Batch marked as In Progress");
+			toast.success(t("inventory.batchDetail.inProgressSuccess", "Batch marked as In Progress"));
 		} catch {
-			toast.error("Failed to update batch status");
+			toast.error(t("inventory.batchDetail.inProgressFailed", "Failed to update batch status"));
 		}
+	};
+
+	const formatAmount = (amount: string | null) =>
+		amount
+			? `৳${parseFloat(amount).toLocaleString(locale === "bn" ? "bn-BD" : "en-IN", {
+				minimumFractionDigits: 2,
+			})}`
+			: t("inventory.common.empty", "—");
+
+	const formatDate = (date: string | null) =>
+		date
+			? new Date(date).toLocaleDateString(locale === "bn" ? "bn-BD" : "en-GB", {
+				day: "2-digit",
+				month: "short",
+				year: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+			})
+			: t("inventory.common.empty", "—");
+
+	const statusLabels: Record<IProductionBatch["status"], string> = {
+		draft: t("inventory.batchStatus.draft", "Draft"),
+		in_progress: t("inventory.batchStatus.inProgress", "In Progress"),
+		completed: t("inventory.batchStatus.completed", "Completed"),
+		cancelled: t("inventory.batchStatus.cancelled", "Cancelled"),
 	};
 
 	if (isLoading) {
@@ -97,7 +124,11 @@ export function BatchDetail() {
 	}
 
 	if (!batch) {
-		return <div className="text-center py-12 text-muted-foreground">Batch not found.</div>;
+		return (
+			<div className="text-center py-12 text-muted-foreground">
+				<T id="inventory.batchDetail.notFound" defaultMessage="Batch not found." />
+			</div>
+		);
 	}
 
 	const isEditable = batch.status === "draft" || batch.status === "in_progress";
@@ -109,7 +140,7 @@ export function BatchDetail() {
 			{/* Breadcrumb */}
 			<Button variant="ghost" size="sm" onClick={() => navigate("/inventory/batches")}>
 				<ArrowLeft className="h-4 w-4 mr-1" />
-				Production Batches
+				<T id="inventory.batches.title" defaultMessage="Production Batches" />
 			</Button>
 
 			{/* Header */}
@@ -118,7 +149,7 @@ export function BatchDetail() {
 					<h1 className="text-3xl font-bold tracking-tight font-mono">
 						{batch.code}
 					</h1>
-					<BatchStatusBadge status={batch.status} />
+					<BatchStatusBadge status={batch.status} labels={statusLabels} />
 				</div>
 
 				{isEditable && (
@@ -130,7 +161,10 @@ export function BatchDetail() {
 								onClick={handleMarkInProgress}
 								disabled={updateMutation.isPending}
 							>
-								Mark In Progress
+								<T
+									id="inventory.batchDetail.markInProgress"
+									defaultMessage="Mark In Progress"
+								/>
 							</Button>
 						)}
 						{canComplete && (
@@ -140,7 +174,10 @@ export function BatchDetail() {
 								disabled={completeMutation.isPending}
 							>
 								<CheckCircle className="h-4 w-4 mr-1" />
-								Complete Batch
+								<T
+									id="inventory.batchDetail.complete"
+									defaultMessage="Complete Batch"
+								/>
 							</Button>
 						)}
 						<Button
@@ -150,7 +187,7 @@ export function BatchDetail() {
 							onClick={() => setCancelDialogOpen(true)}
 						>
 							<XCircle className="h-4 w-4 mr-1" />
-							Cancel
+							<T id="common.cancel" defaultMessage="Cancel" />
 						</Button>
 					</div>
 				)}
@@ -163,25 +200,46 @@ export function BatchDetail() {
 					{/* Materials */}
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-base">Materials Consumed</CardTitle>
+							<CardTitle className="text-base">
+								<T
+									id="inventory.batchDetail.materials.title"
+									defaultMessage="Materials Consumed"
+								/>
+							</CardTitle>
 							<p className="text-sm text-muted-foreground">
-								Raw materials used in this production run.
+								<T
+									id="inventory.batchDetail.materials.description"
+									defaultMessage="Raw materials used in this production run."
+								/>
 							</p>
 						</CardHeader>
 						<CardContent>
 							{batch.materials.length === 0 ? (
 								<p className="text-sm text-muted-foreground py-4 text-center">
-									No materials added.
+									<T
+										id="inventory.batchDetail.materials.empty"
+										defaultMessage="No materials added."
+									/>
 								</p>
 							) : (
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Material</TableHead>
-											<TableHead className="text-right">Planned</TableHead>
-											<TableHead className="text-right">Actual</TableHead>
-											<TableHead className="text-right">Unit Cost</TableHead>
-											<TableHead className="text-right">Total Cost</TableHead>
+											<TableHead>
+												<T id="inventory.batchDetail.materials.table.material" defaultMessage="Material" />
+											</TableHead>
+											<TableHead className="text-right">
+												<T id="inventory.batchDetail.materials.table.planned" defaultMessage="Planned" />
+											</TableHead>
+											<TableHead className="text-right">
+												<T id="inventory.batchDetail.materials.table.actual" defaultMessage="Actual" />
+											</TableHead>
+											<TableHead className="text-right">
+												<T id="inventory.batchDetail.materials.table.unitCost" defaultMessage="Unit Cost" />
+											</TableHead>
+											<TableHead className="text-right">
+												<T id="inventory.batchDetail.materials.table.totalCost" defaultMessage="Total Cost" />
+											</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -189,13 +247,23 @@ export function BatchDetail() {
 											<TableRow key={m.id}>
 												<TableCell className="font-medium">{m.material_name}</TableCell>
 												<TableCell className="text-right tabular-nums text-muted-foreground">
-													{m.planned_quantity ?? "—"}
+													{m.planned_quantity ?? t("inventory.common.empty", "—")}
 												</TableCell>
 												<TableCell className="text-right tabular-nums">
-													{m.actual_quantity}
+													{Number(m.actual_quantity).toLocaleString(
+														locale === "bn" ? "bn-BD" : "en-IN",
+													)}
 												</TableCell>
 												<TableCell className="text-right tabular-nums">
-													{m.actual_unit_cost ? `৳${parseFloat(m.actual_unit_cost).toFixed(2)}` : "—"}
+													{m.actual_unit_cost
+														? `৳${parseFloat(m.actual_unit_cost).toLocaleString(
+															locale === "bn" ? "bn-BD" : "en-IN",
+															{
+																minimumFractionDigits: 2,
+																maximumFractionDigits: 2,
+															},
+														)}`
+														: t("inventory.common.empty", "—")}
 												</TableCell>
 												<TableCell className="text-right tabular-nums font-medium">
 													{formatAmount(m.total_cost)}
@@ -211,25 +279,46 @@ export function BatchDetail() {
 					{/* Outputs */}
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-base">Finished Outputs</CardTitle>
+							<CardTitle className="text-base">
+								<T
+									id="inventory.batchDetail.outputs.title"
+									defaultMessage="Finished Outputs"
+								/>
+							</CardTitle>
 							<p className="text-sm text-muted-foreground">
-								Products produced in this batch.
+								<T
+									id="inventory.batchDetail.outputs.description"
+									defaultMessage="Products produced in this batch."
+								/>
 							</p>
 						</CardHeader>
 						<CardContent>
 							{batch.outputs.length === 0 ? (
 								<p className="text-sm text-muted-foreground py-4 text-center">
-									No outputs added.
+									<T
+										id="inventory.batchDetail.outputs.empty"
+										defaultMessage="No outputs added."
+									/>
 								</p>
 							) : (
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Product</TableHead>
-											<TableHead>Variant</TableHead>
-											<TableHead className="text-right">Quantity</TableHead>
-											<TableHead className="text-right">Unit Cost</TableHead>
-											<TableHead className="text-right">Total Cost</TableHead>
+											<TableHead>
+												<T id="inventory.batchDetail.outputs.table.product" defaultMessage="Product" />
+											</TableHead>
+											<TableHead>
+												<T id="inventory.batchDetail.outputs.table.variant" defaultMessage="Variant" />
+											</TableHead>
+											<TableHead className="text-right">
+												<T id="inventory.batchDetail.outputs.table.quantity" defaultMessage="Quantity" />
+											</TableHead>
+											<TableHead className="text-right">
+												<T id="inventory.batchDetail.outputs.table.unitCost" defaultMessage="Unit Cost" />
+											</TableHead>
+											<TableHead className="text-right">
+												<T id="inventory.batchDetail.outputs.table.totalCost" defaultMessage="Total Cost" />
+											</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -237,9 +326,21 @@ export function BatchDetail() {
 											<TableRow key={o.id}>
 												<TableCell className="font-medium">{o.product_name}</TableCell>
 												<TableCell className="text-muted-foreground">{o.variant_name}</TableCell>
-												<TableCell className="text-right tabular-nums">{o.quantity}</TableCell>
 												<TableCell className="text-right tabular-nums">
-													{o.unit_cost ? `৳${parseFloat(o.unit_cost).toFixed(2)}` : "—"}
+													{Number(o.quantity).toLocaleString(
+														locale === "bn" ? "bn-BD" : "en-IN",
+													)}
+												</TableCell>
+												<TableCell className="text-right tabular-nums">
+													{o.unit_cost
+														? `৳${parseFloat(o.unit_cost).toLocaleString(
+															locale === "bn" ? "bn-BD" : "en-IN",
+															{
+																minimumFractionDigits: 2,
+																maximumFractionDigits: 2,
+															},
+														)}`
+														: t("inventory.common.empty", "—")}
 												</TableCell>
 												<TableCell className="text-right tabular-nums font-medium">
 													{formatAmount(o.total_cost)}
@@ -256,17 +357,29 @@ export function BatchDetail() {
 					{batch.costing && (
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-base">Batch Costing</CardTitle>
+								<CardTitle className="text-base">
+									<T id="inventory.batchDetail.costing.title" defaultMessage="Batch Costing" />
+								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-2 text-sm">
 								<div className="flex justify-between">
-									<span className="text-muted-foreground">Total Material Cost</span>
+									<span className="text-muted-foreground">
+										<T
+											id="inventory.batchDetail.costing.totalMaterialCost"
+											defaultMessage="Total Material Cost"
+										/>
+									</span>
 									<span className="font-medium tabular-nums">
 										{formatAmount(batch.costing.total_material_cost)}
 									</span>
 								</div>
 								<div className="flex justify-between border-t pt-2">
-									<span className="font-semibold">Total Output Cost</span>
+									<span className="font-semibold">
+										<T
+											id="inventory.batchDetail.costing.totalOutputCost"
+											defaultMessage="Total Output Cost"
+										/>
+									</span>
 									<span className="font-semibold tabular-nums">
 										{formatAmount(batch.costing.total_output_cost)}
 									</span>
@@ -280,24 +393,34 @@ export function BatchDetail() {
 				<div className="space-y-4">
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-base">Batch Details</CardTitle>
+							<CardTitle className="text-base">
+								<T id="inventory.batchDetail.info.title" defaultMessage="Batch Details" />
+							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3 text-sm">
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">Status</span>
-								<BatchStatusBadge status={batch.status} />
+								<span className="text-muted-foreground">
+									<T id="inventory.batchDetail.info.status" defaultMessage="Status" />
+								</span>
+								<BatchStatusBadge status={batch.status} labels={statusLabels} />
 							</div>
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">Started</span>
+								<span className="text-muted-foreground">
+									<T id="inventory.batchDetail.info.started" defaultMessage="Started" />
+								</span>
 								<span>{formatDate(batch.started_at)}</span>
 							</div>
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">Completed</span>
+								<span className="text-muted-foreground">
+									<T id="inventory.batchDetail.info.completed" defaultMessage="Completed" />
+								</span>
 								<span>{formatDate(batch.completed_at)}</span>
 							</div>
 							{batch.notes && (
 								<div className="pt-2 border-t">
-									<p className="text-muted-foreground mb-1">Notes</p>
+									<p className="text-muted-foreground mb-1">
+										<T id="inventory.batchDetail.info.notes" defaultMessage="Notes" />
+									</p>
 									<p>{batch.notes}</p>
 								</div>
 							)}
@@ -309,10 +432,13 @@ export function BatchDetail() {
 			{/* Complete confirmation */}
 			<AppConfirmDialog
 				open={completeDialogOpen}
-				title="Complete Production Batch"
-				description="Completing this batch will reduce raw material stock by the amounts listed, add the produced quantity to each variant's stock, and update variant cost prices. This cannot be undone."
-				confirmButtonText="Confirm & Complete"
-				cancelButtonText="Cancel"
+				title={t("inventory.batchDetail.completeDialog.title", "Complete Production Batch")}
+				description={t(
+					"inventory.batchDetail.completeDialog.description",
+					"Completing this batch will reduce raw material stock by the amounts listed, add the produced quantity to each variant's stock, and update variant cost prices. This cannot be undone.",
+				)}
+				confirmButtonText={t("inventory.batchDetail.completeDialog.confirm", "Confirm & Complete")}
+				cancelButtonText={t("common.cancel", "Cancel")}
 				confirmButtonVariant="default"
 				onConfirm={handleComplete}
 				onCancel={() => setCompleteDialogOpen(false)}
@@ -321,10 +447,14 @@ export function BatchDetail() {
 			{/* Cancel confirmation */}
 			<AppConfirmDialog
 				open={cancelDialogOpen}
-				title="Cancel Batch"
-				description={`Are you sure you want to cancel batch "${batch.code}"? This cannot be undone.`}
-				confirmButtonText="Cancel Batch"
-				cancelButtonText="Keep Batch"
+				title={t("inventory.batchDetail.cancelDialog.title", "Cancel Batch")}
+				description={t(
+					"inventory.batchDetail.cancelDialog.description",
+					'Are you sure you want to cancel batch "{code}"? This cannot be undone.',
+					{ code: batch.code },
+				)}
+				confirmButtonText={t("inventory.batchDetail.cancelDialog.confirm", "Cancel Batch")}
+				cancelButtonText={t("inventory.batchDetail.cancelDialog.keep", "Keep Batch")}
 				confirmButtonVariant="destructive"
 				onConfirm={handleCancel}
 				onCancel={() => setCancelDialogOpen(false)}
