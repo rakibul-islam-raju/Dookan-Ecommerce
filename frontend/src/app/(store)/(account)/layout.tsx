@@ -1,11 +1,11 @@
 "use client";
 
+import { Link, usePathname } from "@/i18n/navigation";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { cn } from "@/lib/utils";
 import { Heart, Home, MapPin, Package, User } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const sidebarItems = [
 	{
@@ -33,16 +33,24 @@ const sidebarItems = [
 		href: "/addresses",
 		icon: MapPin,
 	},
-];
+] as const;
 
 export default function AccountLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	const t = useTranslations("accountNav");
 	const pathname = usePathname();
 
 	const user = useAuthStore((state) => state.user);
+	const titleMap = {
+		Home: t("home"),
+		Profile: t("profile"),
+		Orders: t("orders"),
+		Wishlist: t("wishlist"),
+		Addresses: t("addresses"),
+	} satisfies Record<(typeof sidebarItems)[number]["title"], string>;
 
 	return (
 		<div className="container py-4 md:py-8 pb-24 md:pb-12">
@@ -79,7 +87,7 @@ export default function AccountLayout({
 									)}
 								>
 									<item.icon className="size-4" />
-									{item.title}
+									{titleMap[item.title]}
 								</Link>
 							);
 						})}
@@ -112,7 +120,9 @@ export default function AccountLayout({
 								)}
 							>
 								<item.icon className="size-5" />
-								<span className="text-[10px] font-medium">{item.title}</span>
+								<span className="text-[10px] font-medium">
+									{titleMap[item.title]}
+								</span>
 							</Link>
 						);
 					})}

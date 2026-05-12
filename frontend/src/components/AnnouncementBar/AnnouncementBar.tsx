@@ -3,12 +3,14 @@
 import { useAnnouncements } from "@/lib/hooks/useStore";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Megaphone, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 const DISMISS_KEY = "dookan_announcement_dismissed";
 const ROTATE_MS = 4500;
 
 export function AnnouncementBar() {
+	const t = useTranslations("header");
 	const { data: announcements } = useAnnouncements();
 	const [dismissed, setDismissed] = useState(
 		() => typeof window !== "undefined" && !!sessionStorage.getItem(DISMISS_KEY)
@@ -115,7 +117,7 @@ export function AnnouncementBar() {
 				{count > 1 && (
 					<button
 						onClick={prev}
-						aria-label="Previous announcement"
+						aria-label={t("previousAnnouncement")}
 						className="absolute left-3 flex size-7 items-center justify-center rounded-[8px] text-background/65 transition-all duration-200 hover:bg-background/10 hover:text-background"
 					>
 						<ChevronLeft className="size-4" />
@@ -134,7 +136,7 @@ export function AnnouncementBar() {
 					</span>
 					{current.description && (
 						<span className="hidden rounded-[8px] bg-background px-2 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-foreground sm:inline-flex">
-							New
+							{t("newBadge")}
 						</span>
 					)}
 					<span className="truncate font-semibold tracking-normal">
@@ -153,7 +155,7 @@ export function AnnouncementBar() {
 				{count > 1 && (
 					<button
 						onClick={next}
-						aria-label="Next announcement"
+						aria-label={t("nextAnnouncement")}
 						className="absolute right-10 flex size-7 items-center justify-center rounded-[8px] text-background/65 transition-all duration-200 hover:bg-background/10 hover:text-background"
 					>
 						<ChevronRight className="size-4" />
@@ -178,7 +180,7 @@ export function AnnouncementBar() {
 
 				<button
 					onClick={handleDismiss}
-					aria-label="Dismiss"
+					aria-label={t("dismissAnnouncement")}
 					className="absolute right-2 flex size-7 items-center justify-center rounded-[8px] text-background/55 transition-all duration-200 hover:bg-background/10 hover:text-background"
 				>
 					<X className="size-3.5" />

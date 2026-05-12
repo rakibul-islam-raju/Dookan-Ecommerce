@@ -11,8 +11,9 @@ import {
 	type ResendVerificationRequest,
 	type VerifyEmailRequest,
 } from "@/lib/api/auth";
+import { useRouter } from "@/i18n/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 /**
@@ -85,11 +86,12 @@ export function useLogout() {
  */
 export function useVerifyEmail() {
 	const router = useRouter();
+	const t = useTranslations("auth");
 
 	return useMutation({
 		mutationFn: (data: VerifyEmailRequest) => authApi.verifyEmail(data),
 		onSuccess: () => {
-			toast.success("Email verified successfully! Please login.");
+			toast.success(t("emailVerifiedSuccess"));
 			router.push("/login");
 		},
 	});
@@ -99,11 +101,13 @@ export function useVerifyEmail() {
  * Hook to resend verification OTP
  */
 export function useResendVerification() {
+	const t = useTranslations("auth");
+
 	return useMutation({
 		mutationFn: (data: ResendVerificationRequest) =>
 			authApi.resendVerification(data),
 		onSuccess: () => {
-			toast.success("Verification code sent to your email.");
+			toast.success(t("verificationSent"));
 		},
 	});
 }

@@ -1,10 +1,11 @@
 "use client";
 
 import type { ICategory, ICategoryChild } from "@/@types/Category";
+import { Link } from "@/i18n/navigation";
 import { useCategories } from "@/lib/hooks/useCategories";
 import { ChevronDown, LayoutGrid, Loader2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { Button } from "../ui/button";
 import {
@@ -56,6 +57,7 @@ const ChildCategoryImage = ({ child }: { child: ICategoryChild }) => (
 );
 
 export const CategoryDropdownMenu = () => {
+	const t = useTranslations("header");
 	const { data: categoriesData, isLoading } = useCategories();
 
 	const topLevelCategories = useMemo(
@@ -71,13 +73,13 @@ export const CategoryDropdownMenu = () => {
 					className="gap-2 font-medium text-muted-foreground hover:text-primary hover:bg-transparent px-2"
 				>
 					<LayoutGrid className="size-4" />
-					<span>Categories</span>
+					<span>{t("categories")}</span>
 					<ChevronDown className="size-4 opacity-50" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-60 p-2" align="start">
 				<DropdownMenuLabel className="text-xs font-normal text-muted-foreground uppercase tracking-wider mb-2">
-					Browse by Category
+					{t("browseByCategory")}
 				</DropdownMenuLabel>
 				{isLoading ? (
 					<div className="flex items-center justify-center py-8">
@@ -97,7 +99,9 @@ export const CategoryDropdownMenu = () => {
 													{category.name}
 												</span>
 												<span className="text-[11px] text-muted-foreground mt-0.5">
-													{children.length} subcategories
+													{t("subcategories", {
+														count: children.length,
+													})}
 												</span>
 											</div>
 										</DropdownMenuSubTrigger>
@@ -111,7 +115,7 @@ export const CategoryDropdownMenu = () => {
 														<LayoutGrid className="size-3 text-primary" />
 													</div>
 													<span className="text-sm font-medium">
-														All {category.name}
+														{t("allProducts")} {category.name}
 													</span>
 												</Link>
 											</DropdownMenuItem>
@@ -154,13 +158,13 @@ export const CategoryDropdownMenu = () => {
 								href="/shop"
 								className="w-full text-center font-medium text-primary justify-center"
 							>
-								View All Products
+								{t("viewAllProducts")}
 							</Link>
 						</DropdownMenuItem>
 					</>
 				) : (
 					<p className="text-sm text-muted-foreground text-center py-4">
-						No categories available
+						{t("noCategories")}
 					</p>
 				)}
 			</DropdownMenuContent>

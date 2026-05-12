@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "@/i18n/navigation";
 import { useOrder } from "@/lib/hooks/useOrders";
 import { cn } from "@/lib/utils";
 import {
@@ -12,7 +13,6 @@ import {
 	Loader2,
 	MapPin,
 } from "lucide-react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 
 // Helper function to get image URL

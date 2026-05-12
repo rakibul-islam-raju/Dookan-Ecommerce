@@ -1,6 +1,8 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { useSiteConfigContext } from "@/lib/providers/site-config-provider";
+import { useTranslations } from "next-intl";
 import {
 	Facebook,
 	Instagram,
@@ -9,12 +11,12 @@ import {
 	Phone,
 	Youtube,
 } from "lucide-react";
-import Link from "next/link";
 import { AppLogo } from "../AppLogo";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
 export const Footer = () => {
+	const t = useTranslations("footer");
 	const { config } = useSiteConfigContext();
 
 	return (
@@ -24,16 +26,16 @@ export const Footer = () => {
 				<div className="mb-16 grid gap-8 border-b border-border pb-12 lg:grid-cols-3 lg:gap-12">
 					<div className="lg:col-span-2">
 						<h3 className="text-2xl font-bold text-foreground">
-							Join our newsletter
+							{t("newsletterTitle")}
 						</h3>
 						<p className="mt-2 text-muted-foreground">
-							We&apos;ll send you a nice letter once per week. No spam.
+							{t("newsletterDescription")}
 						</p>
 					</div>
 					<div className="flex flex-col justify-end gap-2">
-						<Input placeholder="Enter your email" className="" />
+						<Input placeholder={t("emailPlaceholder")} className="" />
 						<Button size={"lg"} className="">
-							Subscribe
+							{t("subscribe")}
 						</Button>
 					</div>
 				</div>
@@ -46,7 +48,7 @@ export const Footer = () => {
 						</div>
 						<p className="text-sm leading-relaxed">
 							{config?.tagline ||
-								"Premium organic products sourced directly from nature. Quality you can trust, delivered to your doorstep."}
+								t("defaultTagline")}
 						</p>
 						<div className="flex gap-4">
 							{config?.facebook && (
@@ -83,14 +85,16 @@ export const Footer = () => {
 					</div>
 
 					<div>
-						<h4 className="mb-4 text-lg font-semibold text-foreground">Shop</h4>
+						<h4 className="mb-4 text-lg font-semibold text-foreground">
+							{t("shopTitle")}
+						</h4>
 						<ul className="space-y-3 text-sm">
 							<li>
 								<Link
 									href="/shop"
 									className="hover:text-primary transition-colors"
 								>
-									All Products
+									{t("allProducts")}
 								</Link>
 							</li>
 							<li>
@@ -98,7 +102,7 @@ export const Footer = () => {
 									href="/new-arrivals"
 									className="hover:text-primary transition-colors"
 								>
-									New Arrivals
+									{t("newArrivals")}
 								</Link>
 							</li>
 							<li>
@@ -106,7 +110,7 @@ export const Footer = () => {
 									href="/featured"
 									className="hover:text-primary transition-colors"
 								>
-									Featured
+									{t("featured")}
 								</Link>
 							</li>
 							<li>
@@ -114,7 +118,7 @@ export const Footer = () => {
 									href="/deals"
 									className="hover:text-primary transition-colors"
 								>
-									Deals & Discounts
+									{t("deals")}
 								</Link>
 							</li>
 						</ul>
@@ -122,7 +126,7 @@ export const Footer = () => {
 
 					<div>
 						<h4 className="mb-4 text-lg font-semibold text-foreground">
-							Support
+							{t("supportTitle")}
 						</h4>
 						<ul className="space-y-3 text-sm">
 							<li>
@@ -130,7 +134,7 @@ export const Footer = () => {
 									href="/contact"
 									className="hover:text-primary transition-colors"
 								>
-									Contact Us
+									{t("contactUs")}
 								</Link>
 							</li>
 							<li>
@@ -138,7 +142,7 @@ export const Footer = () => {
 									href="/faq"
 									className="hover:text-primary transition-colors"
 								>
-									FAQs
+									{t("faqs")}
 								</Link>
 							</li>
 							<li>
@@ -146,7 +150,7 @@ export const Footer = () => {
 									href="/shipping"
 									className="hover:text-primary transition-colors"
 								>
-									Shipping & Returns
+									{t("shippingReturns")}
 								</Link>
 							</li>
 							<li>
@@ -154,7 +158,7 @@ export const Footer = () => {
 									href="/privacy"
 									className="hover:text-primary transition-colors"
 								>
-									Privacy Policy
+									{t("privacyPolicy")}
 								</Link>
 							</li>
 						</ul>
@@ -162,7 +166,7 @@ export const Footer = () => {
 
 					<div>
 						<h4 className="mb-4 text-lg font-semibold text-foreground">
-							Contact
+							{t("contactTitle")}
 						</h4>
 						<ul className="space-y-3 text-sm">
 							{config?.address && (
@@ -200,8 +204,8 @@ export const Footer = () => {
 				{/* Bottom Section: Copyright */}
 				<div className="mt-16 border-t border-border pt-8 text-center text-sm">
 					<p>
-						&copy; {new Date().getFullYear()} {config?.name || "Dookan"}. All
-						rights reserved.
+						&copy; {new Date().getFullYear()} {config?.name || "Dookan"}.{" "}
+						{t("copyright")}
 					</p>
 				</div>
 			</div>

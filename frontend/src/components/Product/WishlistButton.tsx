@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import {
 	useToggleWishlist,
@@ -8,7 +9,7 @@ import {
 } from "@/lib/hooks/useWishlist";
 import { cn } from "@/lib/utils";
 import { Heart } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface WishlistButtonProps {
 	productId: string;
@@ -21,6 +22,7 @@ export function WishlistButton({
 	variant = "icon",
 	className,
 }: WishlistButtonProps) {
+	const t = useTranslations("common");
 	const user = useAuthStore((state) => state.user);
 	const router = useRouter();
 	const { data: wishlistIds } = useWishlistProductIds();
@@ -46,7 +48,9 @@ export function WishlistButton({
 				size="lg"
 				variant="outline"
 				className={cn("h-12 w-12 p-0", className)}
-				aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+				aria-label={
+					isWishlisted ? `${t("remove")} ${t("wishlist")}` : `Add to ${t("wishlist")}`
+				}
 				onClick={handleToggle}
 				disabled={toggleWishlist.isPending}
 			>
@@ -71,7 +75,7 @@ export function WishlistButton({
 			)}
 			onClick={handleToggle}
 			disabled={toggleWishlist.isPending}
-			title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+			title={isWishlisted ? `${t("remove")} ${t("wishlist")}` : `Add to ${t("wishlist")}`}
 		>
 			<Heart
 				className={cn(

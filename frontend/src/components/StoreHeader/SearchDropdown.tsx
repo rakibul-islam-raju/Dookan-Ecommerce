@@ -1,9 +1,10 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { useProductSearch } from "@/lib/hooks/useProducts";
 import { Loader2, Search, ShoppingBag } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 interface SearchDropdownProps {
@@ -19,6 +20,7 @@ export function SearchDropdown({
 	onClose,
 	onNavigate,
 }: SearchDropdownProps) {
+	const t = useTranslations("common");
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	// Fetch search results with max 10 items and fresh data
@@ -118,7 +120,7 @@ export function SearchDropdown({
 							className="flex items-center justify-center gap-2 w-full py-2 text-sm text-primary hover:bg-muted rounded-md transition-colors"
 						>
 							<Search className="size-4" />
-							View all results for &quot;{searchQuery}&quot;
+							{t("search")} all results for &quot;{searchQuery}&quot;
 						</Link>
 					</div>
 				</>

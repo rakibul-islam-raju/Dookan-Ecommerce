@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { useCreateReview } from "@/lib/hooks/useReviews";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { StarRating } from "./StarRating";

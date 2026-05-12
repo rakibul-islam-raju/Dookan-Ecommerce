@@ -1,6 +1,7 @@
 "use client";
 
 import type { IConsumerProductDetail, IProductVariant } from "@/@types/Product";
+import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -18,7 +19,6 @@ import {
 	ShoppingCart,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { WishlistButton } from "@/components/Product/WishlistButton";
 import { ProductReviews } from "./ProductReviews";

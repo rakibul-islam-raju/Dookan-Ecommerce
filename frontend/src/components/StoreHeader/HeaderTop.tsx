@@ -16,10 +16,11 @@ export const HeaderTop = () => {
 					<p>{store.tagline}</p>
 				</div>
 
-				{/* email */}
-				<div className="flex items-center gap-2">
-					<Mail className="size-4" />
-					<p>{store.email}</p>
+				<div className="flex items-center gap-4">
+					<div className="flex items-center gap-2">
+						<Mail className="size-4" />
+						<p>{store.email}</p>
+					</div>
 				</div>
 			</div>
 		</div>

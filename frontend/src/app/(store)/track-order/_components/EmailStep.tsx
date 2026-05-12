@@ -5,6 +5,7 @@ import { TextField } from "@/components/ui/@form/TextField";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useRequestGuestOrderOTP } from "@/lib/hooks/useOrders";
+import { useTranslations } from "next-intl";
 import { z } from "zod";
 
 const schema = z.object({
@@ -18,6 +19,7 @@ interface EmailStepProps {
 }
 
 export function EmailStep({ onSuccess }: EmailStepProps) {
+	const t = useTranslations("trackOrder");
 	const requestOTP = useRequestGuestOrderOTP();
 
 	const form = useZodForm(schema, {
@@ -36,7 +38,7 @@ export function EmailStep({ onSuccess }: EmailStepProps) {
 			<div className="space-y-4">
 				<TextField<EmailFormValues>
 					name="email"
-					label="Email Address"
+					label={t("emailAddress")}
 					placeholder="you@example.com"
 					type="email"
 				/>
@@ -45,7 +47,7 @@ export function EmailStep({ onSuccess }: EmailStepProps) {
 					className="w-full"
 					isLoading={requestOTP.isPending}
 				>
-					Send OTP
+					{t("sendOtp")}
 				</LoadingButton>
 			</div>
 		</BaseForm>

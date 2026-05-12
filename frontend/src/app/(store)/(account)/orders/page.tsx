@@ -12,6 +12,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useMyOrders } from "@/lib/hooks/useOrders";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import {
 	CheckCircle2,
@@ -21,7 +22,6 @@ import {
 	Truck,
 	XCircle,
 } from "lucide-react";
-import Link from "next/link";
 
 const getStatusColor = (status: IOrderStatus) => {
 	switch (status) {

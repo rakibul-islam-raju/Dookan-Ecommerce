@@ -2,8 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { AppLogo, MiniLogo } from "../AppLogo";
 import { Input } from "../ui/input";
 import { AccountButton } from "./AccountButton";
@@ -11,11 +12,12 @@ import { BottomNav } from "./BottomNav";
 import { CartDrawerProvider } from "./CartDrawerProvider";
 import { CategoryDrawer } from "./CategoryDrawer";
 import { CategoryDropdownMenu } from "./CategoryDropdownMenu";
-import { HeaderTop } from "./HeaderTop";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 import { SearchDropdown } from "./SearchDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export const Header = () => {
+	const t = useTranslations("header");
 	const router = useRouter();
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [showDropdown, setShowDropdown] = useState(false);
@@ -76,7 +78,7 @@ export const Header = () => {
 						<form onSubmit={handleSearchSubmit} className="relative w-full">
 							<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
 							<Input
-								placeholder="Search products..."
+								placeholder={t("searchPlaceholder")}
 								value={searchText}
 								onChange={(e) => handleSearchChange(e.target.value)}
 								className="pl-10 bg-muted/50 focus-visible:bg-background transition-colors"
@@ -105,7 +107,7 @@ export const Header = () => {
 						<button
 							className="lg:hidden p-2 hover:bg-muted rounded-full transition-colors"
 							onClick={() => setIsSearchOpen(!isSearchOpen)}
-							aria-label="Toggle search"
+							aria-label={t("toggleSearch")}
 						>
 							{isSearchOpen ? (
 								<X className="size-5" />
@@ -116,6 +118,13 @@ export const Header = () => {
 
 						{/* Cart */}
 						<CartDrawerProvider />
+
+						{/* Locale Switcher */}
+						<LocaleSwitcher />
+
+						<div className="hidden sm:block md:hidden">
+							<LocaleSwitcher />
+						</div>
 
 						{/* Account */}
 						<div className="">
@@ -137,7 +146,7 @@ export const Header = () => {
 						<form onSubmit={handleSearchSubmit} className="relative w-full">
 							<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
 							<Input
-								placeholder="Search products..."
+								placeholder={t("searchPlaceholder")}
 								value={searchText}
 								onChange={(e) => handleSearchChange(e.target.value)}
 								className="pl-10 w-full"

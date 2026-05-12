@@ -1,10 +1,10 @@
 import { IConsumerProductListItem } from "@/@types/Product";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Eye } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { WishlistButton } from "./WishlistButton";
 
 interface ProductItemProps {

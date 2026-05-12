@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -25,7 +26,7 @@ import {
 	ShoppingCart,
 	Trash2,
 } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 export interface CartDrawerProps {
@@ -37,6 +38,7 @@ export const CartDrawer = ({
 	open: controlledOpen,
 	onOpenChange,
 }: CartDrawerProps = {}) => {
+	const t = useTranslations("common");
 	const [internalOpen, setInternalOpen] = useState(false);
 	const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
 	const setIsOpen = onOpenChange || setInternalOpen;
@@ -85,7 +87,7 @@ export const CartDrawer = ({
 				<SheetHeader className="space-y-2.5 pr-6">
 					<SheetTitle className="flex items-center gap-2">
 						<ShoppingCart className="size-5" />
-						Shopping Cart
+						{t("cart")}
 						<Badge variant="secondary" className="ml-auto">
 							{totalItems} Items
 						</Badge>
@@ -215,7 +217,7 @@ export const CartDrawer = ({
 							</p>
 						</div>
 						<Button variant="outline" onClick={() => setIsOpen(false)}>
-							Start Shopping
+							{t("startShopping")}
 						</Button>
 					</div>
 				)}

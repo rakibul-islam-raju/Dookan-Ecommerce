@@ -1,7 +1,7 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { TextField } from "@/components/ui/@form/TextField";
-import Link from "next/link";
 import { useFormContext } from "react-hook-form";
 import type { CheckoutFormValues } from "../_types";
 

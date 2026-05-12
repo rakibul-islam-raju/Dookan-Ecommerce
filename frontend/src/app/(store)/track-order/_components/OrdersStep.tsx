@@ -4,6 +4,7 @@ import { IMyOrderListItem, IOrderStatus } from "@/@types/Order";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, RefreshCw } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 interface OrdersStepProps {
 	orders: IMyOrderListItem[];
@@ -21,32 +22,27 @@ const statusColors: Record<IOrderStatus, string> = {
 	returned: "bg-gray-100 text-gray-800",
 };
 
-function formatDate(dateString: string): string {
-	return new Date(dateString).toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
-}
-
 function formatCurrency(amount: string): string {
 	return `৳${parseFloat(amount).toLocaleString()}`;
 }
 
 export function OrdersStep({ orders, email, onReset }: OrdersStepProps) {
+	const t = useTranslations("trackOrder");
+	const locale = useLocale();
+
 	if (orders.length === 0) {
 		return (
 			<div className="space-y-6 text-center">
 				<div className="py-8">
 					<Package className="mx-auto h-12 w-12 text-muted-foreground" />
-					<h3 className="mt-4 text-lg font-medium">No orders found</h3>
+					<h3 className="mt-4 text-lg font-medium">{t("noOrdersFound")}</h3>
 					<p className="mt-2 text-sm text-muted-foreground">
-						No orders were found for {email}
+						{t("noOrdersFor", { email })}
 					</p>
 				</div>
 				<Button onClick={onReset} variant="outline" className="w-full">
 					<RefreshCw className="mr-2 h-4 w-4" />
-					Try another email
+					{t("tryAnotherEmail")}
 				</Button>
 			</div>
 		);
@@ -56,8 +52,7 @@ export function OrdersStep({ orders, email, onReset }: OrdersStepProps) {
 		<div className="space-y-6">
 			<div className="text-center">
 				<p className="text-sm text-muted-foreground">
-					Found {orders.length} order{orders.length > 1 ? "s" : ""} for{" "}
-					<span className="font-medium">{email}</span>
+					{t("foundOrders", { count: orders.length, email })}
 				</p>
 			</div>
 
@@ -72,23 +67,29 @@ export function OrdersStep({ orders, email, onReset }: OrdersStepProps) {
 								#{order.order_number}
 							</span>
 							<Badge className={statusColors[order.status]} variant="secondary">
-								{order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+								{t(`status.${order.status}`)}
 							</Badge>
 						</div>
 
 						<div className="grid grid-cols-2 gap-2 text-sm">
 							<div>
 								<span className="text-muted-foreground">Date: </span>
-								<span>{formatDate(order.created_at)}</span>
+								<span>
+									{new Date(order.created_at).toLocaleDateString(locale, {
+										year: "numeric",
+										month: "short",
+										day: "numeric",
+									})}
+								</span>
 							</div>
 							<div>
-								<span className="text-muted-foreground">Items: </span>
+								<span className="text-muted-foreground">{t("items")}: </span>
 								<span>{order.items_count}</span>
 							</div>
 						</div>
 
 						<div className="flex items-center justify-between pt-2 border-t">
-							<span className="text-sm text-muted-foreground">Total</span>
+							<span className="text-sm text-muted-foreground">{t("total")}</span>
 							<span className="font-semibold">
 								{formatCurrency(order.total_amount)}
 							</span>
@@ -99,7 +100,7 @@ export function OrdersStep({ orders, email, onReset }: OrdersStepProps) {
 
 			<Button onClick={onReset} variant="outline" className="w-full">
 				<RefreshCw className="mr-2 h-4 w-4" />
-				Track another order
+				{t("trackAnother")}
 			</Button>
 		</div>
 	);

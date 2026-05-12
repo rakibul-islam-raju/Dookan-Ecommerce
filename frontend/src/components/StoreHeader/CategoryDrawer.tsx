@@ -1,6 +1,7 @@
 "use client";
 
 import type { ICategory, ICategoryChild } from "@/@types/Category";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
 	Sheet,
@@ -12,7 +13,7 @@ import {
 import { useCategories } from "@/lib/hooks/useCategories";
 import { ChevronDown, LayoutGrid, Loader2, Menu } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 const ParentCategoryImage = ({ category }: { category: ICategory }) => (
@@ -52,6 +53,7 @@ const ChildCategoryImage = ({ child }: { child: ICategoryChild }) => (
 );
 
 export const CategoryDrawer = () => {
+	const t = useTranslations("header");
 	const [isOpen, setIsOpen] = useState(false);
 	const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 	const { data: categoriesData, isLoading } = useCategories();
@@ -78,14 +80,14 @@ export const CategoryDrawer = () => {
 			<SheetTrigger asChild>
 				<Button variant="ghost" size="icon" className="lg:hidden">
 					<Menu className="h-6 w-6" />
-					<span className="sr-only">Open categories</span>
+					<span className="sr-only">{t("categories")}</span>
 				</Button>
 			</SheetTrigger>
 			<SheetContent side="left" className="w-[300px] sm:w-[360px] p-0 flex flex-col">
 				<SheetHeader className="px-4 pt-5 pb-3 border-b">
 					<SheetTitle className="flex items-center gap-2">
 						<LayoutGrid className="size-4" />
-						Categories
+						{t("categories")}
 					</SheetTitle>
 				</SheetHeader>
 
@@ -116,7 +118,9 @@ export const CategoryDrawer = () => {
 													</span>
 													{hasChildren && (
 														<span className="text-xs text-muted-foreground mt-0.5">
-															{children.length} subcategories
+															{t("subcategories", {
+																count: children.length,
+															})}
 														</span>
 													)}
 												</div>
@@ -148,7 +152,7 @@ export const CategoryDrawer = () => {
 														<LayoutGrid className="size-3.5 text-primary" />
 													</div>
 													<span className="text-sm font-medium text-primary">
-														All {category.name}
+														{t("allProducts")} {category.name}
 													</span>
 												</Link>
 												{children.map((child) => (
@@ -172,7 +176,7 @@ export const CategoryDrawer = () => {
 						</div>
 					) : (
 						<p className="text-sm text-muted-foreground text-center py-8">
-							No categories available
+							{t("noCategories")}
 						</p>
 					)}
 				</div>
@@ -183,7 +187,7 @@ export const CategoryDrawer = () => {
 						className="flex items-center justify-center w-full py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
 						onClick={() => setIsOpen(false)}
 					>
-						View All Products
+						{t("viewAllProducts")}
 					</Link>
 				</div>
 			</SheetContent>

@@ -1,11 +1,12 @@
 "use client";
 
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Home, LayoutGrid, ShoppingCart, User } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export const BottomNav = () => {
+	const t = useTranslations("common");
 	const pathname = usePathname();
 
 	const isActive = (path: string) => pathname === path;
@@ -23,7 +24,7 @@ export const BottomNav = () => {
 					)}
 				>
 					<Home className="size-5" />
-					Home
+					{t("home")}
 				</Link>
 
 				<Link
@@ -36,7 +37,7 @@ export const BottomNav = () => {
 					)}
 				>
 					<LayoutGrid className="size-5" />
-					Shop
+					{t("shop")}
 				</Link>
 
 					{/* We can reuse CartDrawer trigger here but we might need to customize it to fit the bottom nav style. 
@@ -54,9 +55,9 @@ export const BottomNav = () => {
 								? "text-primary"
 								: "text-muted-foreground hover:text-primary",
 						)}
-					>
-						<ShoppingCart className="size-5" />
-						Cart
+						>
+							<ShoppingCart className="size-5" />
+							{t("cart")}
 					</Link>
 
 				<Link
@@ -69,7 +70,7 @@ export const BottomNav = () => {
 					)}
 				>
 					<User className="size-5" />
-					Account
+					{t("account")}
 				</Link>
 			</div>
 		</div>

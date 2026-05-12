@@ -1,6 +1,7 @@
 import { store } from "@/config/store";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
-import Link from "next/link";
 import { LoginForm } from "./_components/LoginForm";
 
 export const metadata: Metadata = {
@@ -9,34 +10,36 @@ export const metadata: Metadata = {
 	keywords: ["login", "account", "sign in", `${store.title}`],
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+	const t = await getTranslations("auth");
+
 	return (
 		<div className="space-y-6">
 			<div className="space-y-2 text-center lg:text-left">
-				<h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+				<h1 className="text-3xl font-bold tracking-tight">{t("loginTitle")}</h1>
 				<p className="text-muted-foreground">
-					Enter your email to sign in to your account
+					{t("loginDescription")}
 				</p>
 			</div>
 			<LoginForm />
 			<div className="text-center text-sm text-muted-foreground">
 				<div className="text-primary font-medium mb-2">
-					<Link href="/forgot-password">Forgot password?</Link>
+					<Link href="/forgot-password">{t("forgotPasswordLink")}</Link>
 				</div>
 				<div className="mb-2">
 					<Link
 						href="/verify-email"
 						className="text-xs text-muted-foreground hover:text-primary hover:underline"
 					>
-						Didn&apos;t receive verification email?
+						{t("verificationMissing")}
 					</Link>
 				</div>
-				Don&apos;t have an account?{" "}
+				{t("noAccount")}{" "}
 				<Link
 					href="/register"
 					className="font-medium text-primary hover:underline"
 				>
-					Sign up
+					{t("signUp")}
 				</Link>
 			</div>
 		</div>

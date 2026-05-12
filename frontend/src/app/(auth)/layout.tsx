@@ -1,12 +1,15 @@
 import { store } from "@/config/store";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
-export default function AuthLayout({
+export default async function AuthLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	const t = await getTranslations("auth");
+
 	return (
 		<div className="min-h-screen grid lg:grid-cols-2">
 			{/* Left side - Form */}
@@ -39,11 +42,10 @@ export default function AuthLayout({
 				</div>
 				<div className="relative h-full flex flex-col items-center justify-center p-12 text-center">
 					<h2 className="text-3xl font-serif font-bold text-foreground mb-4">
-						Experience Premium Shopping
+						{t("marketingTitle")}
 					</h2>
 					<p className="text-muted-foreground max-w-md">
-						Join our community and discover a curated collection of organic and
-						sustainable products.
+						{t("marketingDescription")}
 					</p>
 				</div>
 			</div>

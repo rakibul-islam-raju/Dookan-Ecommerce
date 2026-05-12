@@ -1,61 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
-import { COOKIES_KEYS } from "@/config";
+import createMiddleware from "next-intl/middleware";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { routing } from "./i18n/routing";
 
-const authRoutes = ["/login", "/register", "/forgot-password", "/verify-email"];
-const protectedRoutes = ["/profile", "/orders", "/wishlist", "/addresses"];
-const publicRoutes = ["/", "/shop", "/products", "/cart", "/checkout", "/track-order"];
+const intlMiddleware = createMiddleware(routing);
 
-function isAuthenticated(request: NextRequest): boolean {
-	const accessToken = request.cookies.get(COOKIES_KEYS.ACCESS_TOKEN)?.value;
-	return !!accessToken;
-}
-
-function matchesRoute(pathname: string, routes: string[]): boolean {
-	return routes.some((route) => pathname.startsWith(route));
-}
-
-export function proxy(request: NextRequest) {
-	const { pathname } = request.nextUrl;
-	const isAuth = isAuthenticated(request);
-
-	// Skip middleware for API routes, static files, and Next.js internals
-	if (
-		pathname.startsWith("/api") ||
+function isPublicPath(pathname: string) {
+	return (
 		pathname.startsWith("/_next") ||
-		pathname.startsWith("/favicon") ||
-		pathname.includes(".")
-	) {
+		pathname.startsWith("/api") ||
+		pathname === "/favicon.ico" ||
+		pathname === "/robots.txt" ||
+		pathname === "/sitemap.xml" ||
+		/\.[a-zA-Z0-9]+$/.test(pathname)
+	);
+}
+
+export default function proxy(request: NextRequest) {
+	const { pathname, search } = request.nextUrl;
+
+	if (isPublicPath(pathname)) {
 		return NextResponse.next();
 	}
 
-	if (isAuth && matchesRoute(pathname, authRoutes)) {
-		return NextResponse.redirect(new URL("/", request.url));
+	if (pathname === "/") {
+		return NextResponse.redirect(new URL(`/${routing.defaultLocale}`, request.url));
 	}
 
-	if (!isAuth && matchesRoute(pathname, protectedRoutes)) {
-		const loginUrl = new URL("/login", request.url);
-		const redirectPath = `${pathname}${request.nextUrl.search}`;
-		loginUrl.searchParams.set("redirect", redirectPath);
-		return NextResponse.redirect(loginUrl);
+	const hasLocalePrefix = routing.locales.some(
+		(locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
+	);
+
+	if (!hasLocalePrefix) {
+		return NextResponse.redirect(new URL(`/en${pathname}${search}`, request.url));
 	}
 
-	if (matchesRoute(pathname, authRoutes) || matchesRoute(pathname, publicRoutes)) {
-		return NextResponse.next();
-	}
-
-	return NextResponse.next();
+	return intlMiddleware(request);
 }
 
 export const config = {
-	matcher: [
-		/*
-		 * Match all request paths except for the ones starting with:
-		 * - api (API routes)
-		 * - _next/static (static files)
-		 * - _next/image (image optimization files)
-		 * - favicon.ico (favicon file)
-		 * - public files with extensions
-		 */
-		"/((?!api|_next/static|_next/image|favicon.ico|.*\\.).*)",
-	],
+	matcher: ["/((?!_next|_vercel|.*\\..*).*)"],
 };

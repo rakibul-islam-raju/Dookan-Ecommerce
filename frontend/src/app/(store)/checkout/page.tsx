@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Separator } from "@/components/ui/separator";
 import { useZodForm } from "@/hooks/useZodForm";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useCart } from "@/lib/hooks/useCart";
 import {
 	generateMetaEventId,
@@ -20,8 +21,7 @@ import { useAuthStore } from "@/lib/store/useAuthStore";
 import type { CouponValidateResponse } from "@/lib/api/coupons";
 import { couponClientApi } from "@/lib/api/coupons";
 import { ArrowLeft, Loader2, Truck } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useRef } from "react";
 import { checkoutSchema } from "./_types";

@@ -1,11 +1,11 @@
 import { IConsumerProductListItem } from "@/@types/Product";
 import { Button } from "@/components/ui/button";
 import { env } from "@/config/env";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
 import { WishlistButton } from "./WishlistButton";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 

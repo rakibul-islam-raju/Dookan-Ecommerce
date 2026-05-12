@@ -12,6 +12,7 @@ import {
 	useTrackGuestOrders,
 } from "@/lib/hooks/useOrders";
 import { ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { z } from "zod";
 
 const schema = z.object({
@@ -30,6 +31,7 @@ interface OTPStepProps {
 }
 
 export function OTPStep({ email, onSuccess, onBack }: OTPStepProps) {
+	const t = useTranslations("trackOrder");
 	const trackOrders = useTrackGuestOrders();
 	const resendOTP = useRequestGuestOrderOTP();
 
@@ -52,12 +54,12 @@ export function OTPStep({ email, onSuccess, onBack }: OTPStepProps) {
 		<div className="space-y-6">
 			<Button variant="ghost" onClick={onBack} className="px-0">
 				<ArrowLeft className="mr-2 h-4 w-4" />
-				Back
+				{t("back")}
 			</Button>
 
 			<div className="text-center">
 				<p className="text-sm text-muted-foreground">
-					Enter the code sent to <span className="font-medium">{email}</span>
+					{t("otpSentTo")} <span className="font-medium">{email}</span>
 				</p>
 			</div>
 
@@ -70,7 +72,7 @@ export function OTPStep({ email, onSuccess, onBack }: OTPStepProps) {
 						className="w-full"
 						isLoading={trackOrders.isPending}
 					>
-						Verify & Track Orders
+						{t("verifyTrack")}
 					</LoadingButton>
 
 					<div className="text-center">

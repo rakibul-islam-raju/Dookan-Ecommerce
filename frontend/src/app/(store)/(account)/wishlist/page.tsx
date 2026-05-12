@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { useRemoveFromWishlist, useWishlist } from "@/lib/hooks/useWishlist";
 import { Heart, Loader2, ShoppingCart, Trash2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function WishlistPage() {
 	const { data: items, isLoading } = useWishlist();

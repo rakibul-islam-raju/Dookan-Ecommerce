@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -8,14 +9,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { LogOut, Settings, User } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export const AccountButton = () => {
+	const t = useTranslations("header");
+	const router = useRouter();
 	const { user, isAuthenticated, logout } = useAuthStore();
 
 	const handleLogout = () => {
 		logout();
-		window.location.href = "/"; // Redirect to home after logout
+		router.push("/");
 	};
 
 	return (
@@ -25,7 +28,7 @@ export const AccountButton = () => {
 					<DropdownMenuTrigger asChild>
 						<button
 							className="cursor-pointer relative p-2 rounded-full hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-							aria-label="View account menu"
+							aria-label={t("viewAccountMenu")}
 						>
 							<Avatar className="lg:size-6 size-5">
 								<AvatarFallback className="text-xs">
@@ -51,19 +54,19 @@ export const AccountButton = () => {
 						<DropdownMenuItem asChild>
 							<Link href="/profile" className="cursor-pointer">
 								<User className="mr-2 h-4 w-4" />
-								My Profile
+								{t("myProfile")}
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
 							<Link href="/orders" className="cursor-pointer">
 								<Settings className="mr-2 h-4 w-4" />
-								My Orders
+								{t("myOrders")}
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
 							<LogOut className="mr-2 h-4 w-4" />
-							Logout
+							{t("logout")}
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -77,10 +80,10 @@ export const AccountButton = () => {
 					</div>
 					<div className="hidden lg:block">
 						<p className="text-xs text-muted-foreground font-semibold group-hover:text-primary">
-							Account
+							{t("myProfile")}
 						</p>
 						<div className="text-sm font-semibold group-hover:text-primary">
-							Sign in / Register
+							{t("signInRegister")}
 						</div>
 					</div>
 				</Link>

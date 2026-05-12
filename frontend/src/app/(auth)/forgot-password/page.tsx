@@ -6,41 +6,40 @@ import { PasswordField } from "@/components/ui/@form/PasswordField";
 import { ResendOTPButton } from "@/components/ui/@form/ResendOTPButton";
 import { TextField } from "@/components/ui/@form/TextField";
 import { LoadingButton } from "@/components/ui/LoadingButton";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useZodForm } from "@/hooks/useZodForm";
 import { authApi } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const emailSchema = z.object({
-	email: z.string().email("Please enter a valid email address"),
-});
-
-const resetSchema = z
-	.object({
-		otp_code: z
-			.string()
-			.length(6, "OTP must be 6 digits")
-			.regex(/^\d+$/, "OTP must contain only numbers"),
-		new_password: z.string().min(8, "Password must be at least 8 characters"),
-		confirm_password: z.string(),
-	})
-	.refine((data) => data.new_password === data.confirm_password, {
-		message: "Passwords do not match",
-		path: ["confirm_password"],
-	});
-
-type EmailFormValues = z.infer<typeof emailSchema>;
-type ResetFormValues = z.infer<typeof resetSchema>;
-
 export default function ForgotPasswordPage() {
+	const t = useTranslations("auth");
 	const router = useRouter();
 	const [step, setStep] = useState<"email" | "reset">("email");
 	const [email, setEmail] = useState("");
+	const emailSchema = z.object({
+		email: z.string().email(t("invalidEmail")),
+	});
+	const resetSchema = z
+		.object({
+			otp_code: z
+				.string()
+				.length(6, t("otpLength"))
+				.regex(/^\d+$/, t("otpNumbersOnly")),
+			new_password: z.string().min(8, t("passwordMinLengthReset")),
+			confirm_password: z.string(),
+		})
+		.refine((data) => data.new_password === data.confirm_password, {
+			message: t("passwordsDoNotMatch"),
+			path: ["confirm_password"],
+		});
+
+	type EmailFormValues = z.infer<typeof emailSchema>;
+	type ResetFormValues = z.infer<typeof resetSchema>;
 
 	const emailForm = useZodForm(emailSchema, {
 		defaultValues: { email: "" },
@@ -56,7 +55,7 @@ export default function ForgotPasswordPage() {
 		onSuccess: () => {
 			setEmail(emailForm.getValues("email"));
 			setStep("reset");
-			toast.success("OTP sent to your email address.");
+			toast.success(t("passwordResetOtpSent"));
 		},
 	});
 
@@ -64,14 +63,14 @@ export default function ForgotPasswordPage() {
 		mutationFn: (data: ResetFormValues) =>
 			authApi.confirmPasswordReset(email, data.otp_code, data.new_password),
 		onSuccess: () => {
-			toast.success("Password reset successfully! Please login.");
+			toast.success(t("passwordResetSuccess"));
 			router.push("/login");
 		},
 	});
 
 	const handleResendOTP = async () => {
 		await authApi.requestPasswordReset(email);
-		toast.success("OTP resent to your email.");
+		toast.success(t("otpResent"));
 	};
 
 	if (step === "reset") {
@@ -79,30 +78,30 @@ export default function ForgotPasswordPage() {
 			<div className="space-y-6">
 				<div className="space-y-2 text-center lg:text-left">
 					<h1 className="text-3xl font-bold tracking-tight">
-						Reset password
+						{t("resetPasswordTitle")}
 					</h1>
 					<p className="text-muted-foreground">
-						Enter the OTP sent to{" "}
-						<span className="font-medium text-foreground">{email}</span> and
-						your new password.
+						{t("resetPasswordDescription", { email })}
 					</p>
 				</div>
 				<BaseForm form={resetForm} onSubmit={confirmReset}>
 					<div className="space-y-4">
 						<div className="space-y-2">
-							<label className="text-sm font-medium">Verification Code</label>
+							<label className="text-sm font-medium">
+								{t("verificationCode")}
+							</label>
 							<OTPInput name="otp_code" length={6} />
 						</div>
 						<PasswordField
 							name="new_password"
-							label="New Password"
-							placeholder="Enter new password"
+							label={t("newPassword")}
+							placeholder={t("newPassword")}
 							required
 						/>
 						<PasswordField
 							name="confirm_password"
-							label="Confirm Password"
-							placeholder="Confirm new password"
+							label={t("confirmPassword")}
+							placeholder={t("confirmPassword")}
 							required
 						/>
 						<LoadingButton
@@ -110,7 +109,7 @@ export default function ForgotPasswordPage() {
 							isLoading={isConfirming}
 							className="w-full"
 						>
-							Reset Password
+							{t("resetPassword")}
 						</LoadingButton>
 					</div>
 				</BaseForm>
@@ -121,7 +120,7 @@ export default function ForgotPasswordPage() {
 						className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
 					>
 						<ArrowLeft className="size-4" />
-						Change email
+						{t("changeEmail")}
 					</button>
 					<ResendOTPButton onResend={handleResendOTP} />
 				</div>
@@ -133,19 +132,18 @@ export default function ForgotPasswordPage() {
 		<div className="space-y-6">
 			<div className="space-y-2 text-center lg:text-left">
 				<h1 className="text-3xl font-bold tracking-tight">
-					Forgot password?
+					{t("forgotPasswordTitle")}
 				</h1>
 				<p className="text-muted-foreground">
-					Enter your email address and we&apos;ll send you an OTP to reset your
-					password.
+					{t("forgotPasswordDescription")}
 				</p>
 			</div>
 			<BaseForm form={emailForm} onSubmit={requestReset}>
 				<div className="space-y-4">
 					<TextField
 						name="email"
-						label="Email"
-						placeholder="m@example.com"
+						label={t("email")}
+						placeholder={t("emailPlaceholderAlt")}
 						type="email"
 						required
 					/>
@@ -154,7 +152,7 @@ export default function ForgotPasswordPage() {
 						isLoading={isRequesting}
 						className="w-full"
 					>
-						Send OTP
+						{t("sendOtp")}
 					</LoadingButton>
 				</div>
 			</BaseForm>
@@ -164,7 +162,7 @@ export default function ForgotPasswordPage() {
 					className="inline-flex items-center justify-center gap-2 font-medium text-primary hover:underline"
 				>
 					<ArrowLeft className="size-4" />
-					Back to login
+					{t("backToLogin")}
 				</Link>
 			</div>
 		</div>

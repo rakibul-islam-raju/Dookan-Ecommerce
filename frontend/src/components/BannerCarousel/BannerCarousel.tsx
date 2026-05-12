@@ -1,10 +1,10 @@
 "use client";
 
 import type { IBanner } from "@/@types/Store";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 

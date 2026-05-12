@@ -9,6 +9,7 @@ import { QuickViewModal } from "@/components/Product/QuickViewModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useRouter } from "@/i18n/navigation";
 import {
 	Sheet,
 	SheetContent,
@@ -27,7 +28,7 @@ import {
 	SlidersHorizontal,
 	X,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
 const SORT_OPTIONS = [

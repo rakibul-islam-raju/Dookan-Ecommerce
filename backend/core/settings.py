@@ -174,7 +174,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.ScopedRateThrottle",
     ),
     "DEFAULT_THROTTLE_RATES": {
-        "anon": env("DRF_THROTTLE_ANON", default="120/hour"),
+        "anon": env("DRF_THROTTLE_ANON", default="1000/hour"),
         "user": env("DRF_THROTTLE_USER", default="1000/hour"),
         "auth_login": env("DRF_THROTTLE_AUTH_LOGIN", default="5/minute"),
         "auth_register": env("DRF_THROTTLE_AUTH_REGISTER", default="5/hour"),

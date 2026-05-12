@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface ResendOTPButtonProps {
@@ -16,14 +17,11 @@ export function ResendOTPButton({
 	isLoading = false,
 	className,
 }: ResendOTPButtonProps) {
+	const t = useTranslations("auth");
 	const [countdown, setCountdown] = useState(0);
-	const [isCooldown, setIsCooldown] = useState(false);
 
 	useEffect(() => {
-		if (countdown <= 0) {
-			setIsCooldown(false);
-			return;
-		}
+		if (countdown <= 0) return;
 
 		const timer = setInterval(() => {
 			setCountdown((prev) => prev - 1);
@@ -35,7 +33,6 @@ export function ResendOTPButton({
 	const handleClick = async () => {
 		await onResend();
 		setCountdown(cooldownSeconds);
-		setIsCooldown(true);
 	};
 
 	return (
@@ -43,14 +40,14 @@ export function ResendOTPButton({
 			type="button"
 			variant="link"
 			onClick={handleClick}
-			disabled={isCooldown || isLoading}
+			disabled={countdown > 0 || isLoading}
 			className={className}
 		>
-			{isCooldown
-				? `Resend OTP in ${countdown}s`
+			{countdown > 0
+				? t("resendOtpIn", { countdown })
 				: isLoading
-					? "Sending..."
-					: "Resend OTP"}
+					? t("sending")
+					: t("resendOtp")}
 		</Button>
 	);
 }

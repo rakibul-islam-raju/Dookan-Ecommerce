@@ -8,23 +8,9 @@ import { LoadingButton } from "@/components/ui/LoadingButton";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useResendVerification, useVerifyEmail } from "@/lib/hooks/useAuth";
 import { useEmailVerificationStore } from "@/lib/store/useEmailVerificationStore";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { toast } from "react-toastify";
 import { z } from "zod";
-
-const emailSchema = z.object({
-	email: z.email({ message: "Please enter a valid email address" }),
-});
-
-const otpSchema = z.object({
-	otp_code: z
-		.string()
-		.length(6, "OTP must be exactly 6 digits")
-		.regex(/^\d{6}$/, "OTP must contain only numbers"),
-});
-
-type EmailFormValues = z.infer<typeof emailSchema>;
-type VerifyEmailFormValues = z.infer<typeof otpSchema>;
 
 // Helper to mask email: "john@example.com" -> "j***@example.com"
 function maskEmail(email: string): string {
@@ -34,6 +20,19 @@ function maskEmail(email: string): string {
 }
 
 export function EmailVerificationForm() {
+	const t = useTranslations("auth");
+	const emailSchema = z.object({
+		email: z.email({ message: t("invalidEmail") }),
+	});
+	const otpSchema = z.object({
+		otp_code: z
+			.string()
+			.length(6, t("otpExactLength"))
+			.regex(/^\d{6}$/, t("otpNumbersOnly")),
+	});
+
+	type EmailFormValues = z.infer<typeof emailSchema>;
+	type VerifyEmailFormValues = z.infer<typeof otpSchema>;
 	const { pendingEmail, setPendingEmail, clearPendingEmail } =
 		useEmailVerificationStore();
 
@@ -60,14 +59,7 @@ export function EmailVerificationForm() {
 		setPendingEmail(data.email);
 		setIsEmailSubmitted(true);
 		// Automatically resend OTP when email is submitted
-		resendVerification.mutate(
-			{ email: data.email },
-			{
-				onSuccess: () => {
-					toast.success("Verification code sent to your email");
-				},
-			}
-		);
+		resendVerification.mutate({ email: data.email });
 	};
 
 	const onOtpSubmit = (data: VerifyEmailFormValues) => {
@@ -99,13 +91,13 @@ export function EmailVerificationForm() {
 					<div className="space-y-4">
 						<div>
 							<p className="text-sm text-muted-foreground mb-4">
-								Enter your email address to receive a verification code.
+								{t("verifyEmailDescription")}
 							</p>
 						</div>
 						<TextField
 							name="email"
-							label="Email"
-							placeholder="you@example.com"
+							label={t("email")}
+							placeholder={t("emailPlaceholder")}
 							required
 							type="email"
 						/>
@@ -114,7 +106,7 @@ export function EmailVerificationForm() {
 							className="w-full"
 							isLoading={resendVerification.isPending}
 						>
-							Send Verification Code
+							{t("sendVerificationCode")}
 						</LoadingButton>
 					</div>
 				</BaseForm>
@@ -126,10 +118,7 @@ export function EmailVerificationForm() {
 		<div className="space-y-6">
 			<div className="text-center">
 				<p className="text-sm text-muted-foreground">
-					Enter the code sent to{" "}
-					<span className="font-medium text-foreground">
-						{maskEmail(email)}
-					</span>
+					{t("enterCodeSentTo", { email: maskEmail(email) })}
 				</p>
 			</div>
 
@@ -142,7 +131,7 @@ export function EmailVerificationForm() {
 						className="w-full"
 						isLoading={verifyEmail.isPending}
 					>
-						Verify Email
+						{t("verifyEmail")}
 					</LoadingButton>
 
 					<div className="text-center">
@@ -158,7 +147,7 @@ export function EmailVerificationForm() {
 						onClick={handleBackToEmail}
 						className="text-sm text-muted-foreground hover:text-primary underline w-full"
 					>
-						Use a different email
+						{t("useDifferentEmail")}
 					</button>
 				</div>
 			</BaseForm>

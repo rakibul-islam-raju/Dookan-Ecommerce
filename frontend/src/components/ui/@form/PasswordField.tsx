@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
 import { TooltipContent } from "@radix-ui/react-tooltip";
 import { Eye, EyeOff } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Control, FieldValues, Path, useFormContext } from "react-hook-form";
 import { Button } from "../button";
@@ -35,6 +36,7 @@ export function PasswordField<T extends FieldValues>({
 	forgetPasswordPath,
 	helpText,
 }: PasswordFieldProps<T>) {
+	const t = useTranslations("auth");
 	const { control: contextControl } = useFormContext<T>();
 	const control = externalControl || contextControl;
 	const [showPassword, setShowPassword] = useState(false);
@@ -70,7 +72,7 @@ export function PasswordField<T extends FieldValues>({
 				{required && <span className="ml-1 text-red-500">*</span>}
 			</div>
 			<Link href={forgetPasswordPath} className="text-muted-foreground text-sm">
-				Forgot Password?
+				{t("forgotPasswordShort")}
 			</Link>
 		</div>
 	);
@@ -110,7 +112,7 @@ export function PasswordField<T extends FieldValues>({
 								<Eye className="h-4 w-4 text-gray-500" />
 							)}
 							<span className="sr-only">
-								{showPassword ? "Hide password" : "Show password"}
+								{showPassword ? t("hidePassword") : t("showPassword")}
 							</span>
 						</Button>
 					</div>

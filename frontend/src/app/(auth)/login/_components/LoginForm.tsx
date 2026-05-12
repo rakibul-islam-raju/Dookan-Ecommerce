@@ -6,6 +6,7 @@ import { TextField } from "@/components/ui/@form/TextField";
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { queryKeys } from "@/constants/queryKeys";
 import { useZodForm } from "@/hooks/useZodForm";
+import { useRouter } from "@/i18n/navigation";
 import { authApi } from "@/lib/api";
 import { LoginResponse } from "@/lib/api/auth";
 import { queryClient } from "@/lib/react-query";
@@ -13,20 +14,19 @@ import { useAuthStore } from "@/lib/store/useAuthStore";
 import { useEmailVerificationStore } from "@/lib/store/useEmailVerificationStore";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const schema = z.object({
-	email: z.email({ message: "Please enter a valid email address" }),
-	password: z.string().min(6, "Password must be at least 6 characters long"),
-});
-
-type LoginFormValues = z.infer<typeof schema>;
-
 export const LoginForm = () => {
+	const t = useTranslations("auth");
 	const router = useRouter();
+	const schema = z.object({
+		email: z.email({ message: t("invalidEmail") }),
+		password: z.string().min(6, t("passwordMinLength")),
+	});
 
+	type LoginFormValues = z.infer<typeof schema>;
 	const setAuth = useAuthStore((state) => state.setAuth);
 	const setPendingEmail = useEmailVerificationStore(
 		(state) => state.setPendingEmail
@@ -43,7 +43,7 @@ export const LoginForm = () => {
 		mutationFn: authApi.login,
 		onSuccess: (response: LoginResponse) => {
 			setAuth(response.user, response.access, response.refresh);
-			toast.success("Login successful!");
+			toast.success(t("loginSuccess"));
 			router.push("/");
 			queryClient.invalidateQueries({ queryKey: [queryKeys.me] });
 		},
@@ -75,21 +75,21 @@ export const LoginForm = () => {
 			<div className="grid gap-4 py-4">
 				<TextField
 					name="email"
-					label="Email"
-					placeholder="you@example.com"
+					label={t("email")}
+					placeholder={t("emailPlaceholder")}
 					required
 					type="email"
 				/>
 				<PasswordField
 					name="password"
-					label="Password"
+					label={t("password")}
 					placeholder="••••••••"
 					required
 				/>
 			</div>
 
 			<LoadingButton type="submit" isLoading={isPending} className="w-full">
-				Login
+				{t("login")}
 			</LoadingButton>
 		</BaseForm>
 	);

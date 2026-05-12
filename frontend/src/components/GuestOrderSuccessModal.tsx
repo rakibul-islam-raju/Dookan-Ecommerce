@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +11,6 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { CheckCircle, Home, ShoppingBag } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface GuestOrderSuccessModalProps {

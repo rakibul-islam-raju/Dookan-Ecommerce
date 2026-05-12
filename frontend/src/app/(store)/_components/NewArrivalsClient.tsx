@@ -1,11 +1,11 @@
 "use client";
 
 import { IConsumerProductListItem } from "@/@types/Product";
+import { Link } from "@/i18n/navigation";
 import { ProductItem } from "@/components/Product/ProductItem";
 import { QuickViewModal } from "@/components/Product/QuickViewModal";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 interface NewArrivalsClientProps {
@@ -71,4 +71,3 @@ export const NewArrivalsClient = ({ products }: NewArrivalsClientProps) => {
 		</section>
 	);
 };
-

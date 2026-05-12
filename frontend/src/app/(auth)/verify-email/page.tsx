@@ -1,6 +1,7 @@
 import { store } from "@/config/store";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
-import Link from "next/link";
 import { EmailVerificationForm } from "./_components/EmailVerificationForm";
 
 export const metadata: Metadata = {
@@ -9,13 +10,17 @@ export const metadata: Metadata = {
 	keywords: ["verify email", "verification", "OTP", `${store.title}`],
 };
 
-export default function VerifyEmailPage() {
+export default async function VerifyEmailPage() {
+	const t = await getTranslations("auth");
+
 	return (
 		<div className="space-y-6">
 			<div className="space-y-2 text-center lg:text-left">
-				<h1 className="text-3xl font-bold tracking-tight">Verify your email</h1>
+				<h1 className="text-3xl font-bold tracking-tight">
+					{t("verifyEmailTitle")}
+				</h1>
 				<p className="text-muted-foreground">
-					We&apos;ve sent a 6-digit verification code to your email address.
+					{t("verifyEmailDescription")}
 				</p>
 			</div>
 			<EmailVerificationForm />
@@ -24,7 +29,7 @@ export default function VerifyEmailPage() {
 					href="/login"
 					className="font-medium text-primary hover:underline"
 				>
-					Back to login
+					{t("backToLogin")}
 				</Link>
 			</div>
 		</div>
