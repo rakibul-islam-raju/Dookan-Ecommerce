@@ -1,6 +1,6 @@
 import { AnnouncementBar } from "@/components/AnnouncementBar/AnnouncementBar";
 import { Footer } from "@/components/StoreFooter/Footer";
-import { Header } from "@/components/StoreHeader/Header";
+import { FixedStoreHeader } from "@/components/StoreHeader/FixedStoreHeader";
 import { store } from "@/config/store";
 import type { Metadata } from "next";
 import { AuthInitializer } from "./_components/AuthInitializer";
@@ -18,7 +18,7 @@ export default function RootLayout({
 	return (
 		<>
 			<AnnouncementBar />
-			<Header />
+			<FixedStoreHeader />
 			<main className="min-h-[calc(100vh-94px)]">{children}</main>
 			<Footer />
 			<AuthInitializer />

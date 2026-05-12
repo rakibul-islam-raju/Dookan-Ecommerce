@@ -1,117 +1,146 @@
 "use client";
 
+import heroImage from "@/assets/images/slider1.jpg";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Leaf, ShieldCheck, Truck } from "lucide-react";
+import {
+	ArrowRight,
+	BadgeCheck,
+	Clock,
+	Leaf,
+	ShieldCheck,
+	ShoppingBag,
+	Truck,
+} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+
+const highlights = [
+	{
+		icon: Truck,
+		label: "Fast Delivery",
+		value: "Same-day dispatch",
+	},
+	{
+		icon: ShieldCheck,
+		label: "Trusted Quality",
+		value: "Carefully checked",
+	},
+	{
+		icon: Leaf,
+		label: "Fresh Picks",
+		value: "Naturally sourced",
+	},
+];
 
 export const Hero = () => {
 	return (
-		<section className="relative bg-linear-to-br from-primary/5 via-background to-secondary/10 overflow-hidden">
-			{/* Decorative Elements */}
-			<div className="absolute inset-0 opacity-10">
-				<div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
-				<div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl" />
-			</div>
+		<section className="relative isolate overflow-hidden bg-background">
+			<div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(255,244,240,.9),transparent_42%),linear-gradient(90deg,transparent,rgba(244,63,94,.08))]" />
+			<div className="absolute inset-x-0 bottom-0 -z-10 h-px bg-border" />
 
-			<div className="container relative pt-4 pb-12">
-				<div className="grid lg:grid-cols-2 gap-12 items-center">
-					{/* Left Content */}
-					<div className="space-y-8 text-center lg:text-left">
-						<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-							<Leaf className="size-4" />
-							100% Organic & Natural
+			<div className="container py-10 md:py-14 lg:py-16">
+				<div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(440px,1.05fr)] lg:gap-14">
+					<div className="max-w-2xl text-center lg:text-left">
+						<div className="inline-flex items-center gap-2 rounded-[8px] border border-primary/15 bg-background/80 px-3 py-2 text-sm font-semibold text-primary shadow-xs backdrop-blur">
+							<BadgeCheck className="size-4" />
+							Fresh market essentials, curated daily
 						</div>
 
-						<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-serif text-foreground leading-tight">
-							Fresh & Healthy
-							<span className="block text-primary mt-2">Organic Products</span>
+						<h1 className="mt-6 text-4xl font-bold leading-[1.02] tracking-normal text-foreground sm:text-5xl lg:text-6xl">
+							Everyday groceries with a fresher point of view.
 						</h1>
 
-						<p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
-							Discover our premium selection of organic, sustainable, and
-							eco-friendly products. Quality you can trust, delivered to your
-							doorstep.
+						<p className="mx-auto mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg lg:mx-0">
+							Shop crisp produce, pantry favorites, honey, spices, and home
+							essentials selected for quality, seasonality, and quick local
+							delivery.
 						</p>
 
-						<div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-							<Button size="lg" className="text-base h-12 px-8" asChild>
+						<div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+							<Button size="lg" className="h-12 px-7 text-base" asChild>
 								<Link href="/shop">
-									Shop Now <ArrowRight className="ml-2 size-5" />
+									Shop Collection <ArrowRight className="size-5" />
 								</Link>
 							</Button>
 							<Button
 								size="lg"
 								variant="outline"
-								className="text-base h-12 px-8"
+								className="h-12 px-7 bg-background/80 text-base"
 								asChild
 							>
-								<Link href="/about">Learn More</Link>
+								<Link href="/track-order">Track Order</Link>
 							</Button>
 						</div>
 
-						{/* Features */}
-						<div className="grid grid-cols-3 gap-4 pt-8 border-t border-border/50">
-							<div className="flex flex-col items-center lg:items-start gap-2">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-									<Truck className="size-5 text-primary" />
+						<div className="mt-8 grid gap-3 border-t border-border/70 pt-6 sm:grid-cols-3">
+							{highlights.map((item) => (
+								<div
+									key={item.label}
+									className="flex items-center gap-3 rounded-[8px] bg-background/70 p-3 text-left"
+								>
+									<div className="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-primary/10 text-primary">
+										<item.icon className="size-5" />
+									</div>
+									<div className="min-w-0">
+										<p className="text-sm font-semibold text-foreground">
+											{item.label}
+										</p>
+										<p className="truncate text-xs text-muted-foreground">
+											{item.value}
+										</p>
+									</div>
 								</div>
-								<div className="text-center lg:text-left">
-									<p className="font-semibold text-sm">Free Shipping</p>
-									<p className="text-xs text-muted-foreground">
-										On orders $50+
-									</p>
-								</div>
-							</div>
-							<div className="flex flex-col items-center lg:items-start gap-2">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-									<ShieldCheck className="size-5 text-primary" />
-								</div>
-								<div className="text-center lg:text-left">
-									<p className="font-semibold text-sm">Secure Payment</p>
-									<p className="text-xs text-muted-foreground">
-										100% Protected
-									</p>
-								</div>
-							</div>
-							<div className="flex flex-col items-center lg:items-start gap-2">
-								<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-									<Leaf className="size-5 text-primary" />
-								</div>
-								<div className="text-center lg:text-left">
-									<p className="font-semibold text-sm">100% Organic</p>
-									<p className="text-xs text-muted-foreground">
-										Certified Products
-									</p>
-								</div>
-							</div>
+							))}
 						</div>
 					</div>
 
-					{/* Right Image */}
-					<div className="relative hidden lg:block">
-						<div className="relative aspect-square rounded-2xl overflow-hidden">
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop"
-								alt="Fresh organic products"
-								className="object-cover w-full h-full"
-							/>
-							<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-						</div>
+					<div className="relative">
+						<div className="absolute -left-4 top-8 hidden h-24 w-24 border-l border-t border-primary/25 lg:block" />
+						<div className="absolute -right-4 bottom-8 hidden h-24 w-24 border-b border-r border-primary/25 lg:block" />
 
-						{/* Floating Badge */}
-						<div className="absolute -bottom-6 -left-6 bg-card border shadow-lg rounded-2xl p-6 max-w-[200px]">
-							<div className="flex items-center gap-3">
-								<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-									<span className="text-2xl font-bold text-primary">🌿</span>
-								</div>
-								<div>
-									<p className="font-bold text-lg">500+</p>
-									<p className="text-xs text-muted-foreground">
-										Organic Products
+						<div className="relative overflow-hidden rounded-[8px] border bg-card shadow-xl">
+							<div className="relative aspect-[4/3] min-h-[320px] sm:aspect-[16/10] lg:aspect-[1.05/1]">
+								<Image
+									src={heroImage}
+									alt="Fresh groceries and organic produce"
+									fill
+									priority
+									sizes="(min-width: 1024px) 52vw, 100vw"
+									className="object-cover"
+								/>
+								<div className="absolute inset-0 bg-linear-to-t from-black/45 via-black/5 to-transparent" />
+							</div>
+
+							<div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-3 text-white">
+								<div className="rounded-[8px] bg-black/35 px-4 py-3 backdrop-blur-md">
+									<p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/70">
+										Today&apos;s shelf
 									</p>
+									<p className="mt-1 text-2xl font-bold">500+ items</p>
+								</div>
+								<div className="flex items-center gap-2 rounded-[8px] bg-white px-3 py-2 text-sm font-semibold text-foreground shadow-lg">
+									<Clock className="size-4 text-primary" />
+									Ready in 24h
 								</div>
 							</div>
+						</div>
+
+						<div className="absolute -top-5 right-5 hidden items-center gap-3 rounded-[8px] border bg-background px-4 py-3 shadow-lg sm:flex">
+							<div className="flex size-10 items-center justify-center rounded-[8px] bg-primary text-primary-foreground">
+								<ShoppingBag className="size-5" />
+							</div>
+							<div>
+								<p className="text-sm font-bold text-foreground">Curated cart</p>
+								<p className="text-xs text-muted-foreground">
+									Seasonal picks updated weekly
+								</p>
+							</div>
+						</div>
+
+						<div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-medium text-muted-foreground sm:hidden">
+							<span className="rounded-[8px] bg-muted px-2 py-2">Fresh</span>
+							<span className="rounded-[8px] bg-muted px-2 py-2">Local</span>
+							<span className="rounded-[8px] bg-muted px-2 py-2">Fast</span>
 						</div>
 					</div>
 				</div>

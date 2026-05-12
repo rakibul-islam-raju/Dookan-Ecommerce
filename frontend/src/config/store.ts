@@ -1,6 +1,6 @@
 export const store = {
 	title: "Dookan",
-	tagline: "Good Fat, Good Life",
+	tagline: "Store tagnile",
 	description: "Dookan is an organic food brand in Bangladesh",
 	keywords:
 		"Dookan ecommerce, Dookan online store, Dookan online shopping, Dookan online marketplace, Dookan online shopping Bangladesh, Dookan online shopping in Bangladesh",

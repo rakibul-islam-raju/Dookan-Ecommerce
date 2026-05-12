@@ -44,12 +44,12 @@ export const Header = () => {
 
 	return (
 		<>
-			<header className="shadow-sm relative bg-background z-40">
-				<div className="hidden md:block">
+			<header className="relative z-40 bg-background">
+				{/* <div className="hidden md:block">
 					<HeaderTop />
-				</div>
+				</div> */}
 
-				<div className="sticky top-0 z-50 container h-[72px] flex justify-between items-center gap-4 lg:gap-6">
+				<div className="container h-[72px] flex justify-between items-center gap-4 lg:gap-6">
 					{/* Mobile Menu Trigger & Logo */}
 					<div className="flex items-center gap-2 lg:gap-4">
 						{/* Mobile Menu Trigger */}
@@ -130,7 +130,7 @@ export const Header = () => {
 						"lg:hidden transition-all duration-300 ease-in-out border-b bg-background",
 						isSearchOpen
 							? "max-h-20 opacity-100"
-							: "max-h-0 opacity-0 overflow-hidden"
+							: "max-h-0 opacity-0 overflow-hidden",
 					)}
 				>
 					<div className="container py-4">
