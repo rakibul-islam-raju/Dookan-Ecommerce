@@ -60,7 +60,6 @@ export const RegisterForm = () => {
 	const { mutate: register, isPending } = useMutation({
 		mutationFn: authApi.register,
 		onSuccess: (data) => {
-			// Store email for verification page
 			setPendingEmail(data.email);
 			toast.success(t("registerSuccessVerify"));
 			router.push("/verify-email");

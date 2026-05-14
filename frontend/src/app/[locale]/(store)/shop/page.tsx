@@ -1,7 +1,8 @@
-import ShopPage from "@/app/(store)/shop/page";
 import { getPageMetadataCopy } from "@/i18n/page-metadata";
 import type { AppLocale } from "@/i18n/routing";
 import { buildLocalizedMetadata } from "@/lib/seo";
+import { Suspense } from "react";
+import { ShopContent } from "./_components/ShopContent";
 
 export async function generateMetadata({
 	params,
@@ -20,4 +21,10 @@ export async function generateMetadata({
 	});
 }
 
-export default ShopPage;
+export default function ShopPage() {
+	return (
+		<Suspense>
+			<ShopContent />
+		</Suspense>
+	);
+}

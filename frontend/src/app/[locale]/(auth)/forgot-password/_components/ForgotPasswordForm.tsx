@@ -6,8 +6,8 @@ import { PasswordField } from "@/components/ui/@form/PasswordField";
 import { ResendOTPButton } from "@/components/ui/@form/ResendOTPButton";
 import { TextField } from "@/components/ui/@form/TextField";
 import { LoadingButton } from "@/components/ui/LoadingButton";
-import { Link, useRouter } from "@/i18n/navigation";
 import { useZodForm } from "@/hooks/useZodForm";
+import { Link, useRouter } from "@/i18n/navigation";
 import { authApi } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
@@ -16,7 +16,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-export default function ForgotPasswordPage() {
+export function ForgotPasswordForm() {
 	const t = useTranslations("auth");
 	const router = useRouter();
 	const [step, setStep] = useState<"email" | "reset">("email");

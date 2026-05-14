@@ -12,7 +12,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { z } from "zod";
 
-// Helper to mask email: "john@example.com" -> "j***@example.com"
 function maskEmail(email: string): string {
 	const [local, domain] = email.split("@");
 	if (!domain || local.length <= 1) return email;
@@ -58,7 +57,6 @@ export function EmailVerificationForm() {
 		setEmail(data.email);
 		setPendingEmail(data.email);
 		setIsEmailSubmitted(true);
-		// Automatically resend OTP when email is submitted
 		resendVerification.mutate({ email: data.email });
 	};
 

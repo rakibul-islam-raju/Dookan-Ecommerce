@@ -51,18 +51,11 @@ export const LoginForm = () => {
 			const errorMessage =
 				error.response?.data?.detail || error.response?.data?.message;
 
-			// Check for unverified email error
 			if (errorMessage === "Please verify your email before logging in.") {
-				// Store the email for verification
 				const email = form.getValues("email");
 				setPendingEmail(email);
-
-				// Redirect to verification page
 				router.push("/verify-email");
-				return;
 			}
-
-			// Other errors are handled by axios interceptor
 		},
 	});
 

@@ -1,7 +1,7 @@
-import ForgotPasswordPage from "@/app/(auth)/forgot-password/page";
 import { getPageMetadataCopy } from "@/i18n/page-metadata";
 import type { AppLocale } from "@/i18n/routing";
 import { buildLocalizedMetadata } from "@/lib/seo";
+import { ForgotPasswordForm } from "./_components/ForgotPasswordForm";
 
 export async function generateMetadata({
 	params,
@@ -19,4 +19,6 @@ export async function generateMetadata({
 	});
 }
 
-export default ForgotPasswordPage;
+export default function ForgotPasswordPage() {
+	return <ForgotPasswordForm />;
+}

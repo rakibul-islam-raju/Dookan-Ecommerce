@@ -1,7 +1,8 @@
-import TrackOrderPage from "@/app/(store)/track-order/page";
 import { getPageMetadataCopy } from "@/i18n/page-metadata";
 import type { AppLocale } from "@/i18n/routing";
 import { buildLocalizedMetadata } from "@/lib/seo";
+import { getTranslations } from "next-intl/server";
+import { GuestOrderTracking } from "./_components/GuestOrderTracking";
 
 export async function generateMetadata({
 	params,
@@ -20,4 +21,20 @@ export async function generateMetadata({
 	});
 }
 
-export default TrackOrderPage;
+export default async function TrackOrderPage() {
+	const t = await getTranslations("trackOrder");
+
+	return (
+		<div className="container mx-auto py-10 px-4 max-w-md">
+			<div className="space-y-6">
+				<div className="space-y-2 text-center">
+					<h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+					<p className="text-muted-foreground">
+						{t("description")}
+					</p>
+				</div>
+				<GuestOrderTracking />
+			</div>
+		</div>
+	);
+}

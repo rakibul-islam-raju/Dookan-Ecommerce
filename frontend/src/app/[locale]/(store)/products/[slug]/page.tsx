@@ -4,7 +4,8 @@ import { getAbsoluteLocaleUrl, buildLocalizedMetadata } from "@/lib/seo";
 import { getErrorMessage } from "@/lib/api/axios";
 import { productServerApi } from "@/lib/api/products";
 import type { Metadata } from "next";
-import ProductDetailsPage from "@/app/(store)/products/[slug]/page";
+import { notFound } from "next/navigation";
+import { ProductDetailsClient } from "./_components/ProductDetailsClient";
 
 interface ProductPageProps {
 	params: Promise<{ locale: AppLocale; slug: string }>;
@@ -76,4 +77,65 @@ export async function generateMetadata({
 	}
 }
 
-export default ProductDetailsPage;
+export default async function ProductDetailsPage({ params }: ProductPageProps) {
+	const { slug } = await params;
+
+	let product;
+	try {
+		product = await productServerApi.getProductBySlug(slug);
+	} catch {
+		notFound();
+	}
+
+	if (!product.is_active) {
+		notFound();
+	}
+
+	const futureDate = new Date();
+	futureDate.setFullYear(futureDate.getFullYear() + 1);
+
+	const productSchema = {
+		"@context": "https://schema.org",
+		"@type": "Product",
+		name: product.name,
+		description: product.description || product.short_description,
+		image: product.images.map((img) => img.image),
+		sku: product.sku,
+		brand: {
+			"@type": "Brand",
+			name: store.title,
+		},
+		offers: {
+			"@type": "Offer",
+			url: `${store.url}/products/${product.slug}`,
+			priceCurrency: "BDT",
+			price: product.sale_price ?? product.base_price,
+			priceValidUntil: futureDate.toISOString(),
+			availability:
+				product.is_in_stock === true
+					? "https://schema.org/InStock"
+					: "https://schema.org/OutOfStock",
+			itemCondition: "https://schema.org/NewCondition",
+		},
+		...(product.review_summary?.review_count > 0 && {
+			aggregateRating: {
+				"@type": "AggregateRating",
+				ratingValue: String(product.review_summary.average_rating),
+				reviewCount: String(product.review_summary.review_count),
+			},
+		}),
+		category: product.category.name,
+	};
+
+	return (
+		<>
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(productSchema),
+				}}
+			/>
+			<ProductDetailsClient product={product} />
+		</>
+	);
+}
