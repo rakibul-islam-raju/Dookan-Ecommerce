@@ -67,7 +67,7 @@ const ORDER_STATUSES: { value: IOrderStatus; label: string }[] = [
 	{ value: "shipped", label: "Shipped" },
 	{ value: "delivered", label: "Delivered" },
 	{ value: "cancelled", label: "Cancelled" },
-	{ value: "returned", label: "Returned" },
+	{ value: "refunded", label: "Refunded" },
 ];
 
 const PAYMENT_STATUSES: { value: IOrderPaymentStatus; label: string }[] = [
@@ -93,7 +93,7 @@ const getStatusBadgeVariant = (
 			return "success";
 		case "cancelled":
 			return "destructive";
-		case "returned":
+		case "refunded":
 			return "secondary";
 		default:
 			return "default";
@@ -341,7 +341,7 @@ export const OrderDetails = () => {
 		);
 	}
 
-	const canCancel = !["cancelled", "delivered", "returned"].includes(
+	const canCancel = !["cancelled", "delivered", "refunded"].includes(
 		order.status
 	);
 

@@ -71,8 +71,8 @@ export const OrderFilterForm = ({
 									label: t("orders.common.status.cancelled", "Cancelled"),
 								},
 								{
-									value: "returned",
-									label: t("orders.common.status.returned", "Returned"),
+									value: "refunded",
+									label: t("orders.common.status.refunded", "Refunded"),
 								},
 							]}
 						/>

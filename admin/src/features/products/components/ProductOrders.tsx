@@ -55,11 +55,12 @@ import { toast } from "react-toastify";
 
 const ORDER_STATUSES: { value: IOrderStatus; label: string }[] = [
 	{ value: "pending", label: "Pending" },
+	{ value: "confirmed", label: "Confirmed" },
 	{ value: "processing", label: "Processing" },
 	{ value: "shipped", label: "Shipped" },
 	{ value: "delivered", label: "Delivered" },
 	{ value: "cancelled", label: "Cancelled" },
-	{ value: "returned", label: "Returned" },
+	{ value: "refunded", label: "Refunded" },
 ];
 
 const getStatusBadgeVariant = (
@@ -68,6 +69,8 @@ const getStatusBadgeVariant = (
 	switch (status) {
 		case "pending":
 			return "warning";
+		case "confirmed":
+			return "secondary";
 		case "processing":
 			return "info";
 		case "shipped":
@@ -76,7 +79,7 @@ const getStatusBadgeVariant = (
 			return "success";
 		case "cancelled":
 			return "destructive";
-		case "returned":
+		case "refunded":
 			return "secondary";
 		default:
 			return "default";
@@ -261,7 +264,7 @@ export const ProductOrders = ({ productId }: ProductOrdersProps) => {
 									const canCancel = ![
 										"cancelled",
 										"delivered",
-										"returned",
+										"refunded",
 									].includes(order.status);
 
 									return (

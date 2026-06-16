@@ -71,7 +71,7 @@ export function CustomerDetails() {
 		shipped: t("customers.details.orderStatus.shipped", "Shipped"),
 		delivered: t("customers.details.orderStatus.delivered", "Delivered"),
 		cancelled: t("customers.details.orderStatus.cancelled", "Cancelled"),
-		returned: t("customers.details.orderStatus.returned", "Returned"),
+		refunded: t("customers.details.orderStatus.refunded", "Refunded"),
 	};
 
 	const paymentStatusLabels: Record<IOrderPaymentStatus, string> = {

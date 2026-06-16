@@ -80,7 +80,7 @@ export function OrderList() {
 				return "success";
 			case "cancelled":
 				return "destructive";
-			case "returned":
+			case "refunded":
 				return "secondary";
 			default:
 				return "default";

@@ -5,7 +5,7 @@ export type IOrderStatus =
 	| "shipped"
 	| "delivered"
 	| "cancelled"
-	| "returned";
+	| "refunded";
 
 // Response interface
 export interface OrderListResponse {

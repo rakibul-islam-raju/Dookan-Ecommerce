@@ -12,7 +12,11 @@ import {
 import { useLocale } from "@/i18n/locale-context";
 import { T } from "@/i18n/translate";
 import { useT } from "@/i18n/use-t";
-import { useProductDetails, useUpdateProduct } from "@/lib/api/product";
+import {
+	useDeleteProduct,
+	useProductDetails,
+	useUpdateProduct,
+} from "@/lib/api/product";
 import { useQuery } from "@tanstack/react-query";
 import {
 	ArrowLeft,
@@ -40,12 +44,15 @@ export const ProductDetails = () => {
 	const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 	const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
 	const [confirmPublishProduct, setConfirmPublishProduct] = useState(false);
+	const [confirmDeleteProduct, setConfirmDeleteProduct] = useState(false);
 
 	const { data: product, isPending: isLoadingProduct } = useQuery(
 		useProductDetails(id!)
 	);
 	const { mutate: updateProduct, isPending: isUpdatingProduct } =
 		useUpdateProduct();
+	const { mutate: deleteProduct, isPending: isDeletingProduct } =
+		useDeleteProduct();
 
 	const formatCurrency = (value: string | number) =>
 		`৳${Number(value).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
@@ -81,6 +88,31 @@ export const ProductDetails = () => {
 				},
 			}
 		);
+	};
+
+	const handleDeleteProduct = () => {
+		if (!id || isDeletingProduct) return;
+
+		deleteProduct(id, {
+			onSuccess: () => {
+				toast.success(
+					t(
+						"products.details.toast.deleteSuccess",
+						"Product deleted successfully",
+					),
+				);
+				navigate("/products");
+			},
+			onError: (error) => {
+				toast.error(
+					t("products.details.toast.deleteFailed", "Failed to delete product"),
+				);
+				console.error(error);
+			},
+			onSettled: () => {
+				setConfirmDeleteProduct(false);
+			},
+		});
 	};
 
 	const handleBack = () => {
@@ -178,7 +210,11 @@ export const ProductDetails = () => {
 										defaultMessage="Edit Product"
 									/>
 								</DropdownMenuItem>
-								<DropdownMenuItem variant="destructive">
+								<DropdownMenuItem
+									variant="destructive"
+									onClick={() => setConfirmDeleteProduct(true)}
+									disabled={isDeletingProduct}
+								>
 									<Trash className="h-4 w-4 mr-2" />
 									<T
 										id="products.details.actions.delete"
@@ -513,6 +549,21 @@ export const ProductDetails = () => {
 				open={confirmPublishProduct}
 				onConfirm={handlePublishProduct}
 				onCancel={() => setConfirmPublishProduct(false)}
+			/>
+
+			{/* Confirm Delete Product Dialog */}
+			<AppConfirmDialog
+				title={t("products.details.deleteDialog.title", "Delete Product")}
+				description={t(
+					"products.details.deleteDialog.description",
+					"Are you sure you want to delete this product? This action cannot be undone.",
+				)}
+				confirmButtonText={t("products.details.deleteDialog.confirm", "Delete")}
+				cancelButtonText={t("common.cancel", "Cancel")}
+				confirmButtonVariant="destructive"
+				open={confirmDeleteProduct}
+				onConfirm={handleDeleteProduct}
+				onCancel={() => setConfirmDeleteProduct(false)}
 			/>
 		</div>
 	);
