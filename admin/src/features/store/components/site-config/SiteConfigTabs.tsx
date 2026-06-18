@@ -12,6 +12,7 @@ interface SiteConfigTabsProps {
 	logoPreview: string | null;
 	onLogoChange: (event: ChangeEvent<HTMLInputElement>) => void;
 	showMetaTab: boolean;
+	defaultTab?: string;
 	t: TranslateFn;
 }
 
@@ -19,9 +20,10 @@ export const SiteConfigTabs = ({
 	logoPreview,
 	onLogoChange,
 	showMetaTab,
+	defaultTab = "general",
 	t,
 }: SiteConfigTabsProps) => (
-	<Tabs defaultValue="general">
+	<Tabs defaultValue={defaultTab}>
 		<TabsList className="mb-6">
 			<TabsTrigger value="general">
 				<T id="store.siteConfig.tabs.general" defaultMessage="General" />

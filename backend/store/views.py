@@ -1,22 +1,25 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny, BasePermission
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 
 from utils.permissions import HasModulePermission
 from vendors.services import assert_storefront_enabled, is_backoffice_request
 
+from .meta_oauth import (
+    MetaOAuthCallbackSerializer,
+    MetaPixelSelectSerializer,
+    create_meta_oauth_authorization_url,
+    exchange_code_for_access_token,
+    list_existing_meta_pixels,
+    validate_meta_oauth_state,
+)
 from .models import Announcement, Banner, SiteConfig
 from .serializers import (
     AnnouncementSerializer,
     BannerSerializer,
     SiteConfigSerializer,
 )
-
-
-class IsSuperUser(BasePermission):
-    def has_permission(self, request, view):
-        user = request.user
-        return bool(user and user.is_authenticated and user.is_superuser)
-
 
 class AnnouncementListCreateView(generics.ListCreateAPIView):
     serializer_class = AnnouncementSerializer
@@ -65,10 +68,48 @@ class SiteConfigView(generics.RetrieveUpdateAPIView):
 
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
-            self.permission_classes = [IsSuperUser]
+            self.permission_classes = [HasModulePermission("manage_settings")]
         else:
             self.permission_classes = [AllowAny]
         return super().get_permissions()
+
+
+class MetaOAuthStartView(APIView):
+    permission_classes = [HasModulePermission("manage_settings")]
+
+    def post(self, request):
+        return Response(create_meta_oauth_authorization_url(request.user))
+
+
+class MetaOAuthCallbackView(APIView):
+    permission_classes = [HasModulePermission("manage_settings")]
+
+    def post(self, request):
+        serializer = MetaOAuthCallbackSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        state = serializer.validated_data["state"]
+        code = serializer.validated_data["code"]
+
+        validate_meta_oauth_state(state, request.user)
+        access_token = exchange_code_for_access_token(code)
+        pixels = list_existing_meta_pixels(access_token)
+
+        return Response({"pixels": pixels})
+
+
+class MetaPixelSelectView(APIView):
+    permission_classes = [HasModulePermission("manage_settings")]
+
+    def post(self, request):
+        serializer = MetaPixelSelectSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        site_config, _created = SiteConfig.objects.get_or_create()
+        site_config.meta_pixel_id = serializer.validated_data["pixel_id"]
+        site_config.save(update_fields=["meta_pixel_id", "updated_at"])
+
+        return Response(SiteConfigSerializer(site_config, context={"request": request}).data)
 
 
 class BannerListCreateView(generics.ListCreateAPIView):

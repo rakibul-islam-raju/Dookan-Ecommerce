@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { toast } from "react-toastify";
+import { useSearchParams } from "react-router-dom";
 import { SiteConfigLoading } from "./components/site-config/SiteConfigLoading";
 import { SiteConfigPageHeader } from "./components/site-config/SiteConfigPageHeader";
 import { SiteConfigTabs } from "./components/site-config/SiteConfigTabs";
@@ -24,6 +25,7 @@ export function SiteConfig() {
 	const { data: siteConfig, isLoading } = useQuery(getSiteConfig());
 	const { mutate: updateSiteConfig, isPending } = useUpdateSiteConfig();
 	const { vendorContext } = useAuthStore();
+	const [searchParams] = useSearchParams();
 	const [logoFile, setLogoFile] = useState<File | null>(null);
 	const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
@@ -92,6 +94,7 @@ export function SiteConfig() {
 					logoPreview={logoPreview}
 					onLogoChange={handleLogoChange}
 					showMetaTab={Boolean(vendorContext?.meta_pixel_enabled)}
+					defaultTab={searchParams.get("tab") === "meta" ? "meta" : "general"}
 					t={t}
 				/>
 

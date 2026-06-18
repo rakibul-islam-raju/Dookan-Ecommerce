@@ -246,6 +246,18 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Dookan <noreply@dookan.com>")
 ADMIN_URL = env("ADMIN_URL", default="http://localhost:5173")
 
+# Meta / Facebook OAuth for admin Pixel discovery. CAPI tokens stay manual.
+META_APP_ID = env("META_APP_ID", default="")
+META_APP_SECRET = env("META_APP_SECRET", default="")
+META_OAUTH_REDIRECT_URL = env(
+    "META_OAUTH_REDIRECT_URL",
+    default=f"{ADMIN_URL.rstrip('/')}/store/settings/meta/callback",
+)
+META_OAUTH_SCOPES = env(
+    "META_OAUTH_SCOPES",
+    default="ads_management,business_management",
+)
+
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://redis:6379/0")
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=CELERY_BROKER_URL)
 CELERY_ACCEPT_CONTENT = ["json"]
