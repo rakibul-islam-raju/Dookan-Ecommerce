@@ -40,7 +40,7 @@ The project is organized as three applications:
 - Staff accounts, roles, and module-level permissions
 - Banner, announcement, shipping, tax, and general store configuration
 - English and Bengali dashboard interfaces
-- Optional Meta Pixel connection through Facebook OAuth
+- Manual Meta Pixel and Conversions API credential configuration
 
 ### Inventory and expenses
 
@@ -350,7 +350,7 @@ Important configuration groups include:
 - Storefront and admin URLs
 - Next.js authentication cookies and cache revalidation
 - Shipping, tax, and store details managed through the dashboard
-- Optional Meta App, Pixel, and Conversions API credentials
+- Optional Meta Pixel and Conversions API credentials
 - Production HTTPS, Gunicorn, and Nginx settings
 
 Never commit populated `.env` files or production secrets.

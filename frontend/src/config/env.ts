@@ -13,7 +13,7 @@ export const env = {
 		baseAppUrl: process.env.NEXT_PUBLIC_BASE_APP_URL!,
 
 		// Server-side API URL (use 127.0.0.1 to avoid IPv6 issues in Node.js)
-		serverUrl: process.env.NEXT_PUBLIC_API_URL!,
+		serverUrl: process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL!,
 	},
 
 	// Authentication

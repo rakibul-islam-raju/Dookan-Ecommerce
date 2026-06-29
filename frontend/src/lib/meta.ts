@@ -36,7 +36,12 @@ function ensureFbqStub() {
 	if (window.fbq) return window.fbq;
 
 	const fbq = function (...args: unknown[]) {
-		(fbq.callMethod || fbq.queue.push).apply(fbq, args);
+		if (fbq.callMethod) {
+			fbq.callMethod(...args);
+			return;
+		}
+
+		fbq.queue.push(args);
 	} as FbqFunction;
 
 	fbq.queue = [];

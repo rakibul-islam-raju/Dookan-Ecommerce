@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 
 from inventory.models import VariantStockTransaction
 from products.models import Category, Product, ProductVariant
+from store.models import SiteConfig
 from users.models import User
 from vendors.models import Vendor
 
@@ -101,6 +102,48 @@ class OrderInventoryIntegrationTests(APITestCase):
                 transaction_type=VariantStockTransaction.TYPE_ORDER_CANCEL_RETURN,
             ).exists()
         )
+
+    def test_order_totals_use_site_shipping_and_tax_config(self):
+        site_config = SiteConfig.objects.first() or SiteConfig.objects.create()
+        site_config.inside_dhaka_delivery_charge = Decimal("70.00")
+        site_config.outside_dhaka_delivery_charge = Decimal("90.00")
+        site_config.free_shipping_threshold = Decimal("1000.00")
+        site_config.tax_rate = Decimal("5.00")
+        site_config.save()
+
+        response = self.client.post(
+            reverse("orders:order-create"),
+            {
+                "customer_name": "Customer",
+                "customer_email": "customer@example.com",
+                "payment_method": "cod",
+                "delivery_type": "outside_dhaka",
+                "items": [
+                    {
+                        "product_id": str(self.product.id),
+                        "variant_id": str(self.variant.id),
+                        "quantity": 2,
+                    }
+                ],
+                "shipping_address": {
+                    "full_name": "Customer",
+                    "mobile_number": "+8801000000002",
+                    "address_line1": "123 Street",
+                    "address_line2": "",
+                    "city": "Dhaka",
+                    "state": "Dhaka",
+                    "postal_code": "1200",
+                    "country": "Bangladesh",
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["subtotal"], "400.00")
+        self.assertEqual(response.data["shipping_amount"], "90.00")
+        self.assertEqual(response.data["tax_amount"], "20.00")
+        self.assertEqual(response.data["total_amount"], "510.00")
 
     def test_public_order_create_is_blocked_when_storefront_disabled(self):
         self.client.force_authenticate(user=None)

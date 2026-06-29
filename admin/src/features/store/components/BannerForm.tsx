@@ -180,10 +180,12 @@ export const BannerForm = ({ handleClose, banner, mode }: BannerFormProps) => {
 				is_active: banner.is_active,
 			});
 			if (banner.image) {
+				// The edit form mirrors the saved image URL as an immediate preview.
+				// eslint-disable-next-line react-hooks/set-state-in-effect
 				setImagePreview(banner.image);
 			}
 		}
-	}, [banner]);
+	}, [banner, form]);
 
 	return (
 		<BaseForm form={form} onSubmit={onSubmit}>

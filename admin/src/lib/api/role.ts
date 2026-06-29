@@ -13,7 +13,7 @@ export interface RoleCreateData {
 	permissions: Permission[];
 }
 
-export interface RoleUpdateData extends Partial<RoleCreateData> {}
+export type RoleUpdateData = Partial<RoleCreateData>;
 
 export const roleApi = {
 	async list(): Promise<Role[]> {

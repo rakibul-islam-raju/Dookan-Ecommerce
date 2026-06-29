@@ -24,12 +24,16 @@ const revalidateStorefront = async () => {
 	if (!storefrontRevalidateUrl || !storefrontRevalidateSecret) return;
 
 	try {
-		await fetch(storefrontRevalidateUrl, {
+		const response = await fetch(storefrontRevalidateUrl, {
 			method: "POST",
 			headers: {
 				"X-Revalidate-Secret": storefrontRevalidateSecret,
 			},
 		});
+
+		if (!response.ok) {
+			throw new Error(`Request failed with status ${response.status}`);
+		}
 	} catch (error) {
 		console.warn("[Storefront revalidate] Failed:", error);
 	}
@@ -136,24 +140,6 @@ export interface SiteConfigUpdateData {
 	meta_access_token?: string;
 	meta_test_event_code?: string;
 	meta_default_currency?: string;
-}
-
-export interface MetaPixelOption {
-	pixel_id: string;
-	pixel_name: string;
-	ad_account_id: string;
-	ad_account_name: string;
-	business_id: string | null;
-	business_name: string | null;
-}
-
-export interface MetaOAuthStartResponse {
-	authorization_url: string;
-	state: string;
-}
-
-export interface MetaOAuthCallbackResponse {
-	pixels: MetaPixelOption[];
 }
 
 // ============ Banner API ============
@@ -346,34 +332,6 @@ export const siteConfigApi = {
 	},
 };
 
-export const metaOAuthApi = {
-	async start(): Promise<MetaOAuthStartResponse> {
-		const { data } = await clientApi.post<MetaOAuthStartResponse>(
-			"/store/meta/oauth/start/",
-		);
-		return data;
-	},
-
-	async callback(payload: {
-		code: string;
-		state: string;
-	}): Promise<MetaOAuthCallbackResponse> {
-		const { data } = await clientApi.post<MetaOAuthCallbackResponse>(
-			"/store/meta/oauth/callback/",
-			payload,
-		);
-		return data;
-	},
-
-	async selectPixel(pixelId: string): Promise<SiteConfigData> {
-		const { data } = await clientApi.post<SiteConfigData>(
-			"/store/meta/pixels/select/",
-			{ pixel_id: pixelId },
-		);
-		return data;
-	},
-};
-
 // ============ Query Options ============
 export const getBanners = (params: BannerFilter) =>
 	queryOptions({
@@ -491,30 +449,6 @@ export const useUpdateSiteConfig = () => {
 	return useMutation({
 		mutationFn: (updateData: SiteConfigUpdateData) =>
 			siteConfigApi.update(updateData),
-		onSuccess: async () => {
-			queryClient.invalidateQueries({
-				queryKey: [queryKeys.siteConfig],
-			});
-			await revalidateStorefront();
-		},
-	});
-};
-
-export const useStartMetaOAuth = () =>
-	useMutation({
-		mutationFn: () => metaOAuthApi.start(),
-	});
-
-export const useCompleteMetaOAuth = () =>
-	useMutation({
-		mutationFn: (payload: { code: string; state: string }) =>
-			metaOAuthApi.callback(payload),
-	});
-
-export const useSelectMetaPixel = () => {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (pixelId: string) => metaOAuthApi.selectPixel(pixelId),
 		onSuccess: async () => {
 			queryClient.invalidateQueries({
 				queryKey: [queryKeys.siteConfig],

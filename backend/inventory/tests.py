@@ -37,7 +37,6 @@ class InventoryBaseTestCase(APITestCase):
             is_active=True,
             is_email_verified=True,
             is_staff=True,
-            role=self.role,
         )
         self.vendor = Vendor.objects.first()
         self.vendor.name = "Vendor A"

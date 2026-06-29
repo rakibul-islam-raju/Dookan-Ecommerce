@@ -5,9 +5,6 @@ from .views import (
     AnnouncementRetrieveUpdateDestroyView,
     BannerListCreateView,
     BannerRetrieveUpdateDestroyView,
-    MetaOAuthCallbackView,
-    MetaOAuthStartView,
-    MetaPixelSelectView,
     SiteConfigView,
 )
 
@@ -18,21 +15,6 @@ urlpatterns = [
         "site-config/",
         SiteConfigView.as_view(),
         name="site-config",
-    ),
-    path(
-        "meta/oauth/start/",
-        MetaOAuthStartView.as_view(),
-        name="meta-oauth-start",
-    ),
-    path(
-        "meta/oauth/callback/",
-        MetaOAuthCallbackView.as_view(),
-        name="meta-oauth-callback",
-    ),
-    path(
-        "meta/pixels/select/",
-        MetaPixelSelectView.as_view(),
-        name="meta-pixel-select",
     ),
     path(
         "banners/",

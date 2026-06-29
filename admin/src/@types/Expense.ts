@@ -46,7 +46,8 @@ export interface IExpenseCategoryCreateData {
 	description?: string;
 }
 
-export interface IExpenseCategoryUpdateData extends Partial<IExpenseCategoryCreateData> {}
+export type IExpenseCategoryUpdateData =
+	Partial<IExpenseCategoryCreateData>;
 
 export interface IExpenseCreateData {
 	category: string;
@@ -58,4 +59,4 @@ export interface IExpenseCreateData {
 	product_variant?: string | null;
 }
 
-export interface IExpenseUpdateData extends Partial<IExpenseCreateData> {}
+export type IExpenseUpdateData = Partial<IExpenseCreateData>;

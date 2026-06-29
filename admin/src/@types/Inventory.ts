@@ -127,7 +127,7 @@ export interface IMaterialCreateData {
 	is_active?: boolean;
 }
 
-export interface IMaterialUpdateData extends Partial<IMaterialCreateData> {}
+export type IMaterialUpdateData = Partial<IMaterialCreateData>;
 
 export interface IMaterialTransactionCreateData {
 	material_id: string;

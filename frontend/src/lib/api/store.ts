@@ -11,6 +11,7 @@ import { clientApi, serverApi } from "./axios";
 
 export const STORE_CACHE_TAGS = {
 	banners: "store:banners",
+	siteConfig: "store:site-config",
 } as const;
 
 const getBannersUncached = async (): Promise<IBanner[]> => {
@@ -18,6 +19,11 @@ const getBannersUncached = async (): Promise<IBanner[]> => {
 		"/store/banners/"
 	);
 	return data.results;
+};
+
+const getSiteConfigUncached = async (): Promise<ISiteConfig> => {
+	const { data } = await serverApi.get<ISiteConfig>("/store/site-config/");
+	return data;
 };
 
 /**
@@ -29,9 +35,21 @@ export const storeServerApi = {
 	 * Use in Server Components with ISR
 	 */
 	async getSiteConfig(): Promise<ISiteConfig> {
-		const { data } = await serverApi.get<ISiteConfig>("/store/site-config/");
-		return data;
+		return getSiteConfigUncached();
 	},
+
+	/**
+	 * Get site configuration with explicit tag-based invalidation.
+	 * Cache is invalidated via `revalidateTag(STORE_CACHE_TAGS.siteConfig)`.
+	 */
+	getSiteConfigCached: unstable_cache(
+		async () => getSiteConfigUncached(),
+		["storeServerApi.getSiteConfigCached"],
+		{
+			revalidate: 60 * 60 * 24 * 365,
+			tags: [STORE_CACHE_TAGS.siteConfig],
+		}
+	),
 
 	/**
 	 * Get active banners

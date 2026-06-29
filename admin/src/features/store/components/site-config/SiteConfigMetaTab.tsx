@@ -3,16 +3,11 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { TabsContent } from "@/components/ui/tabs";
 import { T } from "@/i18n/translate";
-import { useStartMetaOAuth } from "@/lib/api/store";
-import { ExternalLink, Loader2 } from "lucide-react";
-import { toast } from "react-toastify";
 import type { TranslateFn } from "./site-config-form";
 
 interface SiteConfigMetaTabProps {
@@ -20,24 +15,6 @@ interface SiteConfigMetaTabProps {
 }
 
 export const SiteConfigMetaTab = ({ t }: SiteConfigMetaTabProps) => {
-	const { mutate: startMetaOAuth, isPending } = useStartMetaOAuth();
-
-	const handleConnect = () => {
-		startMetaOAuth(undefined, {
-			onSuccess: (data) => {
-				window.location.assign(data.authorization_url);
-			},
-			onError: () => {
-				toast.error(
-					t(
-						"store.siteConfig.meta.connectFailed",
-						"Failed to start Facebook connection",
-					),
-				);
-			},
-		});
-	};
-
 	return (
 		<TabsContent value="meta" className="space-y-6">
 			<Card>
@@ -51,7 +28,7 @@ export const SiteConfigMetaTab = ({ t }: SiteConfigMetaTabProps) => {
 					<CardDescription>
 						<T
 							id="store.siteConfig.meta.description"
-							defaultMessage="Configure your Meta Pixel and Conversions API credentials. Enable or disable tracking from the Vendor settings."
+							defaultMessage="Configure your Meta Pixel and Conversions API credentials manually. Enable or disable tracking from the Vendor settings."
 						/>
 					</CardDescription>
 				</CardHeader>
@@ -102,30 +79,6 @@ export const SiteConfigMetaTab = ({ t }: SiteConfigMetaTabProps) => {
 						/>
 					</div>
 				</CardContent>
-				<CardFooter className="flex items-center justify-between border-t pt-4">
-					<p className="text-sm text-muted-foreground">
-						<T
-							id="store.siteConfig.meta.connectHelp"
-							defaultMessage="Use Facebook Login to find an existing Pixel ID. CAPI access token remains manual."
-						/>
-					</p>
-					<Button
-						type="button"
-						variant="outline"
-						onClick={handleConnect}
-						disabled={isPending}
-					>
-						{isPending ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
-						) : (
-							<ExternalLink className="h-4 w-4" />
-						)}
-						<T
-							id="store.siteConfig.meta.connectFacebook"
-							defaultMessage="Connect Facebook"
-						/>
-					</Button>
-				</CardFooter>
 			</Card>
 		</TabsContent>
 	);

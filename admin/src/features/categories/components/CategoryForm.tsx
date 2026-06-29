@@ -213,16 +213,18 @@ export const CategoryForm = ({
 
 	useEffect(() => {
 		form.setValue("slug", slugify(nameValue, { lower: true }));
-	}, [nameValue]);
+	}, [form, nameValue]);
 
 	useEffect(() => {
 		if (category) {
 			form.reset(category);
 			if (category.image) {
+				// The edit form mirrors the saved image URL as an immediate preview.
+				// eslint-disable-next-line react-hooks/set-state-in-effect
 				setImagePreview(category.image);
 			}
 		}
-	}, [category]);
+	}, [category, form]);
 
 	return (
 		<BaseForm form={form} onSubmit={onSubmit}>

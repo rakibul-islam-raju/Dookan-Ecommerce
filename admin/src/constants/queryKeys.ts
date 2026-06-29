@@ -10,7 +10,6 @@ export const queryKeys = {
 	banners: "banners",
 	announcements: "announcements",
 	siteConfig: "siteConfig",
-	metaOAuth: "metaOAuth",
 	variantTypes: "variantTypes",
 	productVariants: "productVariants",
 	coupons: "coupons",

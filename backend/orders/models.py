@@ -115,7 +115,21 @@ class Order(BaseModel):
         if self.delivery_type == "free_delivery":
             self.delivery_charge = 0
         else:
-            if self.delivery_type == "inside_dhaka":
+            try:
+                from store.models import SiteConfig
+
+                site_config = SiteConfig.objects.first()
+            except Exception:
+                site_config = None
+
+            if site_config:
+                charge = (
+                    site_config.inside_dhaka_delivery_charge
+                    if self.delivery_type == "inside_dhaka"
+                    else site_config.outside_dhaka_delivery_charge
+                )
+                self.delivery_charge = int(charge)
+            elif self.delivery_type == "inside_dhaka":
                 self.delivery_charge = 60
             else:
                 self.delivery_charge = 120

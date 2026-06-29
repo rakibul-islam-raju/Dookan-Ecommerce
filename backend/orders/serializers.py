@@ -13,6 +13,7 @@ from coupons.models import Coupon
 from inventory.models import VariantStockTransaction
 from inventory.services import apply_variant_stock_transaction
 from products.models import ProductVariant
+from store.models import SiteConfig
 from .models import (
     Order,
     OrderItem,
@@ -296,12 +297,35 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             except Coupon.DoesNotExist:
                 pass  # Invalid coupon code silently ignored during order creation
 
-        # Calculate tax and shipping (you can customize this logic)
-        tax_rate = Decimal("0.00")  # 0% tax for now
-        tax_amount = subtotal * tax_rate
+        site_config = SiteConfig.objects.first()
+        tax_rate = (
+            Decimal(site_config.tax_rate) / Decimal("100.00")
+            if site_config
+            else Decimal("0.00")
+        )
+        tax_amount = (subtotal - discount_amount) * tax_rate
 
-        # Free shipping over certain amount, else flat rate
-        shipping_amount = Decimal("0.00") if subtotal >= 1000 else Decimal("50.00")
+        delivery_type = validated_data.get("delivery_type", "inside_dhaka")
+        if delivery_type == "free_delivery":
+            shipping_amount = Decimal("0.00")
+        elif site_config:
+            base_shipping = (
+                site_config.inside_dhaka_delivery_charge
+                if delivery_type == "inside_dhaka"
+                else site_config.outside_dhaka_delivery_charge
+            )
+            free_shipping_threshold = site_config.free_shipping_threshold
+            shipping_amount = (
+                Decimal("0.00")
+                if free_shipping_threshold > 0 and subtotal >= free_shipping_threshold
+                else Decimal(base_shipping)
+            )
+        else:
+            shipping_amount = (
+                Decimal("60.00")
+                if delivery_type == "inside_dhaka"
+                else Decimal("120.00")
+            )
 
         total_amount = subtotal - discount_amount + tax_amount + shipping_amount
 

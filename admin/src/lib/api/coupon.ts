@@ -40,7 +40,7 @@ export interface CouponCreateData {
 	is_active?: boolean;
 }
 
-export interface CouponUpdateData extends Partial<CouponCreateData> {}
+export type CouponUpdateData = Partial<CouponCreateData>;
 
 export interface CouponFilter extends ICommonFilter {
 	search?: string;

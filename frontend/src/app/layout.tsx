@@ -36,7 +36,7 @@ export const revalidate = 3600;
 
 async function getSiteConfig() {
 	try {
-		return await storeServerApi.getSiteConfig();
+		return await storeServerApi.getSiteConfigCached();
 	} catch {
 		// Return default config if API fails
 		return {

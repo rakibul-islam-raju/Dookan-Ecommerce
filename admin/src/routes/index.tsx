@@ -22,7 +22,6 @@ import { ProductDetails } from "@/features/products/ProductDetails";
 import { ProductList } from "@/features/products/ProductList";
 import { AnnouncementList } from "@/features/store/AnnouncementList";
 import { BannerList } from "@/features/store/BannerList";
-import { MetaOAuthCallback } from "@/features/store/MetaOAuthCallback";
 import { SiteConfig } from "@/features/store/SiteConfig";
 import { StaffList } from "@/features/staff/StaffList";
 import { RoleList } from "@/features/roles/RoleList";
@@ -186,14 +185,6 @@ export const router = createBrowserRouter([
 				element: (
 					<PermissionGuard permission="manage_settings">
 						<SiteConfig />
-					</PermissionGuard>
-				),
-			},
-			{
-				path: "store/settings/meta/callback",
-				element: (
-					<PermissionGuard permission="manage_settings">
-						<MetaOAuthCallback />
 					</PermissionGuard>
 				),
 			},
