@@ -14,6 +14,7 @@ import {
 	MapPin,
 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
 // Helper function to get image URL
 const getImageUrl = (image?: string) => {
@@ -48,6 +49,8 @@ const getStatusStep = (status: import("@/@types/Order").IOrderStatus) => {
 };
 
 export default function OrderDetailsPage() {
+	const t = useTranslations("orders");
+	const locale = useLocale();
 	const params = useParams();
 	const orderId = params.id as string;
 
@@ -61,10 +64,10 @@ export default function OrderDetailsPage() {
 				</div>
 				<div className="space-y-2">
 					<h1 className="text-3xl font-bold font-serif">
-						Loading order details...
+						{t("loadingDetails")}
 					</h1>
 					<p className="text-muted-foreground max-w-md mx-auto">
-						Please wait while we fetch your order information.
+						{t("loadingDetailsDescription")}
 					</p>
 				</div>
 			</div>
@@ -78,14 +81,13 @@ export default function OrderDetailsPage() {
 					<div className="w-12 h-12 text-red-600">⚠️</div>
 				</div>
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold font-serif">Order Not Found</h1>
+					<h1 className="text-3xl font-bold font-serif">{t("notFound")}</h1>
 					<p className="text-muted-foreground max-w-md mx-auto">
-						We couldn&apos;t find the order you&apos;re looking for. Please
-						check the order ID and try again.
+						{t("notFoundDescription")}
 					</p>
 				</div>
 				<Link href="/orders">
-					<Button>Back to Orders</Button>
+					<Button>{t("backToOrders")}</Button>
 				</Link>
 			</div>
 		);
@@ -100,12 +102,12 @@ export default function OrderDetailsPage() {
 					href="/orders"
 					className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
 				>
-					<ArrowLeft className="size-4 mr-1" /> Back to Orders
+					<ArrowLeft className="size-4 mr-1" /> {t("backToOrders")}
 				</Link>
 				<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div>
 						<h1 className="text-3xl font-bold font-serif flex items-center gap-3">
-							Order #{order.order_number}
+							{t("orderHeading", { number: order.order_number })}
 							<Badge
 								variant="outline"
 								className={cn(
@@ -113,27 +115,28 @@ export default function OrderDetailsPage() {
 									getStatusColor(order.status)
 								)}
 							>
-								{order.status}
+								{t(`orderStatus.${order.status}`)}
 							</Badge>
 						</h1>
 						<p className="text-muted-foreground mt-1">
-							Placed on{" "}
-							{new Date(order.created_at).toLocaleDateString("en-US", {
+							{t("placedOn", {
+								date: new Date(order.created_at).toLocaleDateString(locale, {
 								weekday: "long",
 								year: "numeric",
 								month: "long",
 								day: "numeric",
 								hour: "numeric",
 								minute: "numeric",
+								}),
 							})}
 						</p>
 						<p className="text-sm text-muted-foreground mt-1">
-							Customer: {order.customer_name}
+							{t("customer", { name: order.customer_name })}
 							{order.customer_email && ` • ${order.customer_email}`}
 						</p>
 					</div>
 					{order.status !== "cancelled" && (
-						<Button variant="outline">Download Invoice</Button>
+						<Button variant="outline">{t("downloadInvoice")}</Button>
 					)}
 				</div>
 			</div>
@@ -152,7 +155,12 @@ export default function OrderDetailsPage() {
 						/>
 
 						{/* Steps */}
-						{["Order Placed", "Processing", "Shipped", "Delivered"].map(
+						{[
+							t("orderPlaced"),
+							t("processing"),
+							t("shipped"),
+							t("delivered"),
+						].map(
 							(step, index) => {
 								const isCompleted = index + 1 <= currentStep;
 								const isCurrent = index + 1 === currentStep;
@@ -196,7 +204,7 @@ export default function OrderDetailsPage() {
 			{/* Customer Note */}
 			{order.customer_note && (
 				<div className="border rounded-xl bg-card p-6">
-					<h3 className="font-semibold text-lg mb-3">Order Notes</h3>
+					<h3 className="font-semibold text-lg mb-3">{t("orderNotes")}</h3>
 					<p className="text-muted-foreground">{order.customer_note}</p>
 				</div>
 			)}
@@ -206,7 +214,7 @@ export default function OrderDetailsPage() {
 				<div className="md:col-span-2 space-y-6">
 					<div className="border rounded-xl overflow-hidden bg-card">
 						<div className="p-4 bg-muted/30 border-b font-medium">
-							Order Items ({order.items.length})
+							{t("orderItems", { count: order.items.length })}
 						</div>
 						<div className="divide-y">
 							{order.items.map((item) => (
@@ -227,8 +235,10 @@ export default function OrderDetailsPage() {
 											{item.product_name}
 										</Link>
 										<p className="text-sm text-muted-foreground mt-1">
-											Qty: {item.quantity} × ৳
-											{parseFloat(item.unit_price).toFixed(2)}
+											{t("quantityPrice", {
+												quantity: item.quantity,
+												price: parseFloat(item.unit_price).toFixed(2),
+											})}
 										</p>
 									</div>
 									<div className="text-right font-medium">
@@ -244,19 +254,19 @@ export default function OrderDetailsPage() {
 				<div className="space-y-6">
 					{/* Order Summary */}
 					<div className="border rounded-xl bg-card p-6 space-y-4">
-						<h3 className="font-semibold text-lg">Order Summary</h3>
+						<h3 className="font-semibold text-lg">{t("orderSummary")}</h3>
 						<div className="space-y-2 text-sm">
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">Subtotal</span>
+								<span className="text-muted-foreground">{t("subtotal")}</span>
 								<span>৳{parseFloat(order.subtotal).toFixed(2)}</span>
 							</div>
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">Shipping</span>
+								<span className="text-muted-foreground">{t("shipping")}</span>
 								<span>৳{parseFloat(order.shipping_amount).toFixed(2)}</span>
 							</div>
 							{parseFloat(order.discount_amount) > 0 && (
 								<div className="flex justify-between">
-									<span className="text-muted-foreground">Discount</span>
+									<span className="text-muted-foreground">{t("discount")}</span>
 									<span className="text-green-600">
 										-৳{parseFloat(order.discount_amount).toFixed(2)}
 									</span>
@@ -264,13 +274,13 @@ export default function OrderDetailsPage() {
 							)}
 							{parseFloat(order.tax_amount) > 0 && (
 								<div className="flex justify-between">
-									<span className="text-muted-foreground">Tax</span>
+									<span className="text-muted-foreground">{t("tax")}</span>
 									<span>৳{parseFloat(order.tax_amount).toFixed(2)}</span>
 								</div>
 							)}
 							<Separator className="my-2" />
 							<div className="flex justify-between font-bold text-lg">
-								<span>Total</span>
+								<span>{t("total")}</span>
 								<span>৳{parseFloat(order.total_amount).toFixed(2)}</span>
 							</div>
 						</div>
@@ -279,7 +289,7 @@ export default function OrderDetailsPage() {
 					{/* Shipping Details */}
 					<div className="border rounded-xl bg-card p-6 space-y-4">
 						<h3 className="font-semibold flex items-center gap-2">
-							<MapPin className="size-4 text-primary" /> Shipping Address
+							<MapPin className="size-4 text-primary" /> {t("shippingAddress")}
 						</h3>
 						<address className="not-italic text-sm text-muted-foreground leading-relaxed">
 							<span className="font-medium text-foreground block mb-1">
@@ -303,22 +313,22 @@ export default function OrderDetailsPage() {
 					{/* Payment Details */}
 					<div className="border rounded-xl bg-card p-6 space-y-4">
 						<h3 className="font-semibold flex items-center gap-2">
-							<CreditCard className="size-4 text-primary" /> Payment Method
+							<CreditCard className="size-4 text-primary" /> {t("paymentMethod")}
 						</h3>
 						<p className="text-sm text-muted-foreground capitalize">
 							{order.payment_method === "cod"
-								? "Cash on Delivery"
+								? t("cashOnDelivery")
 								: order.payment_method}
 						</p>
 						<div className="flex items-center gap-2 text-sm">
-							<span className="text-muted-foreground">Status:</span>
+							<span className="text-muted-foreground">{t("statusLabel")}</span>
 							<Badge
 								variant={
 									order.payment_status === "paid" ? "default" : "secondary"
 								}
 								className="capitalize"
 							>
-								{order.payment_status}
+								{t(`paymentStatus.${order.payment_status}`)}
 							</Badge>
 						</div>
 					</div>

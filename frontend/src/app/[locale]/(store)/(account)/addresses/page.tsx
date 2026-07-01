@@ -25,26 +25,27 @@ import {
 } from "@/lib/hooks/useUser";
 import { cn } from "@/lib/utils";
 import { Briefcase, Home, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const addressSchema = z.object({
+const createAddressSchema = (t: (key: string) => string) => z.object({
 	address_type: z.enum(["home", "work", "other"]),
-	full_name: z.string().min(1, "Full name is required"),
+	full_name: z.string().min(1, t("validation.fullNameRequired")),
 	mobile_number: z
 		.string()
-		.min(1, "Mobile number is required")
-		.regex(/^[0-9]{11}$/, "Mobile number must be 11 digits"),
-	address_line1: z.string().min(1, "Street address is required"),
+		.min(1, t("validation.mobileRequired"))
+		.regex(/^[0-9]{11}$/, t("validation.mobileDigits")),
+	address_line1: z.string().min(1, t("validation.streetRequired")),
 	address_line2: z.string().optional(),
-	city: z.string().min(1, "City is required"),
-	state: z.string().min(1, "State is required"),
-	postal_code: z.string().min(1, "Postal code is required"),
-	country: z.string().min(1, "Country is required"),
+	city: z.string().min(1, t("validation.cityRequired")),
+	state: z.string().min(1, t("validation.stateRequired")),
+	postal_code: z.string().min(1, t("validation.postalCodeRequired")),
+	country: z.string().min(1, t("validation.countryRequired")),
 });
 
-type AddressFormData = z.infer<typeof addressSchema>;
+type AddressFormData = z.infer<ReturnType<typeof createAddressSchema>>;
 
 const getAddressIcon = (type: IUserAddress["address_type"]) => {
 	switch (type) {
@@ -58,11 +59,13 @@ const getAddressIcon = (type: IUserAddress["address_type"]) => {
 };
 
 export default function AddressesPage() {
+	const t = useTranslations("account");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [editingAddress, setEditingAddress] = useState<IUserAddress | null>(
 		null
 	);
 
+	const addressSchema = useMemo(() => createAddressSchema(t), [t]);
 	const form = useZodForm(addressSchema, {
 		defaultValues: {
 			address_type: "home" as const,
@@ -91,7 +94,7 @@ export default function AddressesPage() {
 			await createAddressMutation.mutateAsync(data);
 			closeDialog();
 		} catch {
-			toast.error("Failed to create address");
+			toast.error(t("createAddressFailed"));
 		}
 	};
 
@@ -105,17 +108,17 @@ export default function AddressesPage() {
 			});
 			closeDialog();
 		} catch {
-			toast.error("Failed to update address");
+			toast.error(t("updateAddressFailed"));
 		}
 	};
 
 	const handleDeleteAddress = async (addressId: string) => {
-		if (!confirm("Are you sure you want to delete this address?")) return;
+		if (!confirm(t("deleteAddressConfirm"))) return;
 
 		try {
 			await deleteAddressMutation.mutateAsync(addressId);
 		} catch {
-			toast.error("Failed to delete address");
+			toast.error(t("deleteAddressFailed"));
 		}
 	};
 
@@ -126,7 +129,7 @@ export default function AddressesPage() {
 				updateData: { id: address.id, is_default: true },
 			});
 		} catch {
-			toast.error("Failed to set address as default");
+			toast.error(t("setDefaultFailed"));
 		}
 	};
 
@@ -172,15 +175,15 @@ export default function AddressesPage() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h2 className="text-2xl font-bold font-serif">My Addresses</h2>
+					<h2 className="text-2xl font-bold font-serif">{t("addressesTitle")}</h2>
 					<p className="text-muted-foreground">
-						Manage your shipping and billing addresses.
+						{t("addressesDescription")}
 					</p>
 				</div>
 
 				<Button onClick={openCreateDialog}>
 					<Plus className="size-4 mr-2" />
-					Add Address
+					{t("addAddress")}
 				</Button>
 			</div>
 
@@ -189,12 +192,12 @@ export default function AddressesPage() {
 			<div className="grid md:grid-cols-2 gap-6">
 				{isLoadingAddresses ? (
 					<div className="col-span-full flex justify-center py-8">
-						<div className="text-muted-foreground">Loading addresses...</div>
+						<div className="text-muted-foreground">{t("loadingAddresses")}</div>
 					</div>
 				) : addresses.length === 0 ? (
 					<div className="col-span-full text-center py-8">
 						<p className="text-muted-foreground">
-							No addresses found. Add your first address above.
+							{t("noAddresses")}
 						</p>
 					</div>
 				) : (
@@ -220,14 +223,14 @@ export default function AddressesPage() {
 										{getAddressIcon(address.address_type)}
 									</div>
 									<span className="font-medium capitalize">
-										{address.address_type}
+										{t(address.address_type)}
 									</span>
 									{address.is_default && (
 										<Badge
 											variant="secondary"
 											className="text-xs font-normal bg-primary/10 text-primary hover:bg-primary/20"
 										>
-											Default
+											{t("default")}
 										</Badge>
 									)}
 								</div>
@@ -275,7 +278,7 @@ export default function AddressesPage() {
 										onClick={() => handleSetAsDefault(address)}
 										disabled={updateAddressMutation.isPending}
 									>
-										Set as Default
+										{t("setAsDefault")}
 									</Button>
 								</div>
 							)}
@@ -292,7 +295,7 @@ export default function AddressesPage() {
 					<div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
 						<Plus className="size-6" />
 					</div>
-					<span className="font-medium">Add New Address</span>
+					<span className="font-medium">{t("addNewAddress")}</span>
 				</Button>
 			</div>
 
@@ -300,12 +303,12 @@ export default function AddressesPage() {
 				<DialogContent className="sm:max-w-[500px]">
 					<DialogHeader>
 						<DialogTitle>
-							{editingAddress ? "Edit Address" : "Add New Address"}
+							{editingAddress ? t("editAddress") : t("addNewAddress")}
 						</DialogTitle>
 						<DialogDescription>
 							{editingAddress
-								? "Update your shipping address details."
-								: "Enter the details for your new shipping address."}
+								? t("editAddressDescription")
+								: t("addAddressDescription")}
 						</DialogDescription>
 					</DialogHeader>
 					<BaseForm
@@ -318,76 +321,76 @@ export default function AddressesPage() {
 							<div className="grid grid-cols-2 gap-4">
 								<div className="space-y-2">
 									<label htmlFor="address_type" className="text-sm font-medium">
-										Address Type
+										{t("addressType")}
 									</label>
 									<select
 										id="address_type"
 										{...form.register("address_type")}
 										className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 									>
-										<option value="home">Home</option>
-										<option value="work">Work</option>
-										<option value="other">Other</option>
+										<option value="home">{t("home")}</option>
+										<option value="work">{t("work")}</option>
+										<option value="other">{t("other")}</option>
 									</select>
 									<FormMessage />
 								</div>
 								<TextField
 									name="full_name"
-									label="Full Name"
-									placeholder="John Doe"
+									label={t("fullName")}
+									placeholder={t("fullNamePlaceholder")}
 									required
 								/>
 							</div>
 							<TextField
 								name="mobile_number"
-								label="Mobile Number"
+								label={t("mobileNumber")}
 								placeholder="01XXXXXXXXX"
 								type="tel"
 								required
 							/>
 							<TextField
 								name="address_line1"
-								label="Street Address"
-								placeholder="123 Main St"
+								label={t("streetAddress")}
+								placeholder={t("streetAddressPlaceholder")}
 								required
 							/>
 							<TextField
 								name="address_line2"
-								label="Apartment, Suite, etc. (Optional)"
-								placeholder="Apt 4B"
+								label={t("addressLine2")}
+								placeholder={t("addressLine2Placeholder")}
 							/>
 							<div className="grid grid-cols-2 gap-4">
 								<TextField
 									name="city"
-									label="City"
-									placeholder="Dhaka"
+									label={t("city")}
+									placeholder={t("cityPlaceholder")}
 									required
 								/>
 								<TextField
 									name="state"
-									label="State / Province"
-									placeholder="Dhaka"
+									label={t("stateProvince")}
+									placeholder={t("cityPlaceholder")}
 									required
 								/>
 							</div>
 							<div className="grid grid-cols-2 gap-4">
 								<TextField
 									name="postal_code"
-									label="Zip / Postal Code"
+									label={t("zipPostalCode")}
 									placeholder="1216"
 									required
 								/>
 								<TextField
 									name="country"
-									label="Country"
-									placeholder="Bangladesh"
+									label={t("country")}
+								placeholder={t("countryPlaceholder")}
 									required
 								/>
 							</div>
 						</div>
 						<DialogFooter>
 							<Button variant="outline" onClick={closeDialog} type="button">
-								Cancel
+								{t("cancel")}
 							</Button>
 							<LoadingButton
 								type="submit"
@@ -396,7 +399,7 @@ export default function AddressesPage() {
 									updateAddressMutation.isPending
 								}
 							>
-								{editingAddress ? "Update Address" : "Save Address"}
+								{editingAddress ? t("updateAddress") : t("saveAddress")}
 							</LoadingButton>
 						</DialogFooter>
 					</BaseForm>

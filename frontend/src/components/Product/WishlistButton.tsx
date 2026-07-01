@@ -22,7 +22,7 @@ export function WishlistButton({
 	variant = "icon",
 	className,
 }: WishlistButtonProps) {
-	const t = useTranslations("common");
+	const t = useTranslations("product");
 	const user = useAuthStore((state) => state.user);
 	const router = useRouter();
 	const { data: wishlistIds } = useWishlistProductIds();
@@ -49,7 +49,7 @@ export function WishlistButton({
 				variant="outline"
 				className={cn("h-12 w-12 p-0", className)}
 				aria-label={
-					isWishlisted ? `${t("remove")} ${t("wishlist")}` : `Add to ${t("wishlist")}`
+					isWishlisted ? t("removeFromWishlist") : t("addToWishlist")
 				}
 				onClick={handleToggle}
 				disabled={toggleWishlist.isPending}
@@ -75,7 +75,7 @@ export function WishlistButton({
 			)}
 			onClick={handleToggle}
 			disabled={toggleWishlist.isPending}
-			title={isWishlisted ? `${t("remove")} ${t("wishlist")}` : `Add to ${t("wishlist")}`}
+			title={isWishlisted ? t("removeFromWishlist") : t("addToWishlist")}
 		>
 			<Heart
 				className={cn(

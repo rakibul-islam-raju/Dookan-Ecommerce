@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CouponValidateResponse } from "@/lib/api/coupons";
 import { Check, Loader2, Tag, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface CheckoutCouponProps {
 	couponCode: string;
@@ -26,11 +27,12 @@ export function CheckoutCoupon({
 	onApply,
 	onRemove,
 }: CheckoutCouponProps) {
+	const t = useTranslations("checkoutPage");
 	return (
 		<section className="space-y-4">
 			<h2 className="text-xl font-semibold flex items-center gap-2">
 				<Tag className="size-5" />
-				Discount Code
+				{t("discountCode")}
 			</h2>
 
 			{appliedCoupon ? (
@@ -56,7 +58,7 @@ export function CheckoutCoupon({
 				<div>
 					<div className="flex gap-2">
 						<Input
-							placeholder="Enter coupon code"
+							placeholder={t("enterCouponCode")}
 							value={couponCode}
 							onChange={(e) => {
 								setCouponCode(e.target.value.toUpperCase());
@@ -79,7 +81,7 @@ export function CheckoutCoupon({
 							{couponLoading ? (
 								<Loader2 className="size-4 animate-spin" />
 							) : (
-								"Apply"
+								t("apply")
 							)}
 						</Button>
 					</div>

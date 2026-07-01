@@ -22,6 +22,7 @@ import {
 	Truck,
 	XCircle,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 const getStatusColor = (status: IOrderStatus) => {
 	switch (status) {
@@ -60,21 +61,23 @@ const getStatusIcon = (status: IOrderStatus) => {
 };
 
 export default function OrdersPage() {
+	const t = useTranslations("orders");
+	const locale = useLocale();
 	const { data: orders, isLoading, error } = useMyOrders();
 
 	if (isLoading) {
 		return (
 			<div className="space-y-8">
 				<div className="flex flex-col gap-2">
-					<h1 className="text-3xl font-bold font-serif">My Orders</h1>
+					<h1 className="text-3xl font-bold font-serif">{t("title")}</h1>
 					<p className="text-muted-foreground">
-						View and track your order history.
+						{t("description")}
 					</p>
 				</div>
 				<div className="flex items-center justify-center py-12">
 					<div className="text-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-						<p className="text-muted-foreground">Loading orders...</p>
+						<p className="text-muted-foreground">{t("loading")}</p>
 					</div>
 				</div>
 			</div>
@@ -85,9 +88,9 @@ export default function OrdersPage() {
 		return (
 			<div className="space-y-8">
 				<div className="flex flex-col gap-2">
-					<h1 className="text-3xl font-bold font-serif">My Orders</h1>
+					<h1 className="text-3xl font-bold font-serif">{t("title")}</h1>
 					<p className="text-muted-foreground">
-						View and track your order history.
+						{t("description")}
 					</p>
 				</div>
 				<div className="flex items-center justify-center py-12">
@@ -96,11 +99,11 @@ export default function OrdersPage() {
 							<XCircle className="size-8 text-red-500" />
 						</div>
 						<h3 className="text-lg font-semibold mb-2">
-							Failed to load orders
+							{t("failedLoad")}
 						</h3>
 						<p className="text-muted-foreground">
 							{error?.message ||
-								"Something went wrong while loading your orders."}
+								t("failedLoadDescription")}
 						</p>
 					</div>
 				</div>
@@ -111,9 +114,9 @@ export default function OrdersPage() {
 	return (
 		<div className="space-y-8">
 			<div className="flex flex-col gap-2">
-				<h1 className="text-3xl font-bold font-serif">My Orders</h1>
+				<h1 className="text-3xl font-bold font-serif">{t("title")}</h1>
 				<p className="text-muted-foreground">
-					View and track your order history.
+					{t("description")}
 				</p>
 			</div>
 
@@ -125,10 +128,10 @@ export default function OrdersPage() {
 						<Table>
 							<TableHeader>
 								<TableRow className="bg-muted/50 hover:bg-muted/50">
-									<TableHead>Order Number</TableHead>
-									<TableHead>Date</TableHead>
-									<TableHead>Status</TableHead>
-									<TableHead className="text-right">Total</TableHead>
+									<TableHead>{t("orderNumber")}</TableHead>
+									<TableHead>{t("date")}</TableHead>
+									<TableHead>{t("status")}</TableHead>
+									<TableHead className="text-right">{t("total")}</TableHead>
 									<TableHead className="w-[100px]"></TableHead>
 								</TableRow>
 							</TableHeader>
@@ -142,7 +145,7 @@ export default function OrdersPage() {
 											{order.order_number}
 										</TableCell>
 										<TableCell>
-											{new Date(order.created_at).toLocaleDateString("en-US", {
+											{new Date(order.created_at).toLocaleDateString(locale, {
 												year: "numeric",
 												month: "long",
 												day: "numeric",
@@ -157,7 +160,7 @@ export default function OrdersPage() {
 												)}
 											>
 												{getStatusIcon(order.status)}
-												{order.status}
+												{t(`orderStatus.${order.status}`)}
 											</Badge>
 										</TableCell>
 										<TableCell className="text-right font-medium">
@@ -195,7 +198,7 @@ export default function OrdersPage() {
 											{order.order_number}
 										</div>
 										<div className="text-sm text-muted-foreground">
-											{new Date(order.created_at).toLocaleDateString("en-US", {
+											{new Date(order.created_at).toLocaleDateString(locale, {
 												month: "short",
 												day: "numeric",
 												year: "numeric",
@@ -209,15 +212,15 @@ export default function OrdersPage() {
 											getStatusColor(order.status)
 										)}
 									>
-										{order.status}
+										{t(`orderStatus.${order.status}`)}
 									</Badge>
 								</div>
 								<div className="flex justify-between items-center pt-4 border-t border-border/50">
 									<span className="font-medium text-lg">
-										${order.total_amount}
+										৳{order.total_amount}
 									</span>
 									<div className="flex items-center text-sm text-primary font-medium">
-										View Details <ChevronRight className="size-4 ml-1" />
+										{t("viewDetails")} <ChevronRight className="size-4 ml-1" />
 									</div>
 								</div>
 							</Link>
@@ -229,13 +232,12 @@ export default function OrdersPage() {
 					<div className="bg-muted/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
 						<Package className="size-8 text-muted-foreground" />
 					</div>
-					<h3 className="text-lg font-semibold mb-2">No orders yet</h3>
+					<h3 className="text-lg font-semibold mb-2">{t("emptyTitle")}</h3>
 					<p className="text-muted-foreground mb-6">
-						You haven&apos;t placed any orders yet. Start shopping to see them
-						here.
+						{t("emptyDescription")}
 					</p>
 					<Button asChild>
-						<Link href="/">Start Shopping</Link>
+						<Link href="/">{t("startShopping")}</Link>
 					</Button>
 				</div>
 			)}

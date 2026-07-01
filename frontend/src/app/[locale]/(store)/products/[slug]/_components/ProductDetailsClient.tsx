@@ -19,6 +19,7 @@ import {
 	ShoppingCart,
 } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { WishlistButton } from "@/components/Product/WishlistButton";
 import { ProductReviews } from "./ProductReviews";
@@ -32,6 +33,7 @@ interface ProductDetailsClientProps {
 export const ProductDetailsClient = ({
 	product,
 }: ProductDetailsClientProps) => {
+	const t = useTranslations("product");
 	const { config } = useSiteConfigContext();
 	const images = product.images ?? [];
 	const [selectedImage, setSelectedImage] = useState(
@@ -118,7 +120,7 @@ export const ProductDetailsClient = ({
 			{/* Breadcrumb */}
 			<nav className="flex items-center text-sm text-muted-foreground mb-8">
 				<Link href="/" className="hover:text-primary transition-colors">
-					Home
+					{t("home")}
 				</Link>
 				<span className="mx-2">/</span>
 				<Link
@@ -147,7 +149,7 @@ export const ProductDetailsClient = ({
 							/>
 						) : (
 							<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-								No image available
+								{t("noImageAvailable")}
 							</div>
 						)}
 						{activeDiscount > 0 && (
@@ -190,11 +192,11 @@ export const ProductDetailsClient = ({
 						</h1>
 						<div className="flex flex-wrap items-center gap-3 mb-6">
 							<span className="bg-secondary/50 text-secondary-foreground px-3 py-1 rounded-md text-xs font-semibold tracking-wide">
-								SKU: {selectedVariant ? selectedVariant.sku : product.sku}
+								{t("sku")}: {selectedVariant ? selectedVariant.sku : product.sku}
 							</span>
 							{activeDiscount > 0 && (
 								<Badge className="bg-red-500/20 text-red-700 border-red-200 hover:bg-red-500/30">
-									Save {activeDiscount}%
+									{t("savePercent", { percent: activeDiscount })}
 								</Badge>
 							)}
 							{activeSaleName && (
@@ -212,11 +214,11 @@ export const ProductDetailsClient = ({
 							>
 								{activeInStock ? (
 									<>
-										<Check className="size-4" /> In Stock
+										<Check className="size-4" /> {t("inStock")}
 									</>
 								) : (
 									<>
-										<AlertTriangle className="size-4" /> Out of Stock
+										<AlertTriangle className="size-4" /> {t("outOfStock")}
 									</>
 								)}
 							</div>
@@ -252,7 +254,7 @@ export const ProductDetailsClient = ({
 								/>
 								{!selectedVariant && (
 									<p className="text-sm text-amber-600 mt-2">
-										Please select a variant to continue
+										{t("selectVariant")}
 									</p>
 								)}
 							</div>
@@ -262,7 +264,7 @@ export const ProductDetailsClient = ({
 						<div className="space-y-6">
 							<div className="space-y-3">
 								<label className="text-sm font-medium text-foreground">
-									Quantity
+									{t("quantity")}
 								</label>
 								<div className="flex items-center gap-4">
 									<div className="flex items-center border rounded-lg overflow-hidden">
@@ -270,7 +272,7 @@ export const ProductDetailsClient = ({
 											onClick={() => handleQuantityChange(-1)}
 											disabled={quantity <= 1 || !activeInStock}
 											className="p-2 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-											aria-label="Decrease quantity"
+											aria-label={t("decreaseQuantity")}
 										>
 											<Minus className="size-4" />
 										</button>
@@ -281,13 +283,13 @@ export const ProductDetailsClient = ({
 											onClick={() => handleQuantityChange(1)}
 											disabled={quantity >= activeStock || !activeInStock}
 											className="p-2 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-											aria-label="Increase quantity"
+											aria-label={t("increaseQuantity")}
 										>
 											<Plus className="size-4" />
 										</button>
 									</div>
 									<div className="text-sm text-muted-foreground">
-										{product.unit_value} {product.unit} / pack
+										{product.unit_value} {product.unit} / {t("pack")}
 									</div>
 								</div>
 							</div>
@@ -303,12 +305,12 @@ export const ProductDetailsClient = ({
 									{isAddingToCart ? (
 										<>
 											<Loader2 className="mr-2 size-5 animate-spin" />
-											Adding...
+											{t("adding")}
 										</>
 									) : (
 										<>
 											<ShoppingCart className="mr-2 size-5" />
-											Add to Cart
+											{t("addToCart")}
 										</>
 									)}
 								</Button>
@@ -317,7 +319,7 @@ export const ProductDetailsClient = ({
 									size="lg"
 									variant="ghost"
 									className="h-12 w-12 p-0"
-									aria-label="Share product"
+									aria-label={t("shareProduct")}
 								>
 									<Share2 className="size-5" />
 								</Button>
@@ -327,7 +329,7 @@ export const ProductDetailsClient = ({
 								<div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 flex items-center gap-2">
 									<AlertTriangle className="size-4 text-destructive" />
 									<span className="text-sm text-destructive font-medium">
-										This variant is currently out of stock
+										{t("variantOutOfStock")}
 									</span>
 								</div>
 							)}
@@ -338,7 +340,7 @@ export const ProductDetailsClient = ({
 					{product.description && (
 						<div className="mt-12 space-y-6">
 							<div className="bg-muted/30 rounded-xl p-6 space-y-4">
-								<h3 className="font-semibold text-lg">About this Product</h3>
+								<h3 className="font-semibold text-lg">{t("aboutProduct")}</h3>
 								<pre className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
 									{product?.description}
 								</pre>
@@ -346,29 +348,29 @@ export const ProductDetailsClient = ({
 
 							<div className="grid md:grid-cols-2 gap-6">
 								<div className="bg-muted/20 rounded-lg p-4 space-y-3">
-									<h4 className="font-semibold text-sm">Product Details</h4>
+									<h4 className="font-semibold text-sm">{t("productDetails")}</h4>
 									<dl className="space-y-2 text-sm">
 										<div className="flex justify-between">
-											<dt className="text-muted-foreground">SKU:</dt>
+											<dt className="text-muted-foreground">{t("sku")}:</dt>
 											<dd className="font-medium">
 												{selectedVariant ? selectedVariant.sku : product.sku}
 											</dd>
 										</div>
 										<div className="flex justify-between">
-											<dt className="text-muted-foreground">Category:</dt>
+											<dt className="text-muted-foreground">{t("category")}:</dt>
 											<dd className="font-medium">{product.category.name}</dd>
 										</div>
 										<div className="flex justify-between">
-											<dt className="text-muted-foreground">Unit Size:</dt>
+											<dt className="text-muted-foreground">{t("unitSize")}:</dt>
 											<dd className="font-medium">
 												{product.unit_value} {product.unit}
 											</dd>
 										</div>
 										{activeDiscount > 0 && (
 											<div className="flex justify-between">
-												<dt className="text-muted-foreground">Discount:</dt>
+												<dt className="text-muted-foreground">{t("discount")}:</dt>
 												<dd className="font-medium text-green-600">
-													{activeDiscount}% OFF
+													{activeDiscount}% {t("off")}
 												</dd>
 											</div>
 										)}
@@ -376,29 +378,31 @@ export const ProductDetailsClient = ({
 								</div>
 
 								<div className="bg-muted/20 rounded-lg p-4 space-y-3">
-									<h4 className="font-semibold text-sm">Availability</h4>
+									<h4 className="font-semibold text-sm">{t("availability")}</h4>
 									<dl className="space-y-2 text-sm">
 										<div className="flex justify-between items-center">
-											<dt className="text-muted-foreground">Stock Status:</dt>
+											<dt className="text-muted-foreground">{t("stockStatus")}:</dt>
 											<dd
 												className={cn(
 													"font-semibold",
 													activeInStock ? "text-green-600" : "text-destructive",
 												)}
 											>
-												{activeInStock ? "In Stock" : "Out of Stock"}
+												{activeInStock ? t("inStock") : t("outOfStock")}
 											</dd>
 										</div>
 										<div className="flex justify-between">
 											<dt className="text-muted-foreground">
-												Available Quantity:
+												{t("availableQuantity")}:
 											</dt>
 											<dd className="font-medium">
-												{product.is_digital ? "Unlimited" : `${activeStock} units`}
+												{product.is_digital
+													? t("unlimited")
+													: t("units", { count: activeStock })}
 											</dd>
 										</div>
 										<div className="flex justify-between">
-											<dt className="text-muted-foreground">Product Status:</dt>
+											<dt className="text-muted-foreground">{t("productStatus")}:</dt>
 											<dd
 												className={cn(
 													"font-semibold",
@@ -407,7 +411,7 @@ export const ProductDetailsClient = ({
 														: "text-muted-foreground",
 												)}
 											>
-												{product.is_active ? "Active" : "Inactive"}
+												{product.is_active ? t("active") : t("inactive")}
 											</dd>
 										</div>
 									</dl>

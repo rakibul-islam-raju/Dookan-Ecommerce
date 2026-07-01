@@ -7,9 +7,11 @@ import Autoplay from "embla-carousel-autoplay";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 
 export const CategorySlider = () => {
+	const t = useTranslations("homeCategories");
 	const { data: categoriesResponse, isLoading, error } = useCategories();
 
 	const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -40,15 +42,15 @@ export const CategorySlider = () => {
 					<div className="flex items-center justify-between mb-8">
 						<div>
 							<h2 className="text-3xl font-bold font-serif text-foreground">
-								Shop by Category
+								{t("title")}
 							</h2>
 							<p className="text-muted-foreground mt-2">
-								Browse our curated collection of organic products
+								{t("description")}
 							</p>
 						</div>
 					</div>
 					<div className="text-center py-12">
-						<p className="text-muted-foreground">Loading categories...</p>
+						<p className="text-muted-foreground">{t("loading")}</p>
 					</div>
 				</div>
 			</section>
@@ -61,7 +63,7 @@ export const CategorySlider = () => {
 				<div className="container">
 					<div className="text-center py-12">
 						<p className="text-muted-foreground">
-							Failed to load categories. Please try again later.
+							{t("error")}
 						</p>
 					</div>
 				</div>
@@ -75,10 +77,10 @@ export const CategorySlider = () => {
 				<div className="flex items-center justify-between mb-8">
 					<div>
 						<h2 className="text-3xl font-bold font-serif text-foreground">
-							Shop by Category
+							{t("title")}
 						</h2>
 						<p className="text-muted-foreground mt-2">
-							Browse our curated collection of organic products
+							{t("description")}
 						</p>
 					</div>
 					<div className="hidden md:flex gap-2">
@@ -87,7 +89,7 @@ export const CategorySlider = () => {
 							variant="outline"
 							size="icon"
 							className="rounded-full"
-							aria-label="Previous slide"
+							aria-label={t("previousSlide")}
 						>
 							<ChevronLeft className="size-4" />
 						</Button>
@@ -96,7 +98,7 @@ export const CategorySlider = () => {
 							variant="outline"
 							size="icon"
 							className="rounded-full"
-							aria-label="Next slide"
+							aria-label={t("nextSlide")}
 						>
 							<ChevronRight className="size-4" />
 						</Button>
@@ -124,6 +126,7 @@ export const CategorySlider = () => {
 														alt={category.name}
 														className="object-contain transition-transform duration-300 group-hover:scale-110"
 														fill
+														unoptimized
 														sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
 													/>
 												) : (
@@ -145,7 +148,7 @@ export const CategorySlider = () => {
 				) : (
 					<div className="text-center py-12">
 						<p className="text-muted-foreground">
-							No categories available at the moment.
+							{t("empty")}
 						</p>
 					</div>
 				)}

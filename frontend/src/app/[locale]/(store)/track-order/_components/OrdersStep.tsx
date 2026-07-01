@@ -73,7 +73,7 @@ export function OrdersStep({ orders, email, onReset }: OrdersStepProps) {
 
 						<div className="grid grid-cols-2 gap-2 text-sm">
 							<div>
-								<span className="text-muted-foreground">Date: </span>
+								<span className="text-muted-foreground">{t("date")}: </span>
 								<span>
 									{new Date(order.created_at).toLocaleDateString(locale, {
 										year: "numeric",

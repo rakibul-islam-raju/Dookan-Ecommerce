@@ -4,6 +4,7 @@ import { TextField } from "@/components/ui/@form/TextField";
 import { Button } from "@/components/ui/button";
 import { useCreateUserAddress } from "@/lib/hooks/useUser";
 import { Loader2, Save } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useFormContext } from "react-hook-form";
 import type { CheckoutFormValues } from "../_types";
 
@@ -16,6 +17,7 @@ export function CheckoutShippingAddress({
 	isAuthenticated,
 	hasDefaultAddress,
 }: CheckoutShippingAddressProps) {
+	const t = useTranslations("checkoutPage");
 	const form = useFormContext<CheckoutFormValues>();
 	const createAddress = useCreateUserAddress();
 
@@ -55,36 +57,41 @@ export function CheckoutShippingAddress({
 
 	return (
 		<section className="space-y-4">
-			<h2 className="text-xl font-semibold">Shipping Address</h2>
+			<h2 className="text-xl font-semibold">{t("shippingAddress")}</h2>
 			<TextField
 				name="customer_name"
-				label="Full Name"
-				placeholder="John Doe"
+				label={t("fullName")}
+				placeholder={t("fullNamePlaceholder")}
 				required
 			/>
 			<TextField
 				name="address_line1"
-				label="Address Line 1"
-				placeholder="123 Main Street"
+				label={t("addressLine1")}
+				placeholder={t("addressLine1Placeholder")}
 				required
 			/>
 			<TextField
 				name="address_line2"
-				label="Address Line 2"
-				placeholder="Apt 4B (optional)"
+				label={t("addressLine2")}
+				placeholder={t("addressLine2Placeholder")}
 			/>
 			<div className="grid grid-cols-2 gap-4">
-				<TextField name="city" label="City" placeholder="Dhaka" required />
+				<TextField
+					name="city"
+					label={t("city")}
+					placeholder={t("cityPlaceholder")}
+					required
+				/>
 				<TextField
 					name="postal_code"
-					label="Postal Code"
+					label={t("postalCode")}
 					placeholder="1216"
 					required
 				/>
 			</div>
 			<TextField
 				name="mobile_number"
-				label="Delivery Contact Phone"
+				label={t("deliveryContactPhone")}
 				placeholder="+880 1XX XXX XXXX"
 				type="tel"
 				required
@@ -102,12 +109,12 @@ export function CheckoutShippingAddress({
 					{createAddress.isPending ? (
 						<>
 							<Loader2 className="size-4 mr-2 animate-spin" />
-							Saving address...
+							{t("savingAddress")}
 						</>
 					) : (
 						<>
 							<Save className="size-4 mr-2" />
-							Save this address for future orders
+							{t("saveAddressFuture")}
 						</>
 					)}
 				</Button>

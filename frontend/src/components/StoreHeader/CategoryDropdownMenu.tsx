@@ -28,6 +28,7 @@ const CategoryImage = ({ category }: { category: ICategory }) => (
 				alt={category.name}
 				width={32}
 				height={32}
+				unoptimized
 				className="object-cover size-full"
 			/>
 		) : (
@@ -46,6 +47,7 @@ const ChildCategoryImage = ({ child }: { child: ICategoryChild }) => (
 				alt={child.name}
 				width={24}
 				height={24}
+				unoptimized
 				className="object-cover size-full"
 			/>
 		) : (

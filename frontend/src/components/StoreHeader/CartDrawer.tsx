@@ -39,6 +39,7 @@ export const CartDrawer = ({
 	onOpenChange,
 }: CartDrawerProps = {}) => {
 	const t = useTranslations("common");
+	const cartT = useTranslations("cartPage");
 	const [internalOpen, setInternalOpen] = useState(false);
 	const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
 	const setIsOpen = onOpenChange || setInternalOpen;
@@ -73,7 +74,7 @@ export const CartDrawer = ({
 			<SheetTrigger asChild>
 				<button
 					className="cursor-pointer relative p-2 rounded-full hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-					aria-label={`View shopping cart with ${totalItems} items`}
+					aria-label={cartT("viewCartWithItems", { count: totalItems })}
 				>
 					<ShoppingCart className="size-5 lg:size-6" />
 					{totalItems > 0 && (
@@ -89,7 +90,7 @@ export const CartDrawer = ({
 						<ShoppingCart className="size-5" />
 						{t("cart")}
 						<Badge variant="secondary" className="ml-auto">
-							{totalItems} Items
+							{cartT("itemsCount", { count: totalItems })}
 						</Badge>
 					</SheetTitle>
 					<Separator />
@@ -102,10 +103,10 @@ export const CartDrawer = ({
 				) : error ? (
 					<div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
 						<p className="text-destructive text-sm">
-							Failed to load cart. Please try again.
+							{cartT("failedLoadDrawer")}
 						</p>
 						<Button variant="outline" onClick={() => window.location.reload()}>
-							Retry
+							{cartT("retry")}
 						</Button>
 					</div>
 				) : items.length > 0 ? (
@@ -182,24 +183,26 @@ export const CartDrawer = ({
 							<Separator />
 							<div className="space-y-1.5">
 								<div className="flex justify-between text-sm">
-									<span className="text-muted-foreground">Subtotal</span>
+									<span className="text-muted-foreground">
+										{cartT("subtotal", { count: totalItems })}
+									</span>
 									<span className="font-medium">৳{subtotal.toFixed(2)}</span>
 								</div>
 								<div className="flex justify-between text-sm">
-									<span className="text-muted-foreground">Shipping</span>
+									<span className="text-muted-foreground">{cartT("shipping")}</span>
 									<span className="text-muted-foreground">
-										Calculated at checkout
+										{cartT("calculatedAtCheckout")}
 									</span>
 								</div>
 								<div className="flex justify-between text-sm font-medium pt-2 border-t">
-									<span>Total</span>
+									<span>{cartT("total")}</span>
 									<span>৳{subtotal.toFixed(2)}</span>
 								</div>
 							</div>
 							<SheetFooter>
 								<Button className="w-full" size="lg" asChild>
 									<Link href="/checkout" onClick={() => setIsOpen(false)}>
-										Checkout <ArrowRight className="ml-2 size-4" />
+										{cartT("checkout")} <ArrowRight className="ml-2 size-4" />
 									</Link>
 								</Button>
 							</SheetFooter>
@@ -211,9 +214,9 @@ export const CartDrawer = ({
 							<ShoppingCart className="size-8 text-muted-foreground" />
 						</div>
 						<div className="space-y-1">
-							<h3 className="font-semibold text-lg">Your cart is empty</h3>
+							<h3 className="font-semibold text-lg">{cartT("emptyTitle")}</h3>
 							<p className="text-muted-foreground text-sm max-w-[200px] mx-auto">
-								Looks like you haven&apos;t added anything to your cart yet.
+								{cartT("emptyDescription")}
 							</p>
 						</div>
 						<Button variant="outline" onClick={() => setIsOpen(false)}>

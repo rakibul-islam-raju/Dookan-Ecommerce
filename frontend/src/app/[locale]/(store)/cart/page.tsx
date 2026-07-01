@@ -24,8 +24,11 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function CartPage() {
+	const t = useTranslations("cartPage");
+	const commonT = useTranslations("common");
 	const { data: cart, isLoading, error } = useCart();
 	const updateCartItem = useUpdateCartItem();
 	const removeFromCart = useRemoveFromCart();
@@ -55,7 +58,7 @@ export default function CartPage() {
 		} catch (err: unknown) {
 			const axiosErr = err as { response?: { data?: { code?: string[] } } };
 			const message =
-				axiosErr?.response?.data?.code?.[0] || "Invalid coupon code";
+				axiosErr?.response?.data?.code?.[0] || t("invalidCouponCode");
 			setCouponError(message);
 			setAppliedCoupon(null);
 		} finally {
@@ -95,10 +98,10 @@ export default function CartPage() {
 				</div>
 				<div className="space-y-2">
 					<h1 className="text-3xl font-bold font-serif">
-						Loading your cart...
+						{t("loadingTitle")}
 					</h1>
 					<p className="text-muted-foreground max-w-md mx-auto">
-						Please wait while we load your cart items.
+						{t("loadingDescription")}
 					</p>
 				</div>
 			</div>
@@ -112,14 +115,13 @@ export default function CartPage() {
 					<ShoppingCart className="size-12 text-muted-foreground" />
 				</div>
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold font-serif">Unable to load cart</h1>
+					<h1 className="text-3xl font-bold font-serif">{t("errorTitle")}</h1>
 					<p className="text-muted-foreground max-w-md mx-auto">
-						We encountered an error loading your cart. Please try refreshing the
-						page.
+						{t("errorDescription")}
 					</p>
 				</div>
 				<Button size="lg" onClick={() => window.location.reload()}>
-					Refresh Page
+					{t("refreshPage")}
 				</Button>
 			</div>
 		);
@@ -132,14 +134,13 @@ export default function CartPage() {
 					<ShoppingCart className="size-12 text-muted-foreground" />
 				</div>
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold font-serif">Your cart is empty</h1>
+					<h1 className="text-3xl font-bold font-serif">{t("emptyTitle")}</h1>
 					<p className="text-muted-foreground max-w-md mx-auto">
-						Looks like you haven&apos;t added anything to your cart yet. Browse
-						our products to find something you love.
+						{t("emptyDescription")}
 					</p>
 				</div>
 				<Button size="lg" asChild>
-					<Link href="/">Start Shopping</Link>
+					<Link href="/">{commonT("startShopping")}</Link>
 				</Button>
 			</div>
 		);
@@ -147,7 +148,7 @@ export default function CartPage() {
 
 	return (
 		<div className="container py-8 md:py-12">
-			<h1 className="text-3xl font-bold font-serif mb-8">Shopping Cart</h1>
+			<h1 className="text-3xl font-bold font-serif mb-8">{t("title")}</h1>
 
 			<div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
 				{/* Cart Items List */}
@@ -232,7 +233,9 @@ export default function CartPage() {
 													<Trash2 className="size-4 mr-2" />
 												)}
 												<span className="hidden sm:inline">
-													{removeFromCart.isPending ? "Removing..." : "Remove"}
+													{removeFromCart.isPending
+														? t("removing")
+														: commonT("remove")}
 												</span>
 											</Button>
 										</div>
@@ -246,7 +249,7 @@ export default function CartPage() {
 					<div className="rounded-xl border bg-card p-6">
 						<div className="flex items-center gap-2 mb-4">
 							<Tag className="size-4 text-muted-foreground" />
-							<h3 className="font-medium">Discount Code</h3>
+							<h3 className="font-medium">{t("discountCode")}</h3>
 						</div>
 
 						{appliedCoupon ? (
@@ -271,7 +274,7 @@ export default function CartPage() {
 							<div>
 								<div className="flex gap-2">
 									<Input
-										placeholder="Enter coupon code"
+										placeholder={t("enterCouponCode")}
 										value={couponCode}
 										onChange={(e) => {
 											setCouponCode(e.target.value.toUpperCase());
@@ -293,7 +296,7 @@ export default function CartPage() {
 										{couponLoading ? (
 											<Loader2 className="size-4 animate-spin" />
 										) : (
-											"Apply"
+											t("apply")
 										)}
 									</Button>
 								</div>
@@ -308,25 +311,25 @@ export default function CartPage() {
 				{/* Order Summary */}
 				<div className="lg:col-span-1">
 					<div className="sticky top-24 rounded-xl border bg-muted/30 p-6 space-y-6">
-						<h2 className="font-semibold text-xl">Order Summary</h2>
+						<h2 className="font-semibold text-xl">{t("orderSummary")}</h2>
 
 						<div className="space-y-4 text-sm">
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">
-									Subtotal ({totalItems} items)
+									{t("subtotal", { count: totalItems })}
 								</span>
 								<span className="font-medium">৳{subtotal.toFixed(2)}</span>
 							</div>
 							{discount > 0 && (
 								<div className="flex justify-between text-green-600">
-									<span>Discount ({appliedCoupon?.code})</span>
+									<span>{t("discount", { code: appliedCoupon?.code ?? "" })}</span>
 									<span className="font-medium">-৳{discount.toFixed(2)}</span>
 								</div>
 							)}
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">Tax Estimate</span>
+								<span className="text-muted-foreground">{t("taxEstimate")}</span>
 								<span className="text-muted-foreground">
-									Calculated at checkout
+									{t("calculatedAtCheckout")}
 								</span>
 							</div>
 						</div>
@@ -334,7 +337,7 @@ export default function CartPage() {
 						<Separator />
 
 						<div className="flex justify-between items-end">
-							<span className="font-bold text-lg">Total</span>
+							<span className="font-bold text-lg">{t("total")}</span>
 							<div className="text-right">
 								<span className="text-xs text-muted-foreground block font-normal mb-1">
 									BDT
@@ -351,12 +354,12 @@ export default function CartPage() {
 										: "/checkout"
 								}
 							>
-								Proceed to Checkout <ArrowRight className="ml-2 size-5" />
+								{t("proceedToCheckout")} <ArrowRight className="ml-2 size-5" />
 							</Link>
 						</Button>
 
 						<div className="text-center text-xs text-muted-foreground mt-4">
-							Shipping, taxes, and discounts calculated at checkout.
+							{t("checkoutNote")}
 						</div>
 					</div>
 				</div>

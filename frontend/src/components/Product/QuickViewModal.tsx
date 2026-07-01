@@ -8,6 +8,7 @@ import { WishlistButton } from "./WishlistButton";
 import Image from "next/image";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 
 interface QuickViewModalProps {
 	isOpen: boolean;
@@ -20,6 +21,7 @@ export const QuickViewModal = ({
 	onClose,
 	product,
 }: QuickViewModalProps) => {
+	const t = useTranslations("product");
 	const canUseDOM = typeof document !== "undefined";
 
 	useEffect(() => {
@@ -101,7 +103,7 @@ export const QuickViewModal = ({
 							/>
 						) : (
 							<div className="flex h-full w-full items-center justify-center text-zinc-400">
-								No Image
+								{t("noImage")}
 							</div>
 						)}
 					</div>
@@ -127,7 +129,7 @@ export const QuickViewModal = ({
 										৳{base_price}
 									</span>
 									<span className="text-sm font-medium text-red-500">
-										{sale_discount_percentage}% OFF
+										{sale_discount_percentage}% {t("off")}
 									</span>
 								</>
 							) : (
@@ -147,7 +149,7 @@ export const QuickViewModal = ({
 									) : (
 										<X className="h-4 w-4 text-red-500" />
 									)}
-									<span>{is_in_stock ? "In Stock" : "Out of Stock"}</span>
+									<span>{is_in_stock ? t("inStock") : t("outOfStock")}</span>
 								</div>
 								<span>•</span>
 								<span>
@@ -164,7 +166,7 @@ export const QuickViewModal = ({
 									asChild
 								>
 									<Link href={`/products/${product.slug}`} onClick={onClose}>
-										View Product
+										{t("viewProduct")}
 									</Link>
 								</Button>
 								<WishlistButton

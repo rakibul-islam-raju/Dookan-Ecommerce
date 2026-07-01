@@ -8,24 +8,27 @@ import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Separator } from "@/components/ui/separator";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useMe, useUpdateProfile } from "@/lib/hooks/useUser";
-import { useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
 import { z } from "zod";
 
-const profileSchema = z.object({
-	first_name: z.string().min(1, "First name is required"),
-	last_name: z.string().min(1, "Last name is required"),
-	email: z.string().email("Please enter a valid email address"),
+const createProfileSchema = (t: (key: string) => string) => z.object({
+	first_name: z.string().min(1, t("validation.firstNameRequired")),
+	last_name: z.string().min(1, t("validation.lastNameRequired")),
+	email: z.string().email(t("validation.invalidEmail")),
 	mobile_number: z
 		.string()
-		.min(1, "Mobile number is required")
-		.regex(/^[0-9]{11}$/, "Mobile number must be 11 digits"),
+		.min(1, t("validation.mobileRequired"))
+		.regex(/^[0-9]{11}$/, t("validation.mobileDigits")),
 });
 
-type ProfileFormValues = z.infer<typeof profileSchema>;
+type ProfileFormValues = z.infer<ReturnType<typeof createProfileSchema>>;
 
 export default function ProfilePage() {
+	const t = useTranslations("account");
 	const { data: user, isLoading } = useMe();
 	const updateProfile = useUpdateProfile();
+	const profileSchema = useMemo(() => createProfileSchema(t), [t]);
 
 	const form = useZodForm(profileSchema, {
 		defaultValues: {
@@ -59,15 +62,15 @@ export default function ProfilePage() {
 		return (
 			<div className="space-y-6">
 				<div>
-					<h2 className="text-2xl font-bold font-serif">My Profile</h2>
+					<h2 className="text-2xl font-bold font-serif">{t("profileTitle")}</h2>
 					<p className="text-muted-foreground">
-						Manage your personal information and account settings.
+						{t("profileDescription")}
 					</p>
 				</div>
 				<div className="flex items-center justify-center py-12">
 					<div className="text-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-						<p className="text-muted-foreground">Loading profile...</p>
+						<p className="text-muted-foreground">{t("loadingProfile")}</p>
 					</div>
 				</div>
 			</div>
@@ -77,9 +80,9 @@ export default function ProfilePage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h2 className="text-2xl font-bold font-serif">My Profile</h2>
+				<h2 className="text-2xl font-bold font-serif">{t("profileTitle")}</h2>
 				<p className="text-muted-foreground">
-					Manage your personal information and account settings.
+					{t("profileDescription")}
 				</p>
 			</div>
 
@@ -92,17 +95,17 @@ export default function ProfilePage() {
 			>
 				{/* Personal Info */}
 				<div className="space-y-4">
-					<h3 className="text-lg font-medium">Personal Information</h3>
+					<h3 className="text-lg font-medium">{t("personalInformation")}</h3>
 					<div className="grid gap-4">
 						<div className="grid grid-cols-2 gap-4">
 							<div className="grid gap-2">
 								<label htmlFor="first_name" className="text-sm font-medium">
-									First Name
+									{t("firstName")}
 								</label>
 								<Input
 									id="first_name"
 									{...form.register("first_name")}
-									placeholder="Enter your first name"
+									placeholder={t("firstNamePlaceholder")}
 								/>
 								{form.formState.errors.first_name && (
 									<p className="text-sm text-red-600">
@@ -112,12 +115,12 @@ export default function ProfilePage() {
 							</div>
 							<div className="grid gap-2">
 								<label htmlFor="last_name" className="text-sm font-medium">
-									Last Name
+									{t("lastName")}
 								</label>
 								<Input
 									id="last_name"
 									{...form.register("last_name")}
-									placeholder="Enter your last name"
+									placeholder={t("lastNamePlaceholder")}
 								/>
 								{form.formState.errors.last_name && (
 									<p className="text-sm text-red-600">
@@ -128,7 +131,7 @@ export default function ProfilePage() {
 						</div>
 						<div className="grid gap-2">
 							<label htmlFor="email" className="text-sm font-medium">
-								Email
+								{t("email")}
 							</label>
 							<Input id="email" type="email" {...form.register("email")} />
 							{form.formState.errors.email && (
@@ -137,12 +140,12 @@ export default function ProfilePage() {
 								</p>
 							)}
 							<p className="text-[0.8rem] text-muted-foreground">
-								Your email address is used for login and notifications.
+								{t("emailHelp")}
 							</p>
 						</div>
 						<div className="grid gap-2">
 							<label htmlFor="mobile_number" className="text-sm font-medium">
-								Mobile Number
+								{t("mobileNumber")}
 							</label>
 							<Input
 								id="mobile_number"
@@ -163,17 +166,17 @@ export default function ProfilePage() {
 
 				{/* Password Change */}
 				<div className="space-y-4">
-					<h3 className="text-lg font-medium">Password & Security</h3>
+					<h3 className="text-lg font-medium">{t("passwordSecurity")}</h3>
 					<div className="flex items-center justify-between p-4 border rounded-lg">
 						<div>
-							<p className="font-medium">Password</p>
+							<p className="font-medium">{t("password")}</p>
 							<p className="text-sm text-muted-foreground">
-								Last updated recently
+								{t("lastUpdatedRecently")}
 							</p>
 						</div>
 						<ChangePasswordModal>
 							<Button type="button" variant="outline">
-								Change Password
+								{t("changePassword")}
 							</Button>
 						</ChangePasswordModal>
 					</div>
@@ -185,14 +188,14 @@ export default function ProfilePage() {
 						type="button"
 						onClick={() => window.location.reload()}
 					>
-						Cancel
+						{t("cancel")}
 					</Button>
 					<LoadingButton
 						type="button"
 						isLoading={updateProfile.isPending}
 						onClick={() => form.handleSubmit(handleSubmit)()}
 					>
-						{updateProfile.isPending ? "Saving..." : "Save Changes"}
+						{updateProfile.isPending ? t("saving") : t("saveChanges")}
 					</LoadingButton>
 				</div>
 			</BaseForm>

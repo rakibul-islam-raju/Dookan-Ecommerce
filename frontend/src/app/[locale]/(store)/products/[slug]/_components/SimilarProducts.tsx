@@ -5,6 +5,7 @@ import { ProductItem } from "@/components/Product/ProductItem";
 import { QuickViewModal } from "@/components/Product/QuickViewModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProducts } from "@/lib/hooks/useProducts";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 interface SimilarProductsProps {
@@ -16,6 +17,7 @@ export const SimilarProducts = ({
 	categoryId,
 	currentProductId,
 }: SimilarProductsProps) => {
+	const t = useTranslations("product");
 	const [selectedProduct, setSelectedProduct] =
 		useState<IConsumerProductListItem | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,10 +36,10 @@ export const SimilarProducts = ({
 		<section className="mt-16 border-t pt-12">
 			<div className="mb-8">
 				<h2 className="text-2xl font-bold font-serif text-foreground">
-					Similar Products
+					{t("similarProducts")}
 				</h2>
 				<p className="mt-1 text-muted-foreground text-sm">
-					More from the same category
+					{t("moreSameCategory")}
 				</p>
 			</div>
 

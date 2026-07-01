@@ -22,9 +22,10 @@ import type { CouponValidateResponse } from "@/lib/api/coupons";
 import { couponClientApi } from "@/lib/api/coupons";
 import { ArrowLeft, Loader2, Truck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRef } from "react";
-import { checkoutSchema } from "./_types";
+import { useTranslations } from "next-intl";
+import { createCheckoutSchema } from "./_types";
 import type { CheckoutFormValues } from "./_types";
 import { CheckoutContactInfo } from "./_components/CheckoutContactInfo";
 import { CheckoutCoupon } from "./_components/CheckoutCoupon";
@@ -43,6 +44,7 @@ export default function CheckoutPage() {
 }
 
 function CheckoutPageInner() {
+	const t = useTranslations("checkoutPage");
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
@@ -68,6 +70,7 @@ function CheckoutPageInner() {
 		string | undefined
 	>();
 
+	const checkoutSchema = useMemo(() => createCheckoutSchema(t), [t]);
 	const form = useZodForm(checkoutSchema, {
 		defaultValues: {
 			customer_name: "",
@@ -130,7 +133,7 @@ function CheckoutPageInner() {
 		} catch (err: unknown) {
 			const axiosErr = err as { response?: { data?: { code?: string[] } } };
 			const message =
-				axiosErr?.response?.data?.code?.[0] || "Invalid coupon code";
+				axiosErr?.response?.data?.code?.[0] || t("invalidCouponCode");
 			setCouponError(message);
 			setAppliedCoupon(null);
 		} finally {
@@ -245,9 +248,9 @@ function CheckoutPageInner() {
 					<Loader2 className="size-12 text-muted-foreground animate-spin" />
 				</div>
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold font-serif">Loading checkout...</h1>
+					<h1 className="text-3xl font-bold font-serif">{t("loadingTitle")}</h1>
 					<p className="text-muted-foreground max-w-md mx-auto">
-						Please wait while we prepare your checkout.
+						{t("loadingDescription")}
 					</p>
 				</div>
 			</div>
@@ -261,13 +264,13 @@ function CheckoutPageInner() {
 					<Truck className="size-12 text-muted-foreground" />
 				</div>
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold font-serif">Your cart is empty</h1>
+					<h1 className="text-3xl font-bold font-serif">{t("emptyTitle")}</h1>
 					<p className="text-muted-foreground max-w-md mx-auto">
-						Add some items to your cart before checking out.
+						{t("emptyDescription")}
 					</p>
 				</div>
 				<Link href="/">
-					<Button size="lg">Continue Shopping</Button>
+					<Button size="lg">{t("continueShopping")}</Button>
 				</Link>
 				<GuestOrderSuccessModal
 					isOpen={showGuestSuccessModal}
@@ -285,9 +288,9 @@ function CheckoutPageInner() {
 					href="/cart"
 					className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
 				>
-					<ArrowLeft className="size-4 mr-1" /> Back to Cart
+					<ArrowLeft className="size-4 mr-1" /> {t("backToCart")}
 				</Link>
-				<h1 className="text-3xl font-bold font-serif mt-4">Checkout</h1>
+				<h1 className="text-3xl font-bold font-serif mt-4">{t("title")}</h1>
 			</div>
 
 			<BaseForm form={form} onSubmit={handleSubmitOrder}>
@@ -328,7 +331,7 @@ function CheckoutPageInner() {
 							className="w-full text-lg h-12"
 							isLoading={createOrder.isPending}
 						>
-							{createOrder.isPending ? "Processing Order..." : "Place Order"}
+							{createOrder.isPending ? t("processingOrder") : t("placeOrder")}
 						</LoadingButton>
 					</div>
 

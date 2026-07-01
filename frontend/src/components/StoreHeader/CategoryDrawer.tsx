@@ -24,6 +24,7 @@ const ParentCategoryImage = ({ category }: { category: ICategory }) => (
 				alt={category.name}
 				width={36}
 				height={36}
+				unoptimized
 				className="object-cover size-full"
 			/>
 		) : (
@@ -42,6 +43,7 @@ const ChildCategoryImage = ({ child }: { child: ICategoryChild }) => (
 				alt={child.name}
 				width={28}
 				height={28}
+				unoptimized
 				className="object-cover size-full"
 			/>
 		) : (

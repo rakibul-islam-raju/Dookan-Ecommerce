@@ -4,6 +4,7 @@ import type { IProductReview, IReviewSummary } from "@/@types/Review";
 import { Separator } from "@/components/ui/separator";
 import { useProductReviews } from "@/lib/hooks/useReviews";
 import { Loader2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { ReviewForm } from "./ReviewForm";
 import { StarRating } from "./StarRating";
 
@@ -12,16 +13,16 @@ interface ProductReviewsProps {
 	reviewSummary: IReviewSummary;
 }
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string, locale: string) => {
 	const date = new Date(dateString);
-	return new Intl.DateTimeFormat("en-US", {
+	return new Intl.DateTimeFormat(locale, {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
 	}).format(date);
 };
 
-const ReviewItem = ({ review }: { review: IProductReview }) => (
+const ReviewItem = ({ review, locale }: { review: IProductReview; locale: string }) => (
 	<div className="py-4">
 		<div className="flex items-center gap-3 mb-2">
 			<div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
@@ -33,7 +34,7 @@ const ReviewItem = ({ review }: { review: IProductReview }) => (
 					{review.user.first_name} {review.user.last_name}
 				</p>
 				<p className="text-xs text-muted-foreground">
-					{formatDate(review.created_at)}
+					{formatDate(review.created_at, locale)}
 				</p>
 			</div>
 		</div>
@@ -51,6 +52,8 @@ export const ProductReviews = ({
 	productId,
 	reviewSummary,
 }: ProductReviewsProps) => {
+	const t = useTranslations("product");
+	const locale = useLocale();
 	const { data, isLoading } = useProductReviews(productId);
 	const reviews = data?.results || [];
 
@@ -58,7 +61,7 @@ export const ProductReviews = ({
 		<div className="mt-12 space-y-6">
 			<div className="bg-muted/30 rounded-xl p-6 space-y-6">
 				<div className="flex items-center justify-between">
-					<h3 className="font-semibold text-lg">Customer Reviews</h3>
+					<h3 className="font-semibold text-lg">{t("customerReviews")}</h3>
 					{reviewSummary.review_count > 0 && (
 						<div className="flex items-center gap-2">
 							<StarRating
@@ -66,9 +69,10 @@ export const ProductReviews = ({
 								size="sm"
 							/>
 							<span className="text-sm text-muted-foreground">
-								{reviewSummary.average_rating} out of 5 (
-								{reviewSummary.review_count}{" "}
-								{reviewSummary.review_count === 1 ? "review" : "reviews"})
+								{t("ratingSummary", {
+									rating: reviewSummary.average_rating,
+									count: reviewSummary.review_count,
+								})}
 							</span>
 						</div>
 					)}
@@ -84,14 +88,12 @@ export const ProductReviews = ({
 				) : reviews.length > 0 ? (
 					<div className="divide-y">
 						{reviews.map((review) => (
-							<ReviewItem key={review.id} review={review} />
+							<ReviewItem key={review.id} review={review} locale={locale} />
 						))}
 					</div>
 				) : (
 					<p className="text-center text-muted-foreground py-6">
-						No reviews yet. Be the first to review this product! To review this
-						product, you must have purchased it. Once you have made a purchase,
-						you can leave a review.
+						{t("noReviews")}
 					</p>
 				)}
 

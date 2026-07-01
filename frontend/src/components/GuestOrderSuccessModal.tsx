@@ -11,6 +11,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { CheckCircle, Home, ShoppingBag } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface GuestOrderSuccessModalProps {
@@ -24,6 +25,7 @@ export function GuestOrderSuccessModal({
 	onClose,
 	orderNumber,
 }: GuestOrderSuccessModalProps) {
+	const t = useTranslations("guestOrder");
 	const router = useRouter();
 	const [countdown, setCountdown] = useState(0);
 
@@ -62,22 +64,21 @@ export function GuestOrderSuccessModal({
 						<CheckCircle className="h-10 w-10 text-green-600" />
 					</div>
 					<DialogTitle className="text-2xl">
-						Order Placed Successfully!
+						{t("title")}
 					</DialogTitle>
 					{orderNumber && (
 						<p className="text-sm text-muted-foreground">
-							Order #{orderNumber}
+							{t("orderNumber", { number: orderNumber })}
 						</p>
 					)}
 				</DialogHeader>
 
 				<DialogDescription className="text-center space-y-3">
 					<p className="text-base">
-						Thank you for your order! Our agent will call you as soon as
-						possible to confirm your order.
+						{t("thanks")}
 					</p>
 					<p className="text-sm text-muted-foreground">
-						Please keep your phone available for the confirmation call.
+						{t("phoneAvailable")}
 					</p>
 				</DialogDescription>
 
@@ -109,7 +110,7 @@ export function GuestOrderSuccessModal({
 							<span className="absolute text-2xl font-bold">{countdown}</span>
 						</div>
 						<p className="mt-2 text-sm text-muted-foreground">
-							Redirecting to shop...
+							{t("redirecting")}
 						</p>
 					</div>
 				</div>
@@ -121,7 +122,7 @@ export function GuestOrderSuccessModal({
 						size="lg"
 					>
 						<ShoppingBag className="mr-2 h-4 w-4" />
-						Continue Shopping
+						{t("continueShopping")}
 					</Button>
 					<Button
 						onClick={() => handleNavigate("/")}
@@ -130,7 +131,7 @@ export function GuestOrderSuccessModal({
 						size="lg"
 					>
 						<Home className="mr-2 h-4 w-4" />
-						Go to Home
+						{t("goHome")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

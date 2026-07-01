@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Eye } from "lucide-react";
 import Image from "next/image";
 import { WishlistButton } from "./WishlistButton";
+import { useTranslations } from "next-intl";
 
 interface ProductItemProps {
 	product: IConsumerProductListItem;
@@ -18,6 +19,7 @@ export const ProductItem = ({
 	onQuickView,
 	className,
 }: ProductItemProps) => {
+	const t = useTranslations("product");
 	const {
 		name,
 		category,
@@ -53,7 +55,7 @@ export const ProductItem = ({
 					/>
 				) : (
 					<div className="flex h-full w-full items-center justify-center text-muted-foreground">
-						No Image
+						{t("noImage")}
 					</div>
 				)}
 
@@ -74,7 +76,7 @@ export const ProductItem = ({
 							variant="secondary"
 							className="font-bold shadow-sm bg-zinc-800 text-white hover:bg-zinc-700"
 						>
-							Out of Stock
+							{t("outOfStock")}
 						</Badge>
 					)}
 				</div>
@@ -89,7 +91,7 @@ export const ProductItem = ({
 							e.preventDefault();
 							onQuickView(product);
 						}}
-						title="Quick View"
+						title={t("quickView")}
 					>
 						<Eye className="h-5 w-5" />
 					</Button>
@@ -124,7 +126,7 @@ export const ProductItem = ({
 
 					{/* Mobile: View options button */}
 					<span className="lg:hidden text-xs font-medium text-primary">
-						View options
+						{t("viewOptions")}
 					</span>
 				</div>
 			</div>

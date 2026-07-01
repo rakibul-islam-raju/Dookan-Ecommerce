@@ -15,34 +15,37 @@ import {
 import { LoadingButton } from "@/components/ui/LoadingButton";
 import { useZodForm } from "@/hooks/useZodForm";
 import { useChangePassword } from "@/lib/hooks/useUser";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { z } from "zod";
 
-const schema = z
+const createSchema = (t: (key: string) => string) => z
 	.object({
-		old_password: z.string().min(1, "Current password is required"),
+		old_password: z.string().min(1, t("validation.currentPasswordRequired")),
 		new_password: z
 			.string()
-			.min(6, "New password must be at least 6 characters long"),
+			.min(6, t("validation.newPasswordMin")),
 		confirm_password: z
 			.string()
-			.min(6, "Password confirmation must be at least 6 characters long"),
+			.min(6, t("validation.confirmPasswordMin")),
 	})
 	.refine((data) => data.new_password === data.confirm_password, {
-		message: "New passwords do not match",
+		message: t("validation.passwordsDoNotMatch"),
 		path: ["confirm_password"],
 	});
 
-type ChangePasswordFormValues = z.infer<typeof schema>;
+type ChangePasswordFormValues = z.infer<ReturnType<typeof createSchema>>;
 
 export const ChangePasswordModal = ({
 	children,
 }: {
 	children: React.ReactNode;
 }) => {
+	const t = useTranslations("account");
 	const [isOpen, setIsOpen] = useState(false);
 
 	const changePassword = useChangePassword();
+	const schema = useMemo(() => createSchema(t), [t]);
 
 	const passForm = useZodForm(schema, {
 		defaultValues: {
@@ -81,10 +84,9 @@ export const ChangePasswordModal = ({
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>Change Password</DialogTitle>
+					<DialogTitle>{t("changePassword")}</DialogTitle>
 					<DialogDescription>
-						Enter your current password and choose a new one. Make sure
-						it&apos;s at least 6 characters long.
+						{t("changePasswordDescription")}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -92,19 +94,19 @@ export const ChangePasswordModal = ({
 					<div className="grid gap-4 py-4">
 						<PasswordField
 							name="old_password"
-							label="Current Password"
+							label={t("currentPassword")}
 							placeholder="••••••••"
 							required
 						/>
 						<PasswordField
 							name="new_password"
-							label="New Password"
+							label={t("newPassword")}
 							placeholder="••••••••"
 							required
 						/>
 						<PasswordField
 							name="confirm_password"
-							label="Confirm New Password"
+							label={t("confirmNewPassword")}
 							placeholder="••••••••"
 							required
 						/>
@@ -120,14 +122,14 @@ export const ChangePasswordModal = ({
 							}}
 							disabled={changePassword.isPending}
 						>
-							Cancel
+							{t("cancel")}
 						</Button>
 						<LoadingButton
 							type="button"
 							isLoading={changePassword.isPending}
 							onClick={() => passForm.handleSubmit(onSubmit)()}
 						>
-							{changePassword.isPending ? "Changing..." : "Change Password"}
+							{changePassword.isPending ? t("changing") : t("changePassword")}
 						</LoadingButton>
 					</DialogFooter>
 				</BaseForm>

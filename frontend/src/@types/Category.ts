@@ -4,7 +4,7 @@ export interface ICategoryChild {
 	id: string;
 	name: string;
 	slug: string;
-	image: string;
+	image: string | null;
 	display_order: number;
 	is_active: boolean;
 }
@@ -12,7 +12,7 @@ export interface ICategoryChild {
 export interface ICategory extends BaseModel {
 	name: string;
 	slug: string;
-	image: string;
+	image: string | null;
 	display_order: number;
 	parent?: string | null;
 	parent_name?: string | null;

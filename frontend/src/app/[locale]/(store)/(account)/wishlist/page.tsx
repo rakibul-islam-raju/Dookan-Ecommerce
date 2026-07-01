@@ -5,8 +5,12 @@ import { Link } from "@/i18n/navigation";
 import { useRemoveFromWishlist, useWishlist } from "@/lib/hooks/useWishlist";
 import { Heart, Loader2, ShoppingCart, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export default function WishlistPage() {
+	const t = useTranslations("account");
+	const productT = useTranslations("product");
+	const commonT = useTranslations("common");
 	const { data: items, isLoading } = useWishlist();
 	const removeFromWishlist = useRemoveFromWishlist();
 
@@ -22,12 +26,14 @@ export default function WishlistPage() {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[300px] text-center">
 				<Heart className="size-16 text-muted-foreground/30 mb-4" />
-				<h2 className="text-xl font-semibold mb-2">Your wishlist is empty</h2>
+				<h2 className="text-xl font-semibold mb-2">
+					{t("wishlistEmptyTitle")}
+				</h2>
 				<p className="text-muted-foreground mb-6">
-					Save products you love for later by clicking the heart icon.
+					{t("wishlistEmptyDescription")}
 				</p>
 				<Button asChild>
-					<Link href="/shop">Browse Products</Link>
+					<Link href="/shop">{commonT("browseProducts")}</Link>
 				</Button>
 			</div>
 		);
@@ -37,7 +43,7 @@ export default function WishlistPage() {
 		<div>
 			<div className="flex items-center justify-between mb-6">
 				<h1 className="text-2xl font-bold font-serif">
-					My Wishlist ({items.length})
+					{t("wishlistTitle", { count: items.length })}
 				</h1>
 			</div>
 
@@ -65,7 +71,7 @@ export default function WishlistPage() {
 									/>
 								) : (
 									<div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-										No Image
+										{productT("noImage")}
 									</div>
 								)}
 							</Link>
@@ -98,7 +104,7 @@ export default function WishlistPage() {
 								<Button size="sm" asChild>
 									<Link href={`/products/${product.slug}`}>
 										<ShoppingCart className="size-4 mr-1" />
-										<span className="hidden sm:inline">View Product</span>
+										<span className="hidden sm:inline">{productT("viewProduct")}</span>
 									</Link>
 								</Button>
 								<Button
@@ -109,7 +115,7 @@ export default function WishlistPage() {
 									disabled={removeFromWishlist.isPending}
 								>
 									<Trash2 className="size-4 mr-1" />
-									<span className="hidden sm:inline">Remove</span>
+									<span className="hidden sm:inline">{commonT("remove")}</span>
 								</Button>
 							</div>
 						</div>

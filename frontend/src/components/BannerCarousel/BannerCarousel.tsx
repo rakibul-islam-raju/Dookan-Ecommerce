@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 
@@ -19,6 +20,7 @@ export const BannerCarousel = ({
 	className,
 	autoPlayInterval = 5000,
 }: BannerCarouselProps) => {
+	const t = useTranslations("header");
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const totalBanners = banners.length;
 
@@ -67,7 +69,7 @@ export const BannerCarousel = ({
 						size="icon"
 						className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background backdrop-blur-sm"
 						onClick={goToPrevious}
-						aria-label="Previous banner"
+						aria-label={t("previousBanner")}
 					>
 						<ChevronLeft className="h-5 w-5" />
 					</Button>
@@ -76,7 +78,7 @@ export const BannerCarousel = ({
 						size="icon"
 						className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background backdrop-blur-sm"
 						onClick={goToNext}
-						aria-label="Next banner"
+						aria-label={t("nextBanner")}
 					>
 						<ChevronRight className="h-5 w-5" />
 					</Button>
@@ -96,7 +98,7 @@ export const BannerCarousel = ({
 									: "bg-background/60 hover:bg-background/80"
 							)}
 							onClick={() => goToSlide(index)}
-							aria-label={`Go to banner ${index + 1}`}
+							aria-label={t("goToBanner", { number: index + 1 })}
 						/>
 					))}
 				</div>

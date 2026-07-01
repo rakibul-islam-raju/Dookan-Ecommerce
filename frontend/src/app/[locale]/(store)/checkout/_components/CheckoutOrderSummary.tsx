@@ -4,6 +4,7 @@ import { env } from "@/config/env";
 import type { CouponValidateResponse } from "@/lib/api/coupons";
 import type { Cart } from "@/lib/api";
 import { Lock, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface CheckoutOrderSummaryProps {
 	cart: Cart;
@@ -32,11 +33,12 @@ export function CheckoutOrderSummary({
 	appliedCoupon,
 	freeShippingThreshold,
 }: CheckoutOrderSummaryProps) {
+	const t = useTranslations("checkoutPage");
 	const items = cart.items;
 
 	return (
 		<div className="sticky top-24 border rounded-xl bg-muted/30 p-6 space-y-6">
-			<h3 className="font-semibold text-lg">Order Summary</h3>
+			<h3 className="font-semibold text-lg">{t("orderSummary")}</h3>
 
 			<div className="space-y-4">
 				{items.map((item) => (
@@ -70,21 +72,21 @@ export function CheckoutOrderSummary({
 			<div className="space-y-2 text-sm">
 				<div className="flex justify-between">
 					<span className="text-muted-foreground">
-						Subtotal ({cart.total_items || 0} items)
+						{t("subtotal", { count: cart.total_items || 0 })}
 					</span>
 					<span>৳{subtotal.toFixed(2)}</span>
 				</div>
 				{discount > 0 && (
 					<div className="flex justify-between text-green-600">
-						<span>Discount ({appliedCoupon?.code})</span>
+						<span>{t("discount", { code: appliedCoupon?.code ?? "" })}</span>
 						<span>-৳{discount.toFixed(2)}</span>
 					</div>
 				)}
 				<div className="flex justify-between">
-					<span className="text-muted-foreground">Shipping</span>
+					<span className="text-muted-foreground">{t("shipping")}</span>
 					<span>
 						{shipping === 0 ? (
-							<span className="text-green-600">FREE</span>
+							<span className="text-green-600">{t("free")}</span>
 						) : (
 							`৳${shipping}`
 						)}
@@ -92,14 +94,15 @@ export function CheckoutOrderSummary({
 				</div>
 				{tax > 0 && (
 					<div className="flex justify-between">
-						<span className="text-muted-foreground">Tax</span>
+						<span className="text-muted-foreground">{t("tax")}</span>
 						<span>৳{tax.toFixed(2)}</span>
 					</div>
 				)}
 				{freeShippingThreshold > 0 && subtotal < freeShippingThreshold && (
 					<div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-						Add ৳{(freeShippingThreshold - subtotal).toFixed(2)} more for free
-						shipping!
+						{t("freeShippingPrompt", {
+							amount: (freeShippingThreshold - subtotal).toFixed(2),
+						})}
 					</div>
 				)}
 			</div>
@@ -107,7 +110,7 @@ export function CheckoutOrderSummary({
 			<Separator />
 
 			<div className="flex justify-between items-center">
-				<span className="font-bold text-lg">Total</span>
+				<span className="font-bold text-lg">{t("total")}</span>
 				<div className="text-right">
 					<span className="text-xs text-muted-foreground block font-normal">
 						BDT
@@ -118,10 +121,10 @@ export function CheckoutOrderSummary({
 
 			<div className="flex items-center gap-2 text-xs text-muted-foreground justify-center pt-4">
 				<ShieldCheck className="size-4" />
-				Secure Checkout
+				{t("secureCheckout")}
 				<span className="mx-1">•</span>
 				<Lock className="size-4" />
-				Encrypted Data
+				{t("encryptedData")}
 			</div>
 		</div>
 	);

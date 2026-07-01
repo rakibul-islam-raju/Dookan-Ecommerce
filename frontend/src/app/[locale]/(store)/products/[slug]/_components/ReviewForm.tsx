@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { useCreateReview } from "@/lib/hooks/useReviews";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { StarRating } from "./StarRating";
@@ -14,6 +15,7 @@ interface ReviewFormProps {
 }
 
 export const ReviewForm = ({ productId }: ReviewFormProps) => {
+	const t = useTranslations("product");
 	const { isAuthenticated } = useAuthStore();
 	const createReview = useCreateReview();
 
@@ -25,11 +27,11 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
 		return (
 			<div className="bg-muted/30 rounded-xl p-6 text-center">
 				<p className="text-muted-foreground mb-3">
-					Please log in to leave a review
+					{t("pleaseLoginReview")}
 				</p>
 				<Link href="/login">
 					<Button variant="outline" size="sm">
-						Log In
+						{t("logIn")}
 					</Button>
 				</Link>
 			</div>
@@ -39,7 +41,7 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (rating === 0) {
-			toast.error("Please select a rating");
+			toast.error(t("selectRating"));
 			return;
 		}
 
@@ -51,7 +53,7 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
 				comment: comment.trim() || undefined,
 			});
 			toast.success(
-				"Review submitted! It will appear after admin approval."
+				t("reviewSubmitted")
 			);
 			setRating(0);
 			setTitle("");
@@ -65,7 +67,7 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div>
 				<label className="text-sm font-medium block mb-2">
-					Your Rating
+					{t("yourRating")}
 				</label>
 				<StarRating
 					rating={rating}
@@ -77,14 +79,14 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
 
 			<div>
 				<label htmlFor="review-title" className="text-sm font-medium block mb-1.5">
-					Title (optional)
+					{t("reviewTitle")}
 				</label>
 				<input
 					id="review-title"
 					type="text"
 					value={title}
 					onChange={(e) => setTitle(e.target.value)}
-					placeholder="Summarize your experience"
+					placeholder={t("reviewTitlePlaceholder")}
 					maxLength={200}
 					className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
 				/>
@@ -92,13 +94,13 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
 
 			<div>
 				<label htmlFor="review-comment" className="text-sm font-medium block mb-1.5">
-					Review (optional)
+					{t("reviewLabel")}
 				</label>
 				<textarea
 					id="review-comment"
 					value={comment}
 					onChange={(e) => setComment(e.target.value)}
-					placeholder="Share your thoughts about this product..."
+					placeholder={t("reviewPlaceholder")}
 					rows={4}
 					className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
 				/>
@@ -111,10 +113,10 @@ export const ReviewForm = ({ productId }: ReviewFormProps) => {
 				{createReview.isPending ? (
 					<>
 						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						Submitting...
+						{t("submitting")}
 					</>
 				) : (
-					"Submit Review"
+					t("submitReview")
 				)}
 			</Button>
 		</form>

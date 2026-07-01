@@ -20,7 +20,7 @@ export function SearchDropdown({
 	onClose,
 	onNavigate,
 }: SearchDropdownProps) {
-	const t = useTranslations("common");
+	const t = useTranslations("header");
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	// Fetch search results with max 10 items and fresh data
@@ -120,7 +120,7 @@ export function SearchDropdown({
 							className="flex items-center justify-center gap-2 w-full py-2 text-sm text-primary hover:bg-muted rounded-md transition-colors"
 						>
 							<Search className="size-4" />
-							{t("search")} all results for &quot;{searchQuery}&quot;
+							{t("searchAllResults", { query: searchQuery })}
 						</Link>
 					</div>
 				</>
@@ -129,9 +129,9 @@ export function SearchDropdown({
 					<div className="size-12 rounded-full bg-muted flex items-center justify-center mb-3">
 						<Search className="size-6 text-muted-foreground" />
 					</div>
-					<p className="text-sm font-medium mb-1">No products found</p>
+					<p className="text-sm font-medium mb-1">{t("noProductsFound")}</p>
 					<p className="text-xs text-muted-foreground text-center">
-						Try searching with different keywords
+						{t("tryDifferentKeywords")}
 					</p>
 				</div>
 			)}

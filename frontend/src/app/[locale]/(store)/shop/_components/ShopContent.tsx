@@ -29,12 +29,13 @@ import {
 	X,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 
 const SORT_OPTIONS = [
-	{ value: "-created_at", label: "Newest" },
-	{ value: "price", label: "Price: Low to High" },
-	{ value: "-price", label: "Price: High to Low" },
+	{ value: "-created_at", labelKey: "sortNewest" },
+	{ value: "price", labelKey: "sortPriceLowHigh" },
+	{ value: "-price", labelKey: "sortPriceHighLow" },
 ] as const;
 
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
@@ -81,6 +82,7 @@ function CategoryFilterImage({ category }: { category: ICategory }) {
 					alt={category.name}
 					width={24}
 					height={24}
+					unoptimized
 					className="object-cover size-full"
 				/>
 			) : (
@@ -101,6 +103,7 @@ function ChildCategoryFilterImage({ child }: { child: ICategoryChild }) {
 					alt={child.name}
 					width={20}
 					height={20}
+					unoptimized
 					className="object-cover size-full"
 				/>
 			) : (
@@ -113,6 +116,7 @@ function ChildCategoryFilterImage({ child }: { child: ICategoryChild }) {
 }
 
 export function ShopContent() {
+	const t = useTranslations("shopPage");
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
@@ -243,7 +247,7 @@ export function ShopContent() {
 		<>
 			{/* Category Filter */}
 			<div className="space-y-2">
-				<h3 className="font-medium text-sm">Category</h3>
+				<h3 className="font-medium text-sm">{t("category")}</h3>
 				{isCategoriesLoading ? (
 					<CategorySkeleton />
 				) : (
@@ -260,7 +264,7 @@ export function ShopContent() {
 									: "hover:bg-muted",
 							)}
 						>
-							All Categories
+							{t("allCategories")}
 						</button>
 						{topLevelCategories.map((cat) => {
 							const children = cat.children || [];
@@ -299,7 +303,7 @@ export function ShopContent() {
 														? "text-primary-foreground/70 hover:text-primary-foreground"
 														: "text-muted-foreground hover:bg-muted",
 												)}
-												aria-label={isExpanded ? "Collapse" : "Expand"}
+												aria-label={isExpanded ? t("collapse") : t("expand")}
 											>
 												<ChevronDown
 													className={cn(
@@ -344,11 +348,11 @@ export function ShopContent() {
 
 			{/* Price Range */}
 			<div className="space-y-3">
-				<h3 className="font-medium text-sm">Price Range</h3>
+				<h3 className="font-medium text-sm">{t("priceRange")}</h3>
 				<div className="flex gap-2">
 					<input
 						type="number"
-						placeholder="Min"
+						placeholder={t("min")}
 						defaultValue={minPrice}
 						onBlur={(e) => updateFilters({ minPrice: e.target.value })}
 						onKeyDown={(e) => {
@@ -362,7 +366,7 @@ export function ShopContent() {
 					/>
 					<input
 						type="number"
-						placeholder="Max"
+						placeholder={t("max")}
 						defaultValue={maxPrice}
 						onBlur={(e) => updateFilters({ maxPrice: e.target.value })}
 						onKeyDown={(e) => {
@@ -381,7 +385,7 @@ export function ShopContent() {
 
 			{/* Availability */}
 			<div className="space-y-3">
-				<h3 className="font-medium text-sm">Availability</h3>
+				<h3 className="font-medium text-sm">{t("availability")}</h3>
 				<label className="flex items-center gap-2 cursor-pointer">
 					<input
 						type="checkbox"
@@ -391,7 +395,7 @@ export function ShopContent() {
 						}
 						className="rounded border-input text-primary focus:ring-primary"
 					/>
-					<span className="text-sm">In Stock Only</span>
+					<span className="text-sm">{t("inStockOnly")}</span>
 				</label>
 			</div>
 		</>
@@ -401,15 +405,12 @@ export function ShopContent() {
 		<div className="container py-6 md:py-8">
 			{/* Header */}
 			<div className="mb-6">
-				<h1 className="text-3xl font-bold font-serif mb-2">Shop</h1>
+				<h1 className="text-3xl font-bold font-serif mb-2">{t("title")}</h1>
 				<p className="text-muted-foreground">
 					{isProductsLoading ? (
-						"Loading products..."
+						t("loadingProducts")
 					) : (
-						<>
-							Browse our collection of {totalCount} organic product
-							{totalCount !== 1 ? "s" : ""}
-						</>
+						t("browseCollection", { count: totalCount })
 					)}
 				</p>
 			</div>
@@ -420,11 +421,11 @@ export function ShopContent() {
 					<div className="flex items-center justify-between">
 						<h2 className="font-semibold text-lg flex items-center gap-2">
 							<SlidersHorizontal className="size-5" />
-							Filters
+							{t("filters")}
 						</h2>
 						{activeFiltersCount > 0 && (
 							<Button variant="ghost" size="sm" onClick={clearFilters}>
-								Clear All
+								{t("clearAll")}
 							</Button>
 						)}
 					</div>
@@ -446,7 +447,7 @@ export function ShopContent() {
 								onClick={() => setShowFilters(true)}
 							>
 								<Filter className="size-4 mr-2" />
-								Filters
+								{t("filters")}
 								{activeFiltersCount > 0 && (
 									<Badge variant="secondary" className="ml-2">
 										{activeFiltersCount}
@@ -457,14 +458,14 @@ export function ShopContent() {
 							{isFetching && !isProductsLoading && (
 								<div className="flex items-center gap-2 text-sm text-muted-foreground">
 									<Loader2 className="size-4 animate-spin" />
-									<span className="hidden sm:inline">Updating...</span>
+									<span className="hidden sm:inline">{t("updating")}</span>
 								</div>
 							)}
 						</div>
 
 						<div className="flex items-center gap-2 w-full sm:w-auto">
 							<span className="text-sm text-muted-foreground whitespace-nowrap">
-								Sort by:
+								{t("sortBy")}
 							</span>
 							<select
 								value={sortBy}
@@ -473,7 +474,7 @@ export function ShopContent() {
 							>
 								{SORT_OPTIONS.map((option) => (
 									<option key={option.value} value={option.value}>
-										{option.label}
+										{t(option.labelKey)}
 									</option>
 								))}
 							</select>
@@ -489,7 +490,7 @@ export function ShopContent() {
 							<SheetHeader>
 								<SheetTitle className="flex items-center gap-2">
 									<SlidersHorizontal className="size-5" />
-									Filters
+									{t("filters")}
 								</SheetTitle>
 							</SheetHeader>
 
@@ -508,7 +509,7 @@ export function ShopContent() {
 											}}
 											className="w-full"
 										>
-											Clear All Filters
+											{t("clearAllFilters")}
 										</Button>
 									</>
 								)}
@@ -520,11 +521,11 @@ export function ShopContent() {
 					{activeFiltersCount > 0 && (
 						<div className="flex flex-wrap items-center gap-2">
 							<span className="text-sm text-muted-foreground">
-								Active filters:
+								{t("activeFilters")}
 							</span>
 							{searchQuery && (
 								<Badge variant="secondary" className="gap-1">
-									Search: {searchQuery}
+									{t("searchFilter", { query: searchQuery })}
 									<button onClick={() => updateFilters({ search: "" })}>
 										<X className="size-3" />
 									</button>
@@ -540,7 +541,7 @@ export function ShopContent() {
 							)}
 							{minPrice && (
 								<Badge variant="secondary" className="gap-1">
-									Min: ৳{minPrice}
+									{t("minFilter", { amount: minPrice })}
 									<button onClick={() => updateFilters({ minPrice: "" })}>
 										<X className="size-3" />
 									</button>
@@ -548,7 +549,7 @@ export function ShopContent() {
 							)}
 							{maxPrice && (
 								<Badge variant="secondary" className="gap-1">
-									Max: ৳{maxPrice}
+									{t("maxFilter", { amount: maxPrice })}
 									<button onClick={() => updateFilters({ maxPrice: "" })}>
 										<X className="size-3" />
 									</button>
@@ -556,7 +557,7 @@ export function ShopContent() {
 							)}
 							{inStockOnly && (
 								<Badge variant="secondary" className="gap-1">
-									In Stock
+									{t("inStock")}
 									<button onClick={() => updateFilters({ inStock: "" })}>
 										<X className="size-3" />
 									</button>
@@ -584,9 +585,11 @@ export function ShopContent() {
 							{totalPages > 1 && (
 								<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6">
 									<p className="text-sm text-muted-foreground order-2 sm:order-1">
-										Showing {(page - 1) * pageSize + 1} -{" "}
-										{Math.min(page * pageSize, totalCount)} of {totalCount}{" "}
-										products
+										{t("showingProducts", {
+											from: (page - 1) * pageSize + 1,
+											to: Math.min(page * pageSize, totalCount),
+											total: totalCount,
+										})}
 									</p>
 
 									<div className="flex items-center gap-2 order-1 sm:order-2">
@@ -597,7 +600,7 @@ export function ShopContent() {
 											onClick={() => handlePageChange(page - 1)}
 										>
 											<ChevronLeft className="size-4 mr-1" />
-											Previous
+											{t("previous")}
 										</Button>
 
 										<div className="hidden sm:flex items-center gap-1">
@@ -644,7 +647,7 @@ export function ShopContent() {
 											disabled={page >= totalPages || isFetching}
 											onClick={() => handlePageChange(page + 1)}
 										>
-											Next
+											{t("next")}
 											<ChevronRight className="size-4 ml-1" />
 										</Button>
 									</div>
@@ -656,11 +659,13 @@ export function ShopContent() {
 							<div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
 								<Filter className="size-8 text-muted-foreground" />
 							</div>
-							<h3 className="text-lg font-semibold mb-2">No products found</h3>
+							<h3 className="text-lg font-semibold mb-2">
+								{t("noProductsFound")}
+							</h3>
 							<p className="text-muted-foreground mb-6">
-								Try adjusting your filters to find what you&apos;re looking for.
+								{t("adjustFilters")}
 							</p>
-							<Button onClick={clearFilters}>Clear Filters</Button>
+							<Button onClick={clearFilters}>{t("clearFilters")}</Button>
 						</div>
 					)}
 				</div>

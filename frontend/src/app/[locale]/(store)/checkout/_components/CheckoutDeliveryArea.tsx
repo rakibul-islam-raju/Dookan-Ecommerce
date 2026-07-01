@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Truck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { FieldError } from "react-hook-form";
 
 interface CheckoutDeliveryAreaProps {
@@ -19,24 +20,25 @@ export function CheckoutDeliveryArea({
 	insideDhakaCharge,
 	outsideDhakaCharge,
 }: CheckoutDeliveryAreaProps) {
+	const t = useTranslations("checkoutPage");
 	const options = [
 		{
 			value: "inside_dhaka" as const,
-			label: "Inside Dhaka",
-			description: "Delivery within Dhaka city limits",
+			label: t("insideDhaka"),
+			description: t("insideDhakaDescription"),
 			price: `৳${insideDhakaCharge}`,
 		},
 		{
 			value: "outside_dhaka" as const,
-			label: "Outside Dhaka",
-			description: "Delivery outside Dhaka city limits",
+			label: t("outsideDhaka"),
+			description: t("outsideDhakaDescription"),
 			price: `৳${outsideDhakaCharge}`,
 		},
 	];
 
 	return (
 		<section className="space-y-4">
-			<h2 className="text-xl font-semibold">Delivery Area</h2>
+			<h2 className="text-xl font-semibold">{t("deliveryArea")}</h2>
 			<div className="space-y-3">
 				{options.map((option) => (
 					<div
