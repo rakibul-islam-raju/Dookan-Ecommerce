@@ -85,15 +85,21 @@ class OrderItemSerializer(serializers.ModelSerializer):
         """
         Return basic product info
         """
+        image = obj.product.images.filter(is_primary=True).order_by("display_order").first()
+        image_url = None
+        if image:
+            request = self.context.get("request")
+            image_url = (
+                request.build_absolute_uri(image.image.url)
+                if request
+                else image.image.url
+            )
+
         return {
             "id": str(obj.product.id),
             "name": obj.product.name,
             "slug": obj.product.slug,
-            "image": (
-                obj.product.images.filter(is_primary=True).first().image.url
-                if obj.product.images.filter(is_primary=True).exists()
-                else None
-            ),
+            "image": image_url,
         }
 
 

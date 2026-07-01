@@ -15,6 +15,7 @@ import {
 	FileDown,
 	Loader2,
 	MapPin,
+	Package,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -25,15 +26,17 @@ import { toast } from "react-toastify";
 const getImageUrl = (image?: string) => {
 	if (!image) return "";
 	if (image.startsWith("http")) return image;
-	return `${process.env.NEXT_PUBLIC_API_URL || ""}${
-		image.startsWith("/") ? "" : "/"
-	}${image}`;
+	const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+	const origin = baseUrl.replace(/\/api\/?$/, "");
+	return `${origin}${image.startsWith("/") ? "" : "/"}${image}`;
 };
 
 const getStatusColor = (status: import("@/@types/Order").IOrderStatus) => {
 	switch (status) {
 		case "pending":
 			return "bg-yellow-500/15 text-yellow-700 border-yellow-200";
+		case "confirmed":
+			return "bg-violet-500/15 text-violet-700 border-violet-200";
 		case "processing":
 			return "bg-blue-500/15 text-blue-700 border-blue-200";
 		case "shipped":
@@ -48,7 +51,7 @@ const getStatusColor = (status: import("@/@types/Order").IOrderStatus) => {
 };
 
 const getStatusStep = (status: import("@/@types/Order").IOrderStatus) => {
-	const steps = ["pending", "processing", "shipped", "delivered"];
+	const steps = ["pending", "confirmed", "processing", "shipped", "delivered"];
 	const index = steps.indexOf(status);
 	return index === -1 ? 0 : index + 1;
 };
@@ -100,6 +103,13 @@ export default function OrderDetailsPage() {
 	}
 
 	const currentStep = getStatusStep(order.status);
+	const progressSteps = [
+		t("orderPlaced"),
+		t("confirmed"),
+		t("processing"),
+		t("shipped"),
+		t("delivered"),
+	];
 	const formatCurrency = (value: string | number) =>
 		`৳${Number(value).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
 			minimumFractionDigits: 2,
@@ -187,16 +197,11 @@ export default function OrderDetailsPage() {
 						{/* Active Progress Bar */}
 						<div
 							className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 z-0 transition-all duration-500"
-							style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
+							style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
 						/>
 
 						{/* Steps */}
-						{[
-							t("orderPlaced"),
-							t("processing"),
-							t("shipped"),
-							t("delivered"),
-						].map(
+						{progressSteps.map(
 							(step, index) => {
 								const isCompleted = index + 1 <= currentStep;
 								const isCurrent = index + 1 === currentStep;
@@ -256,12 +261,18 @@ export default function OrderDetailsPage() {
 							{order.items.map((item) => (
 								<div key={item.id} className="p-4 flex gap-4">
 									<div className="h-20 w-20 rounded-lg border bg-muted overflow-hidden shrink-0">
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={getImageUrl(item.product_details.image)}
-											alt={item.product_name}
-											className="w-full h-full object-cover"
-										/>
+										{item.product_details.image ? (
+											// eslint-disable-next-line @next/next/no-img-element
+											<img
+												src={getImageUrl(item.product_details.image)}
+												alt={item.product_name}
+												className="w-full h-full object-cover"
+											/>
+										) : (
+											<div className="flex h-full w-full items-center justify-center">
+												<Package className="size-8 text-muted-foreground" />
+											</div>
+										)}
 									</div>
 									<div className="flex-1 min-w-0">
 										<Link

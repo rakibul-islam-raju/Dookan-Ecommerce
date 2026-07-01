@@ -151,6 +151,7 @@
 		"trackAnother": "আরেকটি অর্ডার ট্র্যাক করুন",
 		"status": {
 			"pending": "পেন্ডিং",
+			"confirmed": "নিশ্চিত",
 			"processing": "প্রসেসিং",
 			"shipped": "পাঠানো হয়েছে",
 			"delivered": "ডেলিভারড",
@@ -471,6 +472,7 @@
 		"downloadInvoice": "ইনভয়েস ডাউনলোড",
 		"downloadInvoiceFailed": "ইনভয়েস ডাউনলোড করা যায়নি",
 		"orderPlaced": "অর্ডার করা হয়েছে",
+		"confirmed": "নিশ্চিত",
 		"processing": "প্রসেসিং",
 		"shipped": "পাঠানো হয়েছে",
 		"delivered": "ডেলিভারড",
@@ -494,6 +496,7 @@
 		},
 		"orderStatus": {
 			"pending": "পেন্ডিং",
+			"confirmed": "নিশ্চিত",
 			"processing": "প্রসেসিং",
 			"shipped": "পাঠানো হয়েছে",
 			"delivered": "ডেলিভারড",

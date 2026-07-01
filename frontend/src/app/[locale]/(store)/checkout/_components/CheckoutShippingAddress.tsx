@@ -1,9 +1,6 @@
 "use client";
 
 import { TextField } from "@/components/ui/@form/TextField";
-import { Button } from "@/components/ui/button";
-import { useCreateUserAddress } from "@/lib/hooks/useUser";
-import { Loader2, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormContext } from "react-hook-form";
 import type { CheckoutFormValues } from "../_types";
@@ -19,41 +16,8 @@ export function CheckoutShippingAddress({
 }: CheckoutShippingAddressProps) {
 	const t = useTranslations("checkoutPage");
 	const form = useFormContext<CheckoutFormValues>();
-	const createAddress = useCreateUserAddress();
 
-	const [customerName, mobileNumber, addressLine1, city, postalCode] =
-		form.watch([
-			"customer_name",
-			"mobile_number",
-			"address_line1",
-			"city",
-			"postal_code",
-		]);
-
-	const canSaveAddress = !!(
-		customerName &&
-		mobileNumber &&
-		addressLine1 &&
-		city &&
-		postalCode
-	);
-
-	const handleSaveAddress = async () => {
-		const values = form.getValues();
-		await createAddress.mutateAsync({
-			address_type: "home",
-			full_name: values.customer_name,
-			mobile_number: values.mobile_number,
-			address_line1: values.address_line1,
-			address_line2: values.address_line2 || undefined,
-			city: values.city,
-			state: values.city,
-			postal_code: values.postal_code,
-			country: "Bangladesh",
-		});
-	};
-
-	const showSaveButton = isAuthenticated && !hasDefaultAddress;
+	const showSaveAddressOption = isAuthenticated && !hasDefaultAddress;
 
 	return (
 		<section className="space-y-4">
@@ -97,27 +61,15 @@ export function CheckoutShippingAddress({
 				required
 			/>
 
-			{showSaveButton && (
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					disabled={!canSaveAddress || createAddress.isPending}
-					onClick={handleSaveAddress}
-					className="mt-2"
-				>
-					{createAddress.isPending ? (
-						<>
-							<Loader2 className="size-4 mr-2 animate-spin" />
-							{t("savingAddress")}
-						</>
-					) : (
-						<>
-							<Save className="size-4 mr-2" />
-							{t("saveAddressFuture")}
-						</>
-					)}
-				</Button>
+			{showSaveAddressOption && (
+				<label className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+					<input
+						type="checkbox"
+						className="size-4 rounded border-input text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						{...form.register("save_address")}
+					/>
+					<span>{t("saveAddressFuture")}</span>
+				</label>
 			)}
 		</section>
 	);

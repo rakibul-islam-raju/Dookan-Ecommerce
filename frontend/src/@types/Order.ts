@@ -1,5 +1,6 @@
 export type IOrderStatus =
 	| "pending"
+	| "confirmed"
 	| "processing"
 	| "shipped"
 	| "delivered"

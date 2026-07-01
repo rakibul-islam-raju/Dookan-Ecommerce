@@ -43,6 +43,7 @@ import {
 	useUpdatePaymentStatus,
 } from "@/lib/api/orders";
 import { downloadBlob, getInvoiceFileName } from "@/lib/download";
+import { cn } from "@/lib/utils";
 import type { IOrderPaymentStatus, IOrderStatus } from "@/@types/Order";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -133,6 +134,15 @@ const formatPaymentMethod = (method: string) => {
 		default:
 			return method;
 	}
+};
+
+const getImageUrl = (image?: string | null) => {
+	if (!image) return "";
+	if (image.startsWith("http")) return image;
+
+	const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+	const origin = baseUrl.replace(/\/api\/?$/, "");
+	return `${origin}${image.startsWith("/") ? "" : "/"}${image}`;
 };
 
 export const OrderDetails = () => {
@@ -368,9 +378,13 @@ export const OrderDetails = () => {
 	const canCancel = !["cancelled", "delivered", "refunded"].includes(
 		order.status
 	);
+	const banglaTypographyClass =
+		locale === "bn"
+			? "[&_[data-slot=card-title]]:leading-8 [&_[data-slot=table-head]]:leading-7 [&_[data-slot=table-cell]]:leading-7 [&_.order-detail-text]:leading-7"
+			: "";
 
 	return (
-		<div className="space-y-6">
+		<div className={cn("space-y-6", banglaTypographyClass)}>
 			{/* Header */}
 			<div className="flex items-center justify-between gap-4 flex-wrap">
 				<div className="flex items-center gap-4">
@@ -484,7 +498,7 @@ export const OrderDetails = () => {
 												<div className="flex items-center gap-3">
 													{item.product_details.image ? (
 														<img
-															src={item.product_details.image}
+															src={getImageUrl(item.product_details.image)}
 															alt={item.product_name}
 															className="h-12 w-12 rounded-md object-cover"
 														/>
@@ -494,8 +508,10 @@ export const OrderDetails = () => {
 														</div>
 													)}
 													<div>
-														<p className="font-medium">{item.product_name}</p>
-														<p className="text-sm text-muted-foreground">
+														<p className="order-detail-text font-medium">
+															{item.product_name}
+														</p>
+														<p className="order-detail-text text-sm text-muted-foreground">
 															{t("orders.details.items.sku", "SKU: {sku}", {
 																sku: item.product_sku,
 															})}
@@ -617,20 +633,20 @@ export const OrderDetails = () => {
 											<div className="h-2 w-2 rounded-full bg-primary mt-2" />
 											<div className="flex-1">
 												<div className="flex items-center justify-between">
-													<p className="font-medium capitalize">
+													<p className="order-detail-text font-medium capitalize">
 														{getStatusLabel(history.status as IOrderStatus)}
 													</p>
-													<p className="text-sm text-muted-foreground">
+													<p className="order-detail-text text-sm text-muted-foreground">
 														{formatDateLocalized(history.created_at)}
 													</p>
 												</div>
 												{history.note && (
-													<p className="text-sm text-muted-foreground mt-1">
+													<p className="order-detail-text text-sm text-muted-foreground mt-1">
 														{history.note}
 													</p>
 												)}
 												{history.created_by && (
-													<p className="text-xs text-muted-foreground mt-1">
+													<p className="order-detail-text text-xs text-muted-foreground mt-1">
 														{t("orders.details.history.by", "By: {name}", {
 															name: history.created_by.username,
 														})}
@@ -729,7 +745,9 @@ export const OrderDetails = () => {
 								<span className="text-muted-foreground">
 									<T id="orders.details.summary.subtotal" defaultMessage="Subtotal" />
 								</span>
-								<span>{formatCurrency(order.subtotal)}</span>
+								<span className="order-detail-text">
+									{formatCurrency(order.subtotal)}
+								</span>
 							</div>
 							{Number(order.discount_amount) > 0 && (
 								<div className="flex justify-between text-sm">
@@ -739,7 +757,7 @@ export const OrderDetails = () => {
 											defaultMessage="Discount"
 										/>
 									</span>
-									<span className="text-green-600">
+									<span className="order-detail-text text-green-600">
 										-{formatCurrency(order.discount_amount)}
 									</span>
 								</div>
@@ -749,7 +767,9 @@ export const OrderDetails = () => {
 									<span className="text-muted-foreground">
 										<T id="orders.details.summary.tax" defaultMessage="Tax" />
 									</span>
-									<span>{formatCurrency(order.tax_amount)}</span>
+									<span className="order-detail-text">
+										{formatCurrency(order.tax_amount)}
+									</span>
 								</div>
 							)}
 							<div className="flex justify-between text-sm">
@@ -759,14 +779,16 @@ export const OrderDetails = () => {
 										defaultMessage="Shipping"
 									/>
 								</span>
-								<span>{formatCurrency(order.shipping_amount)}</span>
+								<span className="order-detail-text">
+									{formatCurrency(order.shipping_amount)}
+								</span>
 							</div>
 							<div className="border-t pt-3 mt-3">
 								<div className="flex justify-between font-medium">
 									<span>
 										<T id="orders.details.summary.total" defaultMessage="Total" />
 									</span>
-									<span className="text-lg">
+									<span className="order-detail-text text-lg">
 										{formatCurrency(order.total_amount)}
 									</span>
 								</div>
@@ -786,7 +808,7 @@ export const OrderDetails = () => {
 								<p className="text-sm text-muted-foreground mb-1">
 									<T id="orders.details.timeline.created" defaultMessage="Created" />
 								</p>
-								<p className="text-sm font-medium">
+								<p className="order-detail-text text-sm font-medium">
 									{formatDateLocalized(order.created_at)}
 								</p>
 							</div>
@@ -797,7 +819,7 @@ export const OrderDetails = () => {
 										defaultMessage="Last Updated"
 									/>
 								</p>
-								<p className="text-sm font-medium">
+								<p className="order-detail-text text-sm font-medium">
 									{formatDateLocalized(order.updated_at)}
 								</p>
 							</div>
@@ -806,7 +828,7 @@ export const OrderDetails = () => {
 									<p className="text-sm text-muted-foreground mb-1">
 										{t("orders.common.status.confirmed", "Confirmed")}
 									</p>
-									<p className="text-sm font-medium">
+									<p className="order-detail-text text-sm font-medium">
 										{formatDateLocalized(order.confirmed_at)}
 									</p>
 								</div>
@@ -816,7 +838,7 @@ export const OrderDetails = () => {
 									<p className="text-sm text-muted-foreground mb-1">
 										{t("orders.common.status.shipped", "Shipped")}
 									</p>
-									<p className="text-sm font-medium">
+									<p className="order-detail-text text-sm font-medium">
 										{formatDateLocalized(order.shipped_at)}
 									</p>
 								</div>
@@ -826,7 +848,7 @@ export const OrderDetails = () => {
 									<p className="text-sm text-muted-foreground mb-1">
 										{t("orders.common.status.delivered", "Delivered")}
 									</p>
-									<p className="text-sm font-medium">
+									<p className="order-detail-text text-sm font-medium">
 										{formatDateLocalized(order.delivered_at)}
 									</p>
 								</div>

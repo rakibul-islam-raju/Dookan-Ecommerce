@@ -17,6 +17,7 @@ import {
 } from "@/lib/meta";
 import { useCreateOrder } from "@/lib/hooks/useOrders";
 import { useSiteConfig } from "@/lib/hooks/useStore";
+import { useCreateUserAddress } from "@/lib/hooks/useUser";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import type { CouponValidateResponse } from "@/lib/api/coupons";
 import { couponClientApi } from "@/lib/api/coupons";
@@ -53,6 +54,7 @@ function CheckoutPageInner() {
 
 	const { data: cart, isLoading: cartLoading } = useCart();
 	const createOrder = useCreateOrder();
+	const createAddress = useCreateUserAddress();
 	const { data: siteConfig } = useSiteConfig();
 
 	const [couponCode, setCouponCode] = useState(
@@ -84,6 +86,7 @@ function CheckoutPageInner() {
 			delivery_type: "inside_dhaka",
 			customer_note: "",
 			newsletter: false,
+			save_address: false,
 		},
 	});
 
@@ -150,6 +153,17 @@ function CheckoutPageInner() {
 	const handleSubmitOrder = async (data: CheckoutFormValues) => {
 		if (!cart || items.length === 0) return;
 
+		const shippingAddress = {
+			full_name: data.customer_name,
+			mobile_number: data.mobile_number,
+			address_line1: data.address_line1,
+			address_line2: data.address_line2 || undefined,
+			city: data.city,
+			state: data.city,
+			postal_code: data.postal_code,
+			country: "Bangladesh",
+		};
+
 		const orderData: ICreateOrderRequest = {
 			customer_name: data.customer_name,
 			customer_email: data.customer_email || undefined,
@@ -164,16 +178,7 @@ function CheckoutPageInner() {
 				variant_id: item.variant.id,
 				quantity: item.quantity,
 			})),
-			shipping_address: {
-				full_name: data.customer_name,
-				mobile_number: data.mobile_number,
-				address_line1: data.address_line1,
-				address_line2: data.address_line2 || undefined,
-				city: data.city,
-				state: data.city,
-				postal_code: data.postal_code,
-				country: "Bangladesh",
-			},
+			shipping_address: shippingAddress,
 		};
 
 		try {
@@ -183,6 +188,20 @@ function CheckoutPageInner() {
 					initMetaPixel(siteConfig.meta_pixel_id);
 				}
 				trackMetaPurchase(result, metaCurrency, orderData.meta_event_id);
+			}
+			if (
+				isAuthenticated &&
+				data.save_address &&
+				!user?.default_address?.address_line1
+			) {
+				try {
+					await createAddress.mutateAsync({
+						address_type: "home",
+						...shippingAddress,
+					});
+				} catch (error) {
+					console.error("Address save failed:", error);
+				}
 			}
 			if (!isAuthenticated) {
 				setGuestOrderNumber(result.order_number);
@@ -329,9 +348,13 @@ function CheckoutPageInner() {
 							type="submit"
 							size="lg"
 							className="w-full text-lg h-12"
-							isLoading={createOrder.isPending}
+							isLoading={createOrder.isPending || createAddress.isPending}
 						>
-							{createOrder.isPending ? t("processingOrder") : t("placeOrder")}
+							{createOrder.isPending
+								? t("processingOrder")
+								: createAddress.isPending
+									? t("savingAddress")
+									: t("placeOrder")}
 						</LoadingButton>
 					</div>
 

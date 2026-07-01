@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -50,8 +50,8 @@
     Arial,
     sans-serif;
   --font-bangla:
-    "Hind Siliguri",
     "Noto Sans Bengali",
+    "Hind Siliguri",
     "SolaimanLipi",
     "Kalpurush",
     sans-serif;
@@ -130,6 +130,7 @@
 
   html:lang(bn) {
     font-family: var(--font-bangla);
+    line-height: 1.6;
   }
 
   * {
@@ -139,6 +140,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: inherit;
+    line-height: inherit;
   }
 
   button,
@@ -146,5 +148,25 @@
   textarea,
   select {
     font: inherit;
+  }
+
+  html:lang(bn) [data-slot="card-title"],
+  html:lang(bn) [data-slot="dialog-title"],
+  html:lang(bn) [data-slot="table-head"],
+  html:lang(bn) [data-slot="table-cell"],
+  html:lang(bn) [data-slot="label"],
+  html:lang(bn) .text-xs,
+  html:lang(bn) .text-sm,
+  html:lang(bn) .text-base,
+  html:lang(bn) .text-lg,
+  html:lang(bn) .text-xl,
+  html:lang(bn) .text-2xl,
+  html:lang(bn) .leading-none {
+    line-height: 1.65 !important;
+  }
+
+  html:lang(bn) [data-slot="card-title"],
+  html:lang(bn) [data-slot="dialog-title"] {
+    padding-block: 0.125rem;
   }
 }

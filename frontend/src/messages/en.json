@@ -151,6 +151,7 @@
 		"trackAnother": "Track another order",
 		"status": {
 			"pending": "Pending",
+			"confirmed": "Confirmed",
 			"processing": "Processing",
 			"shipped": "Shipped",
 			"delivered": "Delivered",
@@ -471,6 +472,7 @@
 		"downloadInvoice": "Download Invoice",
 		"downloadInvoiceFailed": "Failed to download invoice",
 		"orderPlaced": "Order Placed",
+		"confirmed": "Confirmed",
 		"processing": "Processing",
 		"shipped": "Shipped",
 		"delivered": "Delivered",
@@ -494,6 +496,7 @@
 		},
 		"orderStatus": {
 			"pending": "Pending",
+			"confirmed": "Confirmed",
 			"processing": "Processing",
 			"shipped": "Shipped",
 			"delivered": "Delivered",

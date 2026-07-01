@@ -18,6 +18,7 @@ export const createCheckoutSchema = (t: CheckoutT) => z.object({
 	delivery_type: z.enum(["inside_dhaka", "outside_dhaka"]),
 	customer_note: z.string().optional(),
 	newsletter: z.boolean().default(false),
+	save_address: z.boolean().default(false),
 });
 
 export type CheckoutFormValues = z.infer<ReturnType<typeof createCheckoutSchema>>;
