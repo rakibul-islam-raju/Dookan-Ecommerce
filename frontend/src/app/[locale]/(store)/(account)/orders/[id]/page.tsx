@@ -4,17 +4,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
+import { orderClientApi } from "@/lib/api/orders";
+import { downloadBlob, getInvoiceFileName } from "@/lib/download";
 import { useOrder } from "@/lib/hooks/useOrders";
 import { cn } from "@/lib/utils";
 import {
 	ArrowLeft,
 	CheckCircle2,
 	CreditCard,
+	FileDown,
 	Loader2,
 	MapPin,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 // Helper function to get image URL
 const getImageUrl = (image?: string) => {
@@ -55,6 +60,7 @@ export default function OrderDetailsPage() {
 	const orderId = params.id as string;
 
 	const { data: order, isLoading, error } = useOrder(orderId);
+	const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
 
 	if (isLoading) {
 		return (
@@ -94,6 +100,34 @@ export default function OrderDetailsPage() {
 	}
 
 	const currentStep = getStatusStep(order.status);
+	const formatCurrency = (value: string | number) =>
+		`৳${Number(value).toLocaleString(locale === "bn" ? "bn-BD" : "en-BD", {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		})}`;
+	const formatDate = (dateString: string) =>
+		new Date(dateString).toLocaleDateString(locale, {
+			weekday: "long",
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+			hour: "numeric",
+			minute: "numeric",
+		});
+	const getPaymentMethodLabel = (method: string) =>
+		method === "cod" ? t("cashOnDelivery") : method;
+	const handleDownloadInvoice = async () => {
+		setIsDownloadingInvoice(true);
+		try {
+			const invoice = await orderClientApi.downloadInvoice(order.id);
+			downloadBlob(invoice, getInvoiceFileName(order.order_number));
+		} catch (downloadError) {
+			console.error(downloadError);
+			toast.error(t("downloadInvoiceFailed"));
+		} finally {
+			setIsDownloadingInvoice(false);
+		}
+	};
 
 	return (
 		<div className="max-w-5xl">
@@ -119,16 +153,7 @@ export default function OrderDetailsPage() {
 							</Badge>
 						</h1>
 						<p className="text-muted-foreground mt-1">
-							{t("placedOn", {
-								date: new Date(order.created_at).toLocaleDateString(locale, {
-								weekday: "long",
-								year: "numeric",
-								month: "long",
-								day: "numeric",
-								hour: "numeric",
-								minute: "numeric",
-								}),
-							})}
+							{t("placedOn", { date: formatDate(order.created_at) })}
 						</p>
 						<p className="text-sm text-muted-foreground mt-1">
 							{t("customer", { name: order.customer_name })}
@@ -136,7 +161,18 @@ export default function OrderDetailsPage() {
 						</p>
 					</div>
 					{order.status !== "cancelled" && (
-						<Button variant="outline">{t("downloadInvoice")}</Button>
+						<Button
+							variant="outline"
+							onClick={handleDownloadInvoice}
+							disabled={isDownloadingInvoice}
+						>
+							{isDownloadingInvoice ? (
+								<Loader2 className="size-4 mr-2 animate-spin" />
+							) : (
+								<FileDown className="size-4 mr-2" />
+							)}
+							{t("downloadInvoice")}
+						</Button>
 					)}
 				</div>
 			</div>
@@ -242,7 +278,7 @@ export default function OrderDetailsPage() {
 										</p>
 									</div>
 									<div className="text-right font-medium">
-										৳{parseFloat(item.total_price).toFixed(2)}
+										{formatCurrency(item.total_price)}
 									</div>
 								</div>
 							))}
@@ -258,30 +294,30 @@ export default function OrderDetailsPage() {
 						<div className="space-y-2 text-sm">
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">{t("subtotal")}</span>
-								<span>৳{parseFloat(order.subtotal).toFixed(2)}</span>
+								<span>{formatCurrency(order.subtotal)}</span>
 							</div>
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">{t("shipping")}</span>
-								<span>৳{parseFloat(order.shipping_amount).toFixed(2)}</span>
+								<span>{formatCurrency(order.shipping_amount)}</span>
 							</div>
 							{parseFloat(order.discount_amount) > 0 && (
 								<div className="flex justify-between">
 									<span className="text-muted-foreground">{t("discount")}</span>
 									<span className="text-green-600">
-										-৳{parseFloat(order.discount_amount).toFixed(2)}
+										-{formatCurrency(order.discount_amount)}
 									</span>
 								</div>
 							)}
 							{parseFloat(order.tax_amount) > 0 && (
 								<div className="flex justify-between">
 									<span className="text-muted-foreground">{t("tax")}</span>
-									<span>৳{parseFloat(order.tax_amount).toFixed(2)}</span>
+									<span>{formatCurrency(order.tax_amount)}</span>
 								</div>
 							)}
 							<Separator className="my-2" />
 							<div className="flex justify-between font-bold text-lg">
 								<span>{t("total")}</span>
-								<span>৳{parseFloat(order.total_amount).toFixed(2)}</span>
+								<span>{formatCurrency(order.total_amount)}</span>
 							</div>
 						</div>
 					</div>
@@ -316,9 +352,7 @@ export default function OrderDetailsPage() {
 							<CreditCard className="size-4 text-primary" /> {t("paymentMethod")}
 						</h3>
 						<p className="text-sm text-muted-foreground capitalize">
-							{order.payment_method === "cod"
-								? t("cashOnDelivery")
-								: order.payment_method}
+							{getPaymentMethodLabel(order.payment_method)}
 						</p>
 						<div className="flex items-center gap-2 text-sm">
 							<span className="text-muted-foreground">{t("statusLabel")}</span>

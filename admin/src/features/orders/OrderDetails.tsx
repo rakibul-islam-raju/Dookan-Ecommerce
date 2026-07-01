@@ -37,10 +37,12 @@ import { T } from "@/i18n/translate";
 import { useT } from "@/i18n/use-t";
 import {
 	getOrderById,
+	orderApi,
 	useCancelOrder,
 	useUpdateOrderStatus,
 	useUpdatePaymentStatus,
 } from "@/lib/api/orders";
+import { downloadBlob, getInvoiceFileName } from "@/lib/download";
 import type { IOrderPaymentStatus, IOrderStatus } from "@/@types/Order";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -53,6 +55,7 @@ import {
 	Phone,
 	Mail,
 	FileText,
+	FileDown,
 	MoreVertical,
 	XCircle,
 } from "lucide-react";
@@ -151,6 +154,7 @@ export const OrderDetails = () => {
 	>("");
 	const [statusNote, setStatusNote] = useState("");
 	const [cancelNote, setCancelNote] = useState("");
+	const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
 
 	const { data: order, isPending: isLoadingOrder } = useQuery(
 		getOrderById(id!)
@@ -318,6 +322,26 @@ export const OrderDetails = () => {
 		);
 	};
 
+	const handleDownloadInvoice = async () => {
+		if (!order) return;
+
+		setIsDownloadingInvoice(true);
+		try {
+			const invoice = await orderApi.downloadInvoice(order.id);
+			downloadBlob(invoice, getInvoiceFileName(order.order_number));
+		} catch (error) {
+			toast.error(
+				t(
+					"orders.details.toast.invoiceDownloadFailed",
+					"Failed to download invoice",
+				),
+			);
+			console.error(error);
+		} finally {
+			setIsDownloadingInvoice(false);
+		}
+	};
+
 	if (isLoadingOrder) {
 		return (
 			<div className="flex justify-center items-center h-full min-h-[400px]">
@@ -348,7 +372,7 @@ export const OrderDetails = () => {
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between gap-4 flex-wrap">
 				<div className="flex items-center gap-4">
 					<Button variant="ghost" size="icon" onClick={handleBack}>
 						<ArrowLeft className="h-4 w-4" />
@@ -363,7 +387,7 @@ export const OrderDetails = () => {
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2">
+				<div className="flex items-center justify-end gap-2 flex-wrap">
 					<Badge variant={getStatusBadgeVariant(order.status)}>
 						{getStatusLabel(order.status)}
 					</Badge>
@@ -372,6 +396,18 @@ export const OrderDetails = () => {
 							status: getPaymentStatusLabel(order.payment_status),
 						})}
 					</Badge>
+					<Button
+						variant="outline"
+						onClick={handleDownloadInvoice}
+						disabled={isDownloadingInvoice}
+					>
+						{isDownloadingInvoice ? (
+							<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+						) : (
+							<FileDown className="h-4 w-4 mr-2" />
+						)}
+						{t("orders.details.actions.downloadInvoice", "Download Invoice")}
+					</Button>
 
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>

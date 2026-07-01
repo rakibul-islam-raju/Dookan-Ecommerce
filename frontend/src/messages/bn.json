@@ -469,6 +469,7 @@
 		"placedOn": "{date}-এ করা হয়েছে",
 		"customer": "কাস্টমার: {name}",
 		"downloadInvoice": "ইনভয়েস ডাউনলোড",
+		"downloadInvoiceFailed": "ইনভয়েস ডাউনলোড করা যায়নি",
 		"orderPlaced": "অর্ডার করা হয়েছে",
 		"processing": "প্রসেসিং",
 		"shipped": "পাঠানো হয়েছে",

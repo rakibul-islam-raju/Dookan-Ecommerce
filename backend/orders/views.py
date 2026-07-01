@@ -1,5 +1,6 @@
 import logging
 from django.utils import timezone
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from rest_framework import filters
@@ -18,6 +19,7 @@ from utils.permissions import IsOwnerOrAdmin
 from utils.email import send_guest_order_tracking_otp, send_order_status_update_email
 from orders.models import Order, OrderStatusHistory
 from orders.filters import OrderFilter
+from orders.invoices import get_invoice_filename, render_order_invoice_pdf
 from store.meta import send_purchase_event
 from orders.serializers import (
     OrderCreateSerializer,
@@ -134,6 +136,39 @@ class OrderDetailView(generics.RetrieveAPIView):
         ):
             return _filter_orders_for_vendor(self.request, queryset)
         return queryset
+
+
+class OrderInvoiceDownloadView(generics.RetrieveAPIView):
+    """
+    Download backend-generated order invoice
+    GET /api/orders/{id}/invoice/
+    """
+
+    permission_classes = [IsOwnerOrAdmin]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        queryset = Order.objects.all().prefetch_related(
+            "items__product", "shipping_address"
+        )
+        user = self.request.user
+        if user.is_superuser and not get_request_vendor(self.request):
+            return queryset
+        if (
+            user.is_superuser
+            or user.is_staff
+            or get_request_vendor_membership(self.request)
+        ):
+            return _filter_orders_for_vendor(self.request, queryset)
+        return queryset
+
+    def retrieve(self, request, *args, **kwargs):
+        order = self.get_object()
+        pdf = render_order_invoice_pdf(order)
+        filename = get_invoice_filename(order)
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
 
 
 class MyOrdersView(generics.ListAPIView):

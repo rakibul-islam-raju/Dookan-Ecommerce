@@ -50,6 +50,13 @@ export const orderClientApi = {
 		return data;
 	},
 
+	async downloadInvoice(orderId: string): Promise<Blob> {
+		const { data } = await clientApi.get<Blob>(`/orders/${orderId}/invoice/`, {
+			responseType: "blob",
+		});
+		return data;
+	},
+
 	/**
 	 * Create new order
 	 */

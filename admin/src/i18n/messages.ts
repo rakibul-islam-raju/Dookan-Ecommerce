@@ -2294,6 +2294,7 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 		"orders.details.actions.changeOrderStatus": "অর্ডারের স্ট্যাটাস পরিবর্তন করুন",
 		"orders.details.actions.changePaymentStatus":
 			"পেমেন্ট স্ট্যাটাস পরিবর্তন করুন",
+		"orders.details.actions.downloadInvoice": "ইনভয়েস ডাউনলোড",
 		"orders.details.actions.cancelOrder": "অর্ডার বাতিল করুন",
 		"orders.details.items.title": "অর্ডার আইটেম",
 		"orders.details.items.product": "পণ্য",
@@ -2359,6 +2360,8 @@ export const messages: Record<AppLocale, MessageDictionary> = {
 			"পেমেন্ট স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে",
 		"orders.details.toast.cancelled": "অর্ডার সফলভাবে বাতিল হয়েছে",
 		"orders.details.toast.cancelFailed": "অর্ডার বাতিল করতে ব্যর্থ হয়েছে",
+		"orders.details.toast.invoiceDownloadFailed":
+			"ইনভয়েস ডাউনলোড করতে ব্যর্থ হয়েছে",
 		"products.common.status.active": "সক্রিয়",
 		"products.common.status.inactive": "নিষ্ক্রিয়",
 		"products.common.status.featured": "ফিচার্ড",

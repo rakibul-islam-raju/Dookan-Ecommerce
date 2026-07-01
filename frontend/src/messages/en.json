@@ -469,6 +469,7 @@
 		"placedOn": "Placed on {date}",
 		"customer": "Customer: {name}",
 		"downloadInvoice": "Download Invoice",
+		"downloadInvoiceFailed": "Failed to download invoice",
 		"orderPlaced": "Order Placed",
 		"processing": "Processing",
 		"shipped": "Shipped",

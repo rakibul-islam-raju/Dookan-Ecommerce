@@ -145,6 +145,50 @@ class OrderInventoryIntegrationTests(APITestCase):
         self.assertEqual(response.data["tax_amount"], "20.00")
         self.assertEqual(response.data["total_amount"], "510.00")
 
+    def test_order_invoice_download_returns_backend_generated_pdf_attachment(self):
+        create_response = self.client.post(
+            reverse("orders:order-create"),
+            {
+                "customer_name": "Customer",
+                "customer_email": "customer@example.com",
+                "payment_method": "cod",
+                "delivery_type": "inside_dhaka",
+                "items": [
+                    {
+                        "product_id": str(self.product.id),
+                        "variant_id": str(self.variant.id),
+                        "quantity": 1,
+                    }
+                ],
+                "shipping_address": {
+                    "full_name": "Customer",
+                    "mobile_number": "+8801000000002",
+                    "address_line1": "123 Street",
+                    "address_line2": "",
+                    "city": "Dhaka",
+                    "state": "Dhaka",
+                    "postal_code": "1200",
+                    "country": "Bangladesh",
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        order_id = create_response.data["id"]
+        order_number = create_response.data["order_number"]
+
+        response = self.client.get(
+            reverse("orders:order-invoice", kwargs={"id": order_id})
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("attachment;", response["Content-Disposition"])
+        self.assertIn(f"invoice-{order_number}.pdf", response["Content-Disposition"])
+        self.assertTrue(response.content.startswith(b"%PDF-1.4"))
+        self.assertIn(order_number.encode("ascii"), response.content)
+
     def test_public_order_create_is_blocked_when_storefront_disabled(self):
         self.client.force_authenticate(user=None)
         self.vendor.storefront_enabled = False
